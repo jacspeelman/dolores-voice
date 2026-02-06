@@ -173,8 +173,8 @@ struct ContentView: View {
                         Circle()
                             .stroke(Color.green.opacity(0.3 - Double(i) * 0.1), lineWidth: 2)
                             .frame(
-                                width: 120 + CGFloat(i * 20) + CGFloat(voiceManager.audioLevel * 30),
-                                height: 120 + CGFloat(i * 20) + CGFloat(voiceManager.audioLevel * 30)
+                                width: 60 + CGFloat(i * 12) + CGFloat(voiceManager.audioLevel * 20),
+                                height: 60 + CGFloat(i * 12) + CGFloat(voiceManager.audioLevel * 20)
                             )
                             .animation(.easeOut(duration: 0.1), value: voiceManager.audioLevel)
                     }
@@ -183,8 +183,8 @@ struct ContentView: View {
                 // Speaking animation
                 if voiceManager.state == .speaking {
                     Circle()
-                        .stroke(Color.purple.opacity(0.5), lineWidth: 3)
-                        .frame(width: 140, height: 140)
+                        .stroke(Color.purple.opacity(0.5), lineWidth: 2)
+                        .frame(width: 70, height: 70)
                         .scaleEffect(1.0)
                         .animation(.easeInOut(duration: 0.5).repeatForever(), value: voiceManager.state)
                 }
@@ -192,12 +192,12 @@ struct ContentView: View {
                 // Main circle
                 Circle()
                     .fill(voiceManager.state.color)
-                    .frame(width: 120, height: 120)
-                    .shadow(color: voiceManager.state.color.opacity(0.5), radius: 15)
+                    .frame(width: 60, height: 60)
+                    .shadow(color: voiceManager.state.color.opacity(0.5), radius: 10)
                 
                 // Icon
                 Image(systemName: voiceManager.state.icon)
-                    .font(.system(size: 50))
+                    .font(.system(size: 26))
                     .foregroundColor(.white)
             }
         }
