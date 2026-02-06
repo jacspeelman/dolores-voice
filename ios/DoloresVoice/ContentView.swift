@@ -79,12 +79,6 @@ struct ContentView: View {
                     Text(voiceManager.isConnected ? "Verbonden" : "Niet verbonden")
                         .font(.caption2)
                         .foregroundColor(.gray)
-                    
-                    if voiceManager.isConnected && !voiceManager.ttsProvider.isEmpty {
-                        Text("· \(voiceManager.ttsVoice)")
-                            .font(.caption2)
-                            .foregroundColor(.gray.opacity(0.7))
-                    }
                 }
             }
             
