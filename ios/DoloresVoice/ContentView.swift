@@ -10,7 +10,6 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var voiceManager: VoiceManager
     @State private var textInput: String = ""
-    @State private var showTextInput: Bool = false
     @FocusState private var isTextFieldFocused: Bool
     
     var body: some View {
@@ -147,48 +146,39 @@ struct ContentView: View {
                     .foregroundColor(.red)
             }
             
-            HStack(spacing: 12) {
-                // Text input toggle
-                Button(action: { withAnimation { showTextInput.toggle() } }) {
-                    Image(systemName: "keyboard")
-                        .font(.system(size: 20))
-                        .foregroundColor(.gray)
-                }
+            // Status text
+            if voiceManager.state != .idle && voiceManager.state != .disconnected {
+                Text(voiceManager.state.rawValue)
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            
+            HStack(spacing: 10) {
+                // Text input field (always visible)
+                TextField("Bericht...", text: $textInput)
+                    .padding(12)
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(22)
+                    .foregroundColor(.white)
+                    .focused($isTextFieldFocused)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .onSubmit { sendText() }
                 
-                if showTextInput {
-                    // Text input field
-                    HStack {
-                        TextField("Bericht...", text: $textInput)
-                            .padding(10)
-                            .background(Color.white.opacity(0.1))
-                            .cornerRadius(20)
-                            .foregroundColor(.white)
-                            .focused($isTextFieldFocused)
-                            .autocorrectionDisabled(true)
-                            .textInputAutocapitalization(.never)
-                            .onSubmit { sendText() }
-                        
-                        Button(action: sendText) {
-                            Image(systemName: "arrow.up.circle.fill")
-                                .font(.system(size: 28))
-                                .foregroundColor(canSend ? .blue : .gray)
-                        }
-                        .disabled(!canSend)
-                    }
-                } else {
-                    Spacer()
-                    
-                    // Status text (compact)
-                    if voiceManager.state != .idle {
-                        Text(voiceManager.state.rawValue)
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-                    
-                    Spacer()
+                // Send button
+                Button(action: sendText) {
+                    Circle()
+                        .fill(canSend ? Color.blue : Color.gray.opacity(0.3))
+                        .frame(width: 44, height: 44)
+                        .overlay(
+                            Image(systemName: "arrow.up")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(.white)
+                        )
                 }
+                .disabled(!canSend)
                 
-                // Voice button (small)
+                // Voice button
                 voiceButton
             }
             .padding(.horizontal)
@@ -238,7 +228,6 @@ struct ContentView: View {
         voiceManager.sendText(textInput)
         textInput = ""
         isTextFieldFocused = false
-        withAnimation { showTextInput = false }
     }
 }
 
