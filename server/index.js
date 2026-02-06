@@ -254,8 +254,8 @@ function sendMessage(ws, message) {
   }
 }
 
-async function handleTextMessage(ws, text, connectionId) {
-  console.log(`📝 [${connectionId}] Jac: "${text}"`);
+async function handleTextMessage(ws, text, connectionId, wantsAudio = true) {
+  console.log(`📝 [${connectionId}] Jac: "${text}" (audio: ${wantsAudio})`);
 
   try {
     console.log(`🦋 [${connectionId}] Asking OpenClaw...`);
@@ -265,14 +265,19 @@ async function handleTextMessage(ws, text, connectionId) {
 
     sendMessage(ws, { type: 'response', text: response });
 
-    console.log(`🔊 [${connectionId}] Generating voice...`);
-    const startTTS = Date.now();
-    try {
-      const audioData = await textToSpeech(response);
-      console.log(`🔊 [${connectionId}] TTS done (${Date.now() - startTTS}ms, ${audioData.length} bytes)`);
-      sendMessage(ws, { type: 'audio', data: audioData.toString('base64') });
-    } catch (ttsError) {
-      console.error(`⚠️ [${connectionId}] TTS failed:`, ttsError.message);
+    // Only generate audio if requested
+    if (wantsAudio) {
+      console.log(`🔊 [${connectionId}] Generating voice...`);
+      const startTTS = Date.now();
+      try {
+        const audioData = await textToSpeech(response);
+        console.log(`🔊 [${connectionId}] TTS done (${Date.now() - startTTS}ms, ${audioData.length} bytes)`);
+        sendMessage(ws, { type: 'audio', data: audioData.toString('base64') });
+      } catch (ttsError) {
+        console.error(`⚠️ [${connectionId}] TTS failed:`, ttsError.message);
+      }
+    } else {
+      console.log(`📝 [${connectionId}] Text-only response (no audio)`);
     }
 
   } catch (error) {
@@ -375,7 +380,8 @@ function startServer() {
       try {
         const message = JSON.parse(data.toString());
         if (message.type === 'text') {
-          await handleTextMessage(ws, message.text, connectionId);
+          const wantsAudio = message.wantsAudio !== false; // Default true for backwards compatibility
+          await handleTextMessage(ws, message.text, connectionId, wantsAudio);
         } else if (message.type === 'audio') {
           await handleAudioMessage(ws, message.data, connectionId);
         } else if (message.type === 'ping') {

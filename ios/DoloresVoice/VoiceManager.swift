@@ -250,6 +250,10 @@ class VoiceManager: ObservableObject {
             if let responseText = json["text"] as? String {
                 lastResponse = responseText
                 messages.append(ChatMessage(isUser: false, text: responseText))
+                // If not in conversation mode, go back to idle (no audio expected)
+                if !isConversationActive {
+                    state = isConnected ? .idle : .disconnected
+                }
             }
             
         case "audio":
@@ -444,7 +448,8 @@ class VoiceManager: ObservableObject {
         
         state = .processing
         messages.append(ChatMessage(isUser: true, text: text))
-        sendJSON(["type": "text", "text": text])
+        // Only request audio if conversation mode is active
+        sendJSON(["type": "text", "text": text, "wantsAudio": isConversationActive])
     }
     
     // MARK: - Audio Playback
