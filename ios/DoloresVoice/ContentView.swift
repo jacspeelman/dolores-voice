@@ -60,6 +60,7 @@ struct ContentView: View {
             .padding()
         }
         .onAppear {
+            voiceManager.requestPermissions()
             voiceManager.connect()
         }
     }
@@ -200,7 +201,7 @@ struct ContentView: View {
             onPress: { voiceManager.startRecording() },
             onRelease: { voiceManager.stopRecording() }
         ))
-        .disabled(!voiceManager.isConnected || voiceManager.state == .processing || voiceManager.state == .speaking)
+        .disabled(!voiceManager.isConnected || voiceManager.state == .processing || voiceManager.state == .speaking || voiceManager.state == .connecting)
     }
     
     private var audioLevelIndicator: some View {

@@ -13,7 +13,7 @@ import Speech
 enum VoiceState: String {
     case disconnected = "Niet verbonden"
     case connecting = "Verbinden..."
-    case idle = "Tik om te praten"
+    case idle = "Klaar"
     case listening = "Luisteren..."
     case processing = "Denken..."
     case speaking = "Spreken..."
@@ -61,7 +61,8 @@ class VoiceManager: ObservableObject {
     @Published var lastResponse: String = ""
     @Published var errorMessage: String?
     @Published var isConnected: Bool = false
-    @Published var audioLevel: Float = 0.0
+    @Published var hasMicPermission: Bool = false
+    @Published var hasSpeechPermission: Bool = false
     
     // MARK: - Private Properties
     
@@ -70,38 +71,40 @@ class VoiceManager: ObservableObject {
     private var reconnectTask: Task<Void, Never>?
     
     // Audio
-    private var audioEngine: AVAudioEngine?
     private var audioPlayer: AVAudioPlayer?
     private let synthesizer = AVSpeechSynthesizer()
     
     // Speech Recognition
-    private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "nl-NL"))
+    private var speechRecognizer: SFSpeechRecognizer?
+    private var audioEngine: AVAudioEngine?
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
     
     // MARK: - Initialization
     
     init() {
-        requestPermissions()
+        // Don't request permissions in init - wait for explicit call
     }
     
     // MARK: - Permissions
     
-    private func requestPermissions() {
+    func requestPermissions() {
         // Microphone permission
-        AVAudioSession.sharedInstance().requestRecordPermission { granted in
-            if !granted {
-                Task { @MainActor in
-                    self.errorMessage = "Microfoon toegang geweigerd"
+        AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
+            Task { @MainActor in
+                self?.hasMicPermission = granted
+                if !granted {
+                    self?.errorMessage = "Microfoon toegang nodig voor spraak"
                 }
             }
         }
         
         // Speech recognition permission
-        SFSpeechRecognizer.requestAuthorization { status in
-            if status != .authorized {
-                Task { @MainActor in
-                    self.errorMessage = "Spraakherkenning niet toegestaan"
+        SFSpeechRecognizer.requestAuthorization { [weak self] status in
+            Task { @MainActor in
+                self?.hasSpeechPermission = (status == .authorized)
+                if status == .authorized {
+                    self?.speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "nl-NL"))
                 }
             }
         }
@@ -166,7 +169,7 @@ class VoiceManager: ObservableObject {
         }
         
         reconnectAttempts += 1
-        let delay = Double(min(reconnectAttempts * 2, 10)) // Max 10 seconds
+        let delay = Double(min(reconnectAttempts * 2, 10))
         
         print("🔄 Reconnecting in \(delay)s (attempt \(reconnectAttempts)/\(maxReconnectAttempts))")
         state = .connecting
@@ -208,7 +211,7 @@ class VoiceManager: ObservableObject {
                 switch result {
                 case .success(let message):
                     self?.handleMessage(message)
-                    self?.receiveMessages() // Continue listening
+                    self?.receiveMessages()
                 case .failure(let error):
                     print("❌ Receive error: \(error)")
                     self?.handleDisconnection()
@@ -257,7 +260,6 @@ class VoiceManager: ObservableObject {
                let audioData = Data(base64Encoded: base64) {
                 playAudio(audioData)
             } else {
-                // Fallback to system TTS
                 speakWithSystemTTS(lastResponse)
             }
             
@@ -265,7 +267,6 @@ class VoiceManager: ObservableObject {
             if let error = json["error"] as? String {
                 errorMessage = error
                 state = .error
-                // Return to idle after showing error
                 Task {
                     try? await Task.sleep(for: .seconds(3))
                     if self.state == .error {
@@ -276,7 +277,6 @@ class VoiceManager: ObservableObject {
             }
             
         case "pong":
-            // Connection confirmed
             break
             
         default:
@@ -284,111 +284,72 @@ class VoiceManager: ObservableObject {
         }
     }
     
-    // MARK: - Voice Recording & Speech Recognition
+    // MARK: - Voice Recording (Simplified - Text-based for now)
     
-    /// Start listening to user's voice
+    /// Start listening - simplified version
     func startRecording() {
         guard state == .idle, isConnected else { return }
         
-        // Check speech recognizer on main thread
-        guard let speechRecognizer = speechRecognizer else {
-            errorMessage = "Spraakherkenning niet geconfigureerd"
-            return
-        }
-        
-        guard speechRecognizer.isAvailable else {
-            errorMessage = "Spraakherkenning niet beschikbaar"
-            return
-        }
-        
-        // Stop any existing audio engine
-        audioEngine?.stop()
-        audioEngine?.inputNode.removeTap(onBus: 0)
-        recognitionRequest?.endAudio()
-        recognitionTask?.cancel()
-        
+        // For now, just show we're ready - actual speech recognition
+        // will be enabled after basic flow works
         state = .listening
         lastTranscript = ""
         
-        // Setup audio in background to avoid blocking UI
-        Task.detached { [weak self] in
-            do {
-                try await self?.setupAudioSessionAsync()
-                await self?.startAudioEngine(speechRecognizer: speechRecognizer)
-            } catch {
-                await MainActor.run {
-                    print("❌ Recording error: \(error)")
-                    self?.errorMessage = "Kon opname niet starten: \(error.localizedDescription)"
-                    self?.state = .idle
-                }
-            }
+        // If we have speech permission, try to use it
+        if hasSpeechPermission && hasMicPermission {
+            startSpeechRecognition()
         }
     }
     
-    private func setupAudioSessionAsync() async throws {
-        let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
-        try session.setActive(true, options: .notifyOthersOnDeactivation)
-    }
-    
-    @MainActor
-    private func startAudioEngine(speechRecognizer: SFSpeechRecognizer) {
+    private func startSpeechRecognition() {
+        guard let speechRecognizer = speechRecognizer, speechRecognizer.isAvailable else {
+            print("⚠️ Speech recognizer not available")
+            return
+        }
+        
         do {
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playAndRecord, mode: .measurement, options: .duckOthers)
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            
             audioEngine = AVAudioEngine()
             guard let audioEngine = audioEngine else { return }
+            
+            recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+            guard let recognitionRequest = recognitionRequest else { return }
+            
+            recognitionRequest.shouldReportPartialResults = true
             
             let inputNode = audioEngine.inputNode
             let recordingFormat = inputNode.outputFormat(forBus: 0)
             
-            // Check if format is valid
-            guard recordingFormat.sampleRate > 0 else {
-                errorMessage = "Ongeldige audio configuratie"
-                state = .idle
-                return
+            inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, _ in
+                self?.recognitionRequest?.append(buffer)
             }
-            
-            recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-            guard let recognitionRequest = recognitionRequest else { return }
-            recognitionRequest.shouldReportPartialResults = true
             
             recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
                 Task { @MainActor in
                     if let result = result {
                         self?.lastTranscript = result.bestTranscription.formattedString
                     }
-                    
-                    if let error = error {
-                        print("⚠️ Recognition error: \(error)")
-                    }
-                }
-            }
-            
-            inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, _ in
-                self?.recognitionRequest?.append(buffer)
-                
-                // Calculate audio level for visualization
-                let level = self?.calculateAudioLevel(buffer: buffer) ?? 0
-                Task { @MainActor in
-                    self?.audioLevel = level
                 }
             }
             
             audioEngine.prepare()
             try audioEngine.start()
-            
-            print("🎤 Recording started")
+            print("🎤 Speech recognition started")
             
         } catch {
-            print("❌ Audio engine error: \(error)")
-            errorMessage = "Audio fout: \(error.localizedDescription)"
-            state = .idle
+            print("❌ Speech recognition setup failed: \(error)")
+            // Continue without speech recognition - user can use text input
         }
     }
     
-    /// Stop recording and send transcript to server
+    /// Stop recording and send transcript
     func stopRecording() {
         guard state == .listening else { return }
         
+        // Stop audio engine
         audioEngine?.stop()
         audioEngine?.inputNode.removeTap(onBus: 0)
         recognitionRequest?.endAudio()
@@ -397,7 +358,6 @@ class VoiceManager: ObservableObject {
         audioEngine = nil
         recognitionRequest = nil
         recognitionTask = nil
-        audioLevel = 0
         
         print("🎤 Recording stopped")
         
@@ -406,27 +366,8 @@ class VoiceManager: ObservableObject {
         if !transcript.isEmpty {
             sendText(transcript)
         } else {
-            state = .idle
+            state = isConnected ? .idle : .disconnected
         }
-    }
-    
-    private func calculateAudioLevel(buffer: AVAudioPCMBuffer) -> Float {
-        guard let channelData = buffer.floatChannelData?[0] else { return 0 }
-        let frames = buffer.frameLength
-        
-        var sum: Float = 0
-        for i in 0..<Int(frames) {
-            sum += abs(channelData[i])
-        }
-        
-        let average = sum / Float(frames)
-        return min(average * 10, 1.0) // Normalize to 0-1
-    }
-    
-    private func setupAudioSession() throws {
-        let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
-        try session.setActive(true, options: .notifyOthersOnDeactivation)
     }
     
     // MARK: - Send Message
@@ -448,7 +389,10 @@ class VoiceManager: ObservableObject {
     
     private func playAudio(_ data: Data) {
         do {
-            try setupAudioSession()
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playback, mode: .default)
+            try audioSession.setActive(true)
+            
             audioPlayer = try AVAudioPlayer(data: data)
             audioPlayer?.delegate = AudioPlayerDelegate { [weak self] in
                 Task { @MainActor in
@@ -471,7 +415,6 @@ class VoiceManager: ObservableObject {
         
         synthesizer.speak(utterance)
         
-        // Return to idle after estimated duration
         Task {
             try? await Task.sleep(for: .seconds(Double(text.count) / 15.0 + 1))
             if state == .speaking {
