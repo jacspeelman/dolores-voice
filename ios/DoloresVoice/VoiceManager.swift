@@ -231,9 +231,9 @@ class VoiceManager: ObservableObject {
         case "transcript":
             // Whisper transcript received
             if let transcript = json["text"] as? String {
-                lastTranscript = transcript
                 if transcript.isEmpty {
                     // Empty transcript - continue listening
+                    lastTranscript = ""
                     if isConversationActive {
                         startRecording()
                     } else {
@@ -241,6 +241,7 @@ class VoiceManager: ObservableObject {
                     }
                 } else {
                     messages.append(ChatMessage(isUser: true, text: transcript))
+                    lastTranscript = ""  // Clear after adding to messages
                     state = .processing
                 }
             }
@@ -442,7 +443,6 @@ class VoiceManager: ObservableObject {
         guard !text.isEmpty, isConnected else { return }
         
         state = .processing
-        lastTranscript = text
         messages.append(ChatMessage(isUser: true, text: text))
         sendJSON(["type": "text", "text": text])
     }

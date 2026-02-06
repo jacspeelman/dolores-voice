@@ -48,6 +48,17 @@ function fetchWithTimeout(url, options, timeoutMs = 60000) {
     .finally(() => clearTimeout(timeout));
 }
 
+// Known Whisper hallucinations (appears on silent/unclear audio)
+const WHISPER_HALLUCINATIONS = [
+  'ondertitels ingediend door de amara.org gemeenschap',
+  'ondertiteling door de amara.org community',
+  'subtitles by the amara.org community',
+  'thanks for watching',
+  'bedankt voor het kijken',
+  'subscribe to my channel',
+  'like and subscribe',
+];
+
 /**
  * OpenAI Whisper Speech-to-Text
  */
@@ -85,7 +96,15 @@ async function whisperTranscribe(audioBase64) {
   }
 
   const transcript = await response.text();
-  return transcript.trim();
+  const cleaned = transcript.trim();
+  
+  // Filter known hallucinations
+  if (WHISPER_HALLUCINATIONS.some(h => cleaned.toLowerCase().includes(h))) {
+    console.log(`⚠️ Filtered Whisper hallucination: "${cleaned}"`);
+    return '';
+  }
+  
+  return cleaned;
 }
 
 /**
