@@ -222,6 +222,8 @@ struct ContentView: View {
                         .cornerRadius(25)
                         .foregroundColor(.white)
                         .focused($isTextFieldFocused)
+                        .autocorrectionDisabled(true)
+                        .textInputAutocapitalization(.never)
                         .onSubmit { sendText() }
                     
                     Button(action: sendText) {
