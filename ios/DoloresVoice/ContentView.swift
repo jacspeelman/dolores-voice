@@ -116,38 +116,44 @@ struct ContentView: View {
         }
     }
     
-    // MARK: - Response View
+    // MARK: - Response View (Dolores - links)
     
     private var responseView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("🦋 Dolores:")
-                .font(.caption)
-                .foregroundColor(.gray)
-            
-            Text(voiceManager.lastResponse)
-                .foregroundColor(.white)
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.white.opacity(0.1))
-                .cornerRadius(12)
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("🦋 Dolores")
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+                
+                Text(voiceManager.lastResponse)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.gray.opacity(0.3))
+                    .cornerRadius(18)
+            }
+            Spacer(minLength: 60)
         }
         .padding(.horizontal)
     }
     
-    // MARK: - Transcript View
+    // MARK: - Transcript View (Jac - rechts)
     
     private var transcriptView: some View {
-        VStack(alignment: .trailing, spacing: 8) {
-            Text("🎤 Jij:")
-                .font(.caption)
-                .foregroundColor(.gray)
-            
-            Text(voiceManager.lastTranscript)
-                .foregroundColor(.white.opacity(0.8))
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .background(Color.blue.opacity(0.2))
-                .cornerRadius(12)
+        HStack {
+            Spacer(minLength: 60)
+            VStack(alignment: .trailing, spacing: 4) {
+                Text("Jij")
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+                
+                Text(voiceManager.lastTranscript)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.blue)
+                    .cornerRadius(18)
+            }
         }
         .padding(.horizontal)
     }
