@@ -2,8 +2,7 @@
 //  VoiceManager.swift
 //  DoloresVoice
 //
-//  Manages communication with the Dolores backend
-//  With speech recognition support
+//  Voice assistant with continuous conversation mode
 //
 
 import SwiftUI
@@ -14,7 +13,7 @@ import Speech
 enum VoiceState: String {
     case disconnected = "Niet verbonden"
     case connecting = "Verbinden..."
-    case idle = "Tik om te praten"
+    case idle = "Start gesprek"
     case listening = "Luisteren..."
     case processing = "Denken..."
     case speaking = "Spreken..."
@@ -25,9 +24,9 @@ enum VoiceState: String {
         case .disconnected: return .gray
         case .connecting: return .orange
         case .idle: return .blue
-        case .listening: return .red
+        case .listening: return .green
         case .processing: return .orange
-        case .speaking: return .green
+        case .speaking: return .purple
         case .error: return .red
         }
     }
@@ -51,6 +50,8 @@ class VoiceManager: ObservableObject {
     
     private let serverURL = URL(string: "ws://192.168.1.214:8765")!
     private let maxReconnectAttempts = 5
+    private let silenceThreshold: Float = 0.01  // Audio level below this = silence
+    private let silenceTimeout: TimeInterval = 1.5  // Seconds of silence before sending
     
     // MARK: - Published State
     
@@ -60,6 +61,8 @@ class VoiceManager: ObservableObject {
     @Published var errorMessage: String?
     @Published var isConnected: Bool = false
     @Published var canUseSpeech: Bool = false
+    @Published var isConversationActive: Bool = false
+    @Published var audioLevel: Float = 0.0
     
     // MARK: - Private Properties
     
@@ -76,6 +79,11 @@ class VoiceManager: ObservableObject {
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
     
+    // Silence detection
+    private var silenceTimer: Timer?
+    private var lastSpeechTime: Date = Date()
+    private var hasDetectedSpeech: Bool = false
+    
     // MARK: - Initialization
     
     init() {
@@ -85,7 +93,6 @@ class VoiceManager: ObservableObject {
     // MARK: - Permissions
     
     func checkPermissions() {
-        // Check microphone using async API
         Task {
             let granted = await AVAudioApplication.requestRecordPermission()
             if granted {
@@ -113,15 +120,13 @@ class VoiceManager: ObservableObject {
         }
     }
     
-    // MARK: - Connection Management
+    // MARK: - Connection
     
     func connect() {
         guard webSocketTask == nil else { return }
         
         state = .connecting
         errorMessage = nil
-        
-        print("🔌 Connecting to \(serverURL)...")
         
         let session = URLSession(configuration: .default)
         webSocketTask = session.webSocketTask(with: serverURL)
@@ -136,14 +141,13 @@ class VoiceManager: ObservableObject {
                 isConnected = true
                 state = .idle
                 reconnectAttempts = 0
-                print("✅ Connected!")
             }
         }
     }
     
     func disconnect() {
+        stopConversation()
         reconnectTask?.cancel()
-        reconnectTask = nil
         webSocketTask?.cancel(with: .goingAway, reason: nil)
         webSocketTask = nil
         isConnected = false
@@ -165,9 +169,7 @@ class VoiceManager: ObservableObject {
         
         reconnectAttempts += 1
         let delay = Double(min(reconnectAttempts * 2, 10))
-        
         state = .connecting
-        errorMessage = "Opnieuw verbinden..."
         
         reconnectTask = Task {
             try? await Task.sleep(for: .seconds(delay))
@@ -212,7 +214,7 @@ class VoiceManager: ObservableObject {
     private func handleDisconnection() {
         isConnected = false
         webSocketTask = nil
-        stopListening()
+        stopConversation()
         scheduleReconnect()
     }
     
@@ -242,8 +244,12 @@ class VoiceManager: ObservableObject {
                 errorMessage = error
                 state = .error
                 Task {
-                    try? await Task.sleep(for: .seconds(3))
-                    state = isConnected ? .idle : .disconnected
+                    try? await Task.sleep(for: .seconds(2))
+                    if isConversationActive {
+                        startListening()
+                    } else {
+                        state = isConnected ? .idle : .disconnected
+                    }
                     errorMessage = nil
                 }
             }
@@ -256,103 +262,159 @@ class VoiceManager: ObservableObject {
         }
     }
     
+    // MARK: - Conversation Mode
+    
+    /// Start continuous conversation
+    func startConversation() {
+        guard isConnected, canUseSpeech else { return }
+        isConversationActive = true
+        startListening()
+    }
+    
+    /// Stop conversation
+    func stopConversation() {
+        isConversationActive = false
+        stopListening()
+        silenceTimer?.invalidate()
+        silenceTimer = nil
+        state = isConnected ? .idle : .disconnected
+    }
+    
+    /// Toggle conversation on/off
+    func toggleConversation() {
+        if isConversationActive {
+            stopConversation()
+        } else {
+            startConversation()
+        }
+    }
+    
     // MARK: - Speech Recognition
     
-    func startListening() {
-        guard state == .idle, isConnected else { return }
-        guard canUseSpeech else {
-            errorMessage = "Spraak niet beschikbaar"
-            return
-        }
+    private func startListening() {
+        guard canUseSpeech, isConnected else { return }
         guard let speechRecognizer = speechRecognizer, speechRecognizer.isAvailable else {
             errorMessage = "Spraakherkenning niet beschikbaar"
             return
         }
         
-        // Reset
-        stopListening()
+        // Clean up any existing session
+        stopListeningQuietly()
+        
         lastTranscript = ""
+        hasDetectedSpeech = false
         state = .listening
         
         do {
-            // Configure audio session
             let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
             
-            // Create audio engine
             audioEngine = AVAudioEngine()
-            guard let audioEngine = audioEngine else {
-                throw NSError(domain: "VoiceManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not create audio engine"])
-            }
+            guard let audioEngine = audioEngine else { return }
             
-            // Create recognition request
             recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-            guard let recognitionRequest = recognitionRequest else {
-                throw NSError(domain: "VoiceManager", code: 2, userInfo: [NSLocalizedDescriptionKey: "Could not create recognition request"])
-            }
+            guard let recognitionRequest = recognitionRequest else { return }
             recognitionRequest.shouldReportPartialResults = true
             
-            // Get input node and format
             let inputNode = audioEngine.inputNode
             let recordingFormat = inputNode.outputFormat(forBus: 0)
             
-            // Install tap
             inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, _ in
                 self?.recognitionRequest?.append(buffer)
+                self?.processAudioLevel(buffer: buffer)
             }
             
-            // Start recognition task
             recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
                 Task { @MainActor in
                     if let result = result {
-                        self?.lastTranscript = result.bestTranscription.formattedString
-                    }
-                    if error != nil {
-                        // Ignore errors during active listening
+                        let transcript = result.bestTranscription.formattedString
+                        if !transcript.isEmpty {
+                            self?.lastTranscript = transcript
+                            self?.hasDetectedSpeech = true
+                            self?.lastSpeechTime = Date()
+                        }
                     }
                 }
             }
             
-            // Start engine
             audioEngine.prepare()
             try audioEngine.start()
             
-            print("🎤 Listening started")
+            // Start silence detection timer
+            startSilenceDetection()
             
         } catch {
-            print("❌ Failed to start listening: \(error)")
             errorMessage = "Kon niet starten"
-            state = .idle
-            stopListening()
+            state = isConversationActive ? .listening : .idle
         }
     }
     
-    func stopListening() {
-        // Stop audio engine
+    private func stopListeningQuietly() {
         audioEngine?.stop()
         audioEngine?.inputNode.removeTap(onBus: 0)
         audioEngine = nil
-        
-        // End recognition
         recognitionRequest?.endAudio()
         recognitionRequest = nil
         recognitionTask?.cancel()
         recognitionTask = nil
-        
-        // Deactivate audio session
+        silenceTimer?.invalidate()
+        silenceTimer = nil
+    }
+    
+    private func stopListening() {
+        stopListeningQuietly()
         try? AVAudioSession.sharedInstance().setActive(false)
+    }
+    
+    private func processAudioLevel(buffer: AVAudioPCMBuffer) {
+        guard let channelData = buffer.floatChannelData?[0] else { return }
+        let frames = buffer.frameLength
         
-        // If we have a transcript, send it
-        if state == .listening {
-            let transcript = lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !transcript.isEmpty {
-                print("🎤 Sending transcript: \(transcript)")
-                sendText(transcript)
-            } else {
-                state = isConnected ? .idle : .disconnected
+        var sum: Float = 0
+        for i in 0..<Int(frames) {
+            sum += abs(channelData[i])
+        }
+        
+        let level = sum / Float(frames)
+        
+        Task { @MainActor in
+            audioLevel = min(level * 5, 1.0)
+        }
+    }
+    
+    private func startSilenceDetection() {
+        lastSpeechTime = Date()
+        silenceTimer?.invalidate()
+        silenceTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.checkSilence()
             }
         }
+    }
+    
+    private func checkSilence() {
+        guard state == .listening, hasDetectedSpeech else { return }
+        
+        let silenceDuration = Date().timeIntervalSince(lastSpeechTime)
+        
+        // If we have speech and enough silence, send the message
+        if silenceDuration >= silenceTimeout && !lastTranscript.isEmpty {
+            sendCurrentTranscript()
+        }
+    }
+    
+    private func sendCurrentTranscript() {
+        let transcript = lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !transcript.isEmpty else {
+            if isConversationActive {
+                startListening()
+            }
+            return
+        }
+        
+        stopListeningQuietly()
+        sendText(transcript)
     }
     
     // MARK: - Send Message
@@ -376,7 +438,7 @@ class VoiceManager: ObservableObject {
             audioPlayer = try AVAudioPlayer(data: data)
             audioPlayerDelegate = AudioPlayerDelegate { [weak self] in
                 Task { @MainActor in
-                    self?.state = self?.isConnected == true ? .idle : .disconnected
+                    self?.onAudioFinished()
                 }
             }
             audioPlayer?.delegate = audioPlayerDelegate
@@ -395,6 +457,18 @@ class VoiceManager: ObservableObject {
         
         Task {
             try? await Task.sleep(for: .seconds(Double(text.count) / 12.0))
+            onAudioFinished()
+        }
+    }
+    
+    private func onAudioFinished() {
+        if isConversationActive {
+            // Continue listening after I finish speaking
+            Task {
+                try? await Task.sleep(for: .milliseconds(300))
+                startListening()
+            }
+        } else {
             state = isConnected ? .idle : .disconnected
         }
     }

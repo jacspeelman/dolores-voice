@@ -2,7 +2,7 @@
 //  ContentView.swift
 //  DoloresVoice
 //
-//  Voice assistant UI with push-to-talk
+//  Continuous conversation UI
 //
 
 import SwiftUI
@@ -41,19 +41,27 @@ struct ContentView: View {
                 }
                 
                 // Transcript while listening
-                if voiceManager.state == .listening && !voiceManager.lastTranscript.isEmpty {
+                if (voiceManager.state == .listening || voiceManager.state == .processing) 
+                    && !voiceManager.lastTranscript.isEmpty {
                     transcriptView
                 }
                 
                 Spacer()
                 
-                // Main button
+                // Main button with audio visualization
                 mainButton
                 
                 // Status text
                 Text(voiceManager.state.rawValue)
                     .font(.headline)
                     .foregroundColor(.white)
+                
+                // Conversation active indicator
+                if voiceManager.isConversationActive {
+                    Text("Gesprek actief - tik om te stoppen")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                }
                 
                 // Error
                 if let error = voiceManager.errorMessage {
@@ -64,7 +72,7 @@ struct ContentView: View {
                 
                 Spacer()
                 
-                // Text input toggle
+                // Bottom controls
                 bottomControls
             }
             .padding()
@@ -139,20 +147,39 @@ struct ContentView: View {
     // MARK: - Main Button
     
     private var mainButton: some View {
-        Button(action: {}) {
+        Button(action: {
+            if voiceManager.isConnected && voiceManager.canUseSpeech {
+                voiceManager.toggleConversation()
+            }
+        }) {
             ZStack {
-                // Outer glow when listening
+                // Audio level visualization (pulsing rings)
                 if voiceManager.state == .listening {
+                    ForEach(0..<3, id: \.self) { i in
+                        Circle()
+                            .stroke(Color.green.opacity(0.3 - Double(i) * 0.1), lineWidth: 2)
+                            .frame(
+                                width: 120 + CGFloat(i * 20) + CGFloat(voiceManager.audioLevel * 30),
+                                height: 120 + CGFloat(i * 20) + CGFloat(voiceManager.audioLevel * 30)
+                            )
+                            .animation(.easeOut(duration: 0.1), value: voiceManager.audioLevel)
+                    }
+                }
+                
+                // Speaking animation
+                if voiceManager.state == .speaking {
                     Circle()
-                        .fill(Color.red.opacity(0.2))
-                        .frame(width: 160, height: 160)
+                        .stroke(Color.purple.opacity(0.5), lineWidth: 3)
+                        .frame(width: 140, height: 140)
+                        .scaleEffect(1.0)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(), value: voiceManager.state)
                 }
                 
                 // Main circle
                 Circle()
                     .fill(voiceManager.state.color)
                     .frame(width: 120, height: 120)
-                    .shadow(color: voiceManager.state.color.opacity(0.5), radius: 10)
+                    .shadow(color: voiceManager.state.color.opacity(0.5), radius: 15)
                 
                 // Icon
                 Image(systemName: voiceManager.state.icon)
@@ -160,27 +187,8 @@ struct ContentView: View {
                     .foregroundColor(.white)
             }
         }
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    if voiceManager.state == .idle && voiceManager.isConnected && voiceManager.canUseSpeech {
-                        voiceManager.startListening()
-                    }
-                }
-                .onEnded { _ in
-                    if voiceManager.state == .listening {
-                        voiceManager.stopListening()
-                    }
-                }
-        )
-        .disabled(!voiceManager.isConnected || voiceManager.state == .processing || voiceManager.state == .speaking)
-        .opacity(buttonOpacity)
-    }
-    
-    private var buttonOpacity: Double {
-        if !voiceManager.isConnected { return 0.5 }
-        if voiceManager.state == .processing || voiceManager.state == .speaking { return 0.7 }
-        return 1.0
+        .disabled(!voiceManager.isConnected || !voiceManager.canUseSpeech)
+        .opacity(voiceManager.isConnected && voiceManager.canUseSpeech ? 1.0 : 0.5)
     }
     
     // MARK: - Bottom Controls
@@ -228,7 +236,8 @@ struct ContentView: View {
     }
     
     private var canSend: Bool {
-        !textInput.isEmpty && voiceManager.isConnected && voiceManager.state == .idle
+        !textInput.isEmpty && voiceManager.isConnected && 
+        (voiceManager.state == .idle || voiceManager.state == .listening)
     }
     
     private func sendText() {
