@@ -85,24 +85,14 @@ class VoiceManager: ObservableObject {
     // MARK: - Permissions
     
     func checkPermissions() {
-        // Check microphone
-        switch AVAudioApplication.shared.recordPermission {
-        case .granted:
-            checkSpeechPermission()
-        case .denied:
-            canUseSpeech = false
-        case .undetermined:
-            AVAudioApplication.shared.requestRecordPermission { [weak self] granted in
-                Task { @MainActor in
-                    if granted {
-                        self?.checkSpeechPermission()
-                    } else {
-                        self?.canUseSpeech = false
-                    }
-                }
+        // Check microphone using async API
+        Task {
+            let granted = await AVAudioApplication.requestRecordPermission()
+            if granted {
+                checkSpeechPermission()
+            } else {
+                canUseSpeech = false
             }
-        @unknown default:
-            canUseSpeech = false
         }
     }
     
