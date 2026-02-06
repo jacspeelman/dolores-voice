@@ -186,7 +186,7 @@ async function handleTextMessage(ws, text, connectionId) {
  * Main WebSocket server setup
  */
 function startServer() {
-  const wss = new WebSocketServer({ port: PORT });
+  const wss = new WebSocketServer({ host: '0.0.0.0', port: PORT });
   let connectionCounter = 0;
 
   console.log(`🚀 Dolores Voice Server starting on port ${PORT}...`);
