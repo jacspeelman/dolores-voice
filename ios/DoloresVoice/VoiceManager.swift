@@ -8,6 +8,14 @@
 import SwiftUI
 import AVFoundation
 
+/// Chat message for history
+struct ChatMessage: Identifiable {
+    let id = UUID()
+    let isUser: Bool
+    let text: String
+    let timestamp = Date()
+}
+
 /// Voice interaction state
 enum VoiceState: String {
     case disconnected = "Niet verbonden"
@@ -71,6 +79,7 @@ class VoiceManager: ObservableObject {
     @Published var sttProvider: String = ""
     @Published var sttFlag: String = ""
     @Published var canUseSpeech: Bool = false
+    @Published var messages: [ChatMessage] = []
     
     // MARK: - Private Properties
     
@@ -231,6 +240,7 @@ class VoiceManager: ObservableObject {
                         state = isConnected ? .idle : .disconnected
                     }
                 } else {
+                    messages.append(ChatMessage(isUser: true, text: transcript))
                     state = .processing
                 }
             }
@@ -238,6 +248,7 @@ class VoiceManager: ObservableObject {
         case "response":
             if let responseText = json["text"] as? String {
                 lastResponse = responseText
+                messages.append(ChatMessage(isUser: false, text: responseText))
             }
             
         case "audio":
@@ -432,6 +443,7 @@ class VoiceManager: ObservableObject {
         
         state = .processing
         lastTranscript = text
+        messages.append(ChatMessage(isUser: true, text: text))
         sendJSON(["type": "text", "text": text])
     }
     

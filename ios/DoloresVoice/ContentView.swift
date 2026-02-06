@@ -2,7 +2,7 @@
 //  ContentView.swift
 //  DoloresVoice
 //
-//  Continuous conversation UI
+//  Telegram-style chat UI
 //
 
 import SwiftUI
@@ -18,64 +18,38 @@ struct ContentView: View {
             // Background
             Color.black.ignoresSafeArea()
             
-            VStack(spacing: 20) {
-                // Header
-                VStack(spacing: 8) {
-                    Text("🦋")
-                        .font(.system(size: 60))
-                    Text("Dolores")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                }
-                .padding(.top, 30)
+            VStack(spacing: 0) {
+                // Compact Header
+                compactHeader
                 
-                // Connection status
-                connectionStatus
-                
-                Spacer()
-                
-                // Response
-                if !voiceManager.lastResponse.isEmpty {
-                    responseView
-                }
-                
-                // Transcript while listening
-                if (voiceManager.state == .listening || voiceManager.state == .processing) 
-                    && !voiceManager.lastTranscript.isEmpty {
-                    transcriptView
-                }
-                
-                Spacer()
-                
-                // Main button with audio visualization
-                mainButton
-                
-                // Status text
-                Text(voiceManager.state.rawValue)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                
-                // Conversation active indicator
-                if voiceManager.isConversationActive {
-                    Text("Gesprek actief - tik om te stoppen")
-                        .font(.caption)
-                        .foregroundColor(.green)
+                // Chat messages (scrollable)
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(voiceManager.messages) { message in
+                                chatBubble(message: message)
+                            }
+                            
+                            // Current transcript (typing indicator)
+                            if voiceManager.state == .listening && !voiceManager.lastTranscript.isEmpty {
+                                currentTranscript
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.vertical, 10)
+                    }
+                    .onChange(of: voiceManager.messages.count) { _ in
+                        if let lastMessage = voiceManager.messages.last {
+                            withAnimation {
+                                proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                            }
+                        }
+                    }
                 }
                 
-                // Error
-                if let error = voiceManager.errorMessage {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                }
-                
-                Spacer()
-                
-                // Bottom controls
-                bottomControls
+                // Bottom bar with button and input
+                bottomBar
             }
-            .padding()
         }
         .onAppear {
             voiceManager.checkPermissions()
@@ -86,169 +60,172 @@ struct ContentView: View {
         }
     }
     
-    // MARK: - Connection Status
+    // MARK: - Compact Header
     
-    private var connectionStatus: some View {
-        VStack(spacing: 4) {
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(voiceManager.isConnected ? Color.green : Color.red)
-                    .frame(width: 10, height: 10)
+    private var compactHeader: some View {
+        HStack(spacing: 10) {
+            Text("🦋")
+                .font(.title2)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Dolores")
+                    .font(.headline)
+                    .foregroundColor(.white)
                 
-                Text(voiceManager.isConnected ? "Verbonden" : "Niet verbonden")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                
-                if !voiceManager.isConnected && voiceManager.state != .connecting {
-                    Button("Opnieuw") {
-                        voiceManager.reconnect()
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(voiceManager.isConnected ? Color.green : Color.red)
+                        .frame(width: 8, height: 8)
+                    
+                    Text(voiceManager.isConnected ? "Verbonden" : "Niet verbonden")
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                    
+                    if voiceManager.isConnected && !voiceManager.ttsProvider.isEmpty {
+                        Text("· \(voiceManager.ttsVoice)")
+                            .font(.caption2)
+                            .foregroundColor(.gray.opacity(0.7))
                     }
-                    .font(.subheadline)
-                    .foregroundColor(.blue)
                 }
             }
             
-            if voiceManager.isConnected && !voiceManager.ttsProvider.isEmpty {
-                Text("🎤 \(voiceManager.ttsProvider) · \(voiceManager.ttsVoice) \(voiceManager.ttsFlag)")
-                    .font(.caption2)
-                    .foregroundColor(.cyan.opacity(0.7))
-            }
-        }
-    }
-    
-    // MARK: - Response View (Dolores - links)
-    
-    private var responseView: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("🦋 Dolores")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-                
-                Text(voiceManager.lastResponse)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(Color.gray.opacity(0.3))
-                    .cornerRadius(18)
-            }
-            Spacer(minLength: 60)
-        }
-        .padding(.horizontal)
-    }
-    
-    // MARK: - Transcript View (Jac - rechts)
-    
-    private var transcriptView: some View {
-        HStack {
-            Spacer(minLength: 60)
-            VStack(alignment: .trailing, spacing: 4) {
-                Text("Jij")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-                
-                Text(voiceManager.lastTranscript)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(Color.blue)
-                    .cornerRadius(18)
+            Spacer()
+            
+            if !voiceManager.isConnected && voiceManager.state != .connecting {
+                Button("Opnieuw") {
+                    voiceManager.reconnect()
+                }
+                .font(.caption)
+                .foregroundColor(.blue)
             }
         }
         .padding(.horizontal)
+        .padding(.vertical, 10)
+        .background(Color.black.opacity(0.9))
     }
     
-    // MARK: - Main Button
+    // MARK: - Chat Bubble
     
-    private var mainButton: some View {
+    private func chatBubble(message: ChatMessage) -> some View {
+        HStack {
+            if message.isUser { Spacer(minLength: 60) }
+            
+            Text(message.text)
+                .foregroundColor(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(message.isUser ? Color.blue : Color.gray.opacity(0.3))
+                .cornerRadius(18)
+            
+            if !message.isUser { Spacer(minLength: 60) }
+        }
+        .id(message.id)
+    }
+    
+    // MARK: - Current Transcript
+    
+    private var currentTranscript: some View {
+        HStack {
+            Spacer(minLength: 60)
+            Text(voiceManager.lastTranscript)
+                .foregroundColor(.white.opacity(0.7))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(Color.blue.opacity(0.5))
+                .cornerRadius(18)
+        }
+    }
+    
+    // MARK: - Bottom Bar
+    
+    private var bottomBar: some View {
+        VStack(spacing: 8) {
+            // Error message
+            if let error = voiceManager.errorMessage {
+                Text(error)
+                    .font(.caption2)
+                    .foregroundColor(.red)
+            }
+            
+            HStack(spacing: 12) {
+                // Text input toggle
+                Button(action: { withAnimation { showTextInput.toggle() } }) {
+                    Image(systemName: "keyboard")
+                        .font(.system(size: 20))
+                        .foregroundColor(.gray)
+                }
+                
+                if showTextInput {
+                    // Text input field
+                    HStack {
+                        TextField("Bericht...", text: $textInput)
+                            .padding(10)
+                            .background(Color.white.opacity(0.1))
+                            .cornerRadius(20)
+                            .foregroundColor(.white)
+                            .focused($isTextFieldFocused)
+                            .autocorrectionDisabled(true)
+                            .textInputAutocapitalization(.never)
+                            .onSubmit { sendText() }
+                        
+                        Button(action: sendText) {
+                            Image(systemName: "arrow.up.circle.fill")
+                                .font(.system(size: 28))
+                                .foregroundColor(canSend ? .blue : .gray)
+                        }
+                        .disabled(!canSend)
+                    }
+                } else {
+                    Spacer()
+                    
+                    // Status text (compact)
+                    if voiceManager.state != .idle {
+                        Text(voiceManager.state.rawValue)
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                    
+                    Spacer()
+                }
+                
+                // Voice button (small)
+                voiceButton
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 10)
+            .background(Color.black.opacity(0.9))
+        }
+    }
+    
+    // MARK: - Voice Button
+    
+    private var voiceButton: some View {
         Button(action: {
             if voiceManager.isConnected && voiceManager.canUseSpeech {
                 voiceManager.toggleConversation()
             }
         }) {
             ZStack {
-                // Audio level visualization (pulsing rings)
+                // Pulse animation when listening
                 if voiceManager.state == .listening {
-                    ForEach(0..<3, id: \.self) { i in
-                        Circle()
-                            .stroke(Color.green.opacity(0.3 - Double(i) * 0.1), lineWidth: 2)
-                            .frame(
-                                width: 60 + CGFloat(i * 12) + CGFloat(voiceManager.audioLevel * 20),
-                                height: 60 + CGFloat(i * 12) + CGFloat(voiceManager.audioLevel * 20)
-                            )
-                            .animation(.easeOut(duration: 0.1), value: voiceManager.audioLevel)
-                    }
-                }
-                
-                // Speaking animation
-                if voiceManager.state == .speaking {
                     Circle()
-                        .stroke(Color.purple.opacity(0.5), lineWidth: 2)
-                        .frame(width: 70, height: 70)
-                        .scaleEffect(1.0)
-                        .animation(.easeInOut(duration: 0.5).repeatForever(), value: voiceManager.state)
+                        .stroke(Color.green.opacity(0.3), lineWidth: 2)
+                        .frame(width: 44 + CGFloat(voiceManager.audioLevel * 15),
+                               height: 44 + CGFloat(voiceManager.audioLevel * 15))
+                        .animation(.easeOut(duration: 0.1), value: voiceManager.audioLevel)
                 }
                 
-                // Main circle
                 Circle()
                     .fill(voiceManager.state.color)
-                    .frame(width: 60, height: 60)
-                    .shadow(color: voiceManager.state.color.opacity(0.5), radius: 10)
+                    .frame(width: 44, height: 44)
                 
-                // Icon
                 Image(systemName: voiceManager.state.icon)
-                    .font(.system(size: 26))
+                    .font(.system(size: 20))
                     .foregroundColor(.white)
             }
         }
         .disabled(!voiceManager.isConnected || !voiceManager.canUseSpeech)
         .opacity(voiceManager.isConnected && voiceManager.canUseSpeech ? 1.0 : 0.5)
-    }
-    
-    // MARK: - Bottom Controls
-    
-    private var bottomControls: some View {
-        VStack(spacing: 12) {
-            // Toggle text input
-            Button(action: { withAnimation { showTextInput.toggle() } }) {
-                HStack {
-                    Image(systemName: showTextInput ? "keyboard.chevron.compact.down" : "keyboard")
-                    Text(showTextInput ? "Verberg" : "Typ een bericht")
-                }
-                .font(.caption)
-                .foregroundColor(.gray)
-            }
-            
-            // Text input
-            if showTextInput {
-                HStack {
-                    TextField("Typ een bericht...", text: $textInput)
-                        .padding(14)
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(25)
-                        .foregroundColor(.white)
-                        .focused($isTextFieldFocused)
-                        .autocorrectionDisabled(true)
-                        .textInputAutocapitalization(.never)
-                        .onSubmit { sendText() }
-                    
-                    Button(action: sendText) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 36))
-                            .foregroundColor(canSend ? .blue : .gray)
-                    }
-                    .disabled(!canSend)
-                }
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-            
-            if !voiceManager.canUseSpeech {
-                Text("Geef toegang tot microfoon in Instellingen")
-                    .font(.caption2)
-                    .foregroundColor(.orange)
-            }
-        }
-        .padding(.bottom, 20)
     }
     
     private var canSend: Bool {
