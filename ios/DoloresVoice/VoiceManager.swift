@@ -2,12 +2,11 @@
 //  VoiceManager.swift
 //  DoloresVoice
 //
-//  Voice assistant with continuous conversation mode
+//  Voice assistant with Whisper transcription
 //
 
 import SwiftUI
 import AVFoundation
-import Speech
 
 /// Voice interaction state
 enum VoiceState: String {
@@ -15,6 +14,7 @@ enum VoiceState: String {
     case connecting = "Verbinden..."
     case idle = "Start gesprek"
     case listening = "Luisteren..."
+    case transcribing = "Transcriberen..."
     case processing = "Denken..."
     case speaking = "Spreken..."
     case error = "Fout"
@@ -25,6 +25,7 @@ enum VoiceState: String {
         case .connecting: return .orange
         case .idle: return .blue
         case .listening: return .green
+        case .transcribing: return .cyan
         case .processing: return .orange
         case .speaking: return .purple
         case .error: return .red
@@ -37,6 +38,7 @@ enum VoiceState: String {
         case .connecting: return "arrow.triangle.2.circlepath"
         case .idle: return "mic.circle.fill"
         case .listening: return "waveform.circle.fill"
+        case .transcribing: return "text.bubble"
         case .processing: return "brain"
         case .speaking: return "speaker.wave.3.fill"
         case .error: return "exclamationmark.triangle.fill"
@@ -50,8 +52,9 @@ class VoiceManager: ObservableObject {
     
     private let serverURL = URL(string: "ws://192.168.1.214:8765")!
     private let maxReconnectAttempts = 5
-    private let silenceThreshold: Float = 0.01  // Audio level below this = silence
+    private let silenceThreshold: Float = 0.015  // Audio level below this = silence
     private let silenceTimeout: TimeInterval = 1.5  // Seconds of silence before sending
+    private let minRecordingDuration: TimeInterval = 0.5  // Minimum recording length
     
     // MARK: - Published State
     
@@ -60,9 +63,14 @@ class VoiceManager: ObservableObject {
     @Published var lastResponse: String = ""
     @Published var errorMessage: String?
     @Published var isConnected: Bool = false
-    @Published var canUseSpeech: Bool = false
     @Published var isConversationActive: Bool = false
     @Published var audioLevel: Float = 0.0
+    @Published var ttsProvider: String = ""
+    @Published var ttsVoice: String = ""
+    @Published var ttsFlag: String = ""
+    @Published var sttProvider: String = ""
+    @Published var sttFlag: String = ""
+    @Published var canUseSpeech: Bool = false
     
     // MARK: - Private Properties
     
@@ -73,21 +81,24 @@ class VoiceManager: ObservableObject {
     private var audioPlayerDelegate: AudioPlayerDelegate?
     private let synthesizer = AVSpeechSynthesizer()
     
-    // Speech Recognition
-    private var speechRecognizer: SFSpeechRecognizer?
-    private var audioEngine: AVAudioEngine?
-    private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
-    private var recognitionTask: SFSpeechRecognitionTask?
-    
-    // Silence detection
+    // Audio Recording
+    private var audioRecorder: AVAudioRecorder?
+    private var recordingURL: URL?
+    private var levelTimer: Timer?
     private var silenceTimer: Timer?
+    private var recordingStartTime: Date?
     private var lastSpeechTime: Date = Date()
     private var hasDetectedSpeech: Bool = false
     
     // MARK: - Initialization
     
     init() {
-        speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "nl-NL"))
+        setupRecordingURL()
+    }
+    
+    private func setupRecordingURL() {
+        let tempDir = FileManager.default.temporaryDirectory
+        recordingURL = tempDir.appendingPathComponent("voice_recording.m4a")
     }
     
     // MARK: - Permissions
@@ -95,28 +106,11 @@ class VoiceManager: ObservableObject {
     func checkPermissions() {
         Task {
             let granted = await AVAudioApplication.requestRecordPermission()
-            if granted {
-                checkSpeechPermission()
-            } else {
-                canUseSpeech = false
+            // No speech recognition permission needed - using Whisper server-side
+            canUseSpeech = granted
+            if !granted {
+                errorMessage = "Microfoon toegang vereist"
             }
-        }
-    }
-    
-    private func checkSpeechPermission() {
-        switch SFSpeechRecognizer.authorizationStatus() {
-        case .authorized:
-            canUseSpeech = true
-        case .denied, .restricted:
-            canUseSpeech = false
-        case .notDetermined:
-            SFSpeechRecognizer.requestAuthorization { [weak self] status in
-                Task { @MainActor in
-                    self?.canUseSpeech = (status == .authorized)
-                }
-            }
-        @unknown default:
-            canUseSpeech = false
         }
     }
     
@@ -225,6 +219,22 @@ class VoiceManager: ObservableObject {
               let type = json["type"] as? String else { return }
         
         switch type {
+        case "transcript":
+            // Whisper transcript received
+            if let transcript = json["text"] as? String {
+                lastTranscript = transcript
+                if transcript.isEmpty {
+                    // Empty transcript - continue listening
+                    if isConversationActive {
+                        startRecording()
+                    } else {
+                        state = isConnected ? .idle : .disconnected
+                    }
+                } else {
+                    state = .processing
+                }
+            }
+            
         case "response":
             if let responseText = json["text"] as? String {
                 lastResponse = responseText
@@ -246,7 +256,7 @@ class VoiceManager: ObservableObject {
                 Task {
                     try? await Task.sleep(for: .seconds(2))
                     if isConversationActive {
-                        startListening()
+                        startRecording()
                     } else {
                         state = isConnected ? .idle : .disconnected
                     }
@@ -257,6 +267,17 @@ class VoiceManager: ObservableObject {
         case "pong":
             break
             
+        case "config":
+            if let tts = json["tts"] as? [String: Any] {
+                ttsProvider = tts["provider"] as? String ?? ""
+                ttsVoice = tts["voice"] as? String ?? ""
+                ttsFlag = tts["flag"] as? String ?? ""
+            }
+            if let stt = json["stt"] as? [String: Any] {
+                sttProvider = stt["provider"] as? String ?? ""
+                sttFlag = stt["flag"] as? String ?? ""
+            }
+            
         default:
             break
         }
@@ -266,17 +287,15 @@ class VoiceManager: ObservableObject {
     
     /// Start continuous conversation
     func startConversation() {
-        guard isConnected, canUseSpeech else { return }
+        guard isConnected else { return }
         isConversationActive = true
-        startListening()
+        startRecording()
     }
     
     /// Stop conversation
     func stopConversation() {
         isConversationActive = false
-        stopListening()
-        silenceTimer?.invalidate()
-        silenceTimer = nil
+        stopRecording(send: false)
         state = isConnected ? .idle : .disconnected
     }
     
@@ -289,135 +308,124 @@ class VoiceManager: ObservableObject {
         }
     }
     
-    // MARK: - Speech Recognition
+    // MARK: - Audio Recording
     
-    private func startListening() {
-        guard canUseSpeech, isConnected else { return }
-        guard let speechRecognizer = speechRecognizer, speechRecognizer.isAvailable else {
-            errorMessage = "Spraakherkenning niet beschikbaar"
-            return
-        }
+    private func startRecording() {
+        guard isConnected else { return }
+        guard let recordingURL = recordingURL else { return }
         
-        // Clean up any existing session
-        stopListeningQuietly()
+        // Clean up any existing recording
+        stopRecording(send: false)
         
-        lastTranscript = ""
-        hasDetectedSpeech = false
         state = .listening
+        hasDetectedSpeech = false
+        lastSpeechTime = Date()
+        recordingStartTime = Date()
         
         do {
             let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
             
-            audioEngine = AVAudioEngine()
-            guard let audioEngine = audioEngine else { return }
+            // Recording settings for M4A (AAC) - good quality, small size
+            let settings: [String: Any] = [
+                AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                AVSampleRateKey: 16000,
+                AVNumberOfChannelsKey: 1,
+                AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+            ]
             
-            recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-            guard let recognitionRequest = recognitionRequest else { return }
-            recognitionRequest.shouldReportPartialResults = true
+            // Delete old recording if exists
+            try? FileManager.default.removeItem(at: recordingURL)
             
-            let inputNode = audioEngine.inputNode
-            let recordingFormat = inputNode.outputFormat(forBus: 0)
+            audioRecorder = try AVAudioRecorder(url: recordingURL, settings: settings)
+            audioRecorder?.isMeteringEnabled = true
+            audioRecorder?.record()
             
-            inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, _ in
-                self?.recognitionRequest?.append(buffer)
-                self?.processAudioLevel(buffer: buffer)
-            }
-            
-            recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
-                Task { @MainActor in
-                    if let result = result {
-                        let transcript = result.bestTranscription.formattedString
-                        if !transcript.isEmpty {
-                            self?.lastTranscript = transcript
-                            self?.hasDetectedSpeech = true
-                            self?.lastSpeechTime = Date()
-                        }
-                    }
-                }
-            }
-            
-            audioEngine.prepare()
-            try audioEngine.start()
-            
-            // Start silence detection timer
-            startSilenceDetection()
+            // Start level monitoring
+            startLevelMonitoring()
             
         } catch {
-            errorMessage = "Kon niet starten"
+            errorMessage = "Opname mislukt: \(error.localizedDescription)"
             state = isConversationActive ? .listening : .idle
         }
     }
     
-    private func stopListeningQuietly() {
-        audioEngine?.stop()
-        audioEngine?.inputNode.removeTap(onBus: 0)
-        audioEngine = nil
-        recognitionRequest?.endAudio()
-        recognitionRequest = nil
-        recognitionTask?.cancel()
-        recognitionTask = nil
+    private func stopRecording(send: Bool) {
+        levelTimer?.invalidate()
+        levelTimer = nil
         silenceTimer?.invalidate()
         silenceTimer = nil
-    }
-    
-    private func stopListening() {
-        stopListeningQuietly()
+        
+        audioRecorder?.stop()
+        audioRecorder = nil
+        
         try? AVAudioSession.sharedInstance().setActive(false)
-    }
-    
-    private func processAudioLevel(buffer: AVAudioPCMBuffer) {
-        guard let channelData = buffer.floatChannelData?[0] else { return }
-        let frames = buffer.frameLength
         
-        var sum: Float = 0
-        for i in 0..<Int(frames) {
-            sum += abs(channelData[i])
-        }
-        
-        let level = sum / Float(frames)
-        
-        Task { @MainActor in
-            audioLevel = min(level * 5, 1.0)
+        if send {
+            sendRecording()
         }
     }
     
-    private func startSilenceDetection() {
-        lastSpeechTime = Date()
-        silenceTimer?.invalidate()
-        silenceTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
+    private func startLevelMonitoring() {
+        levelTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
             Task { @MainActor in
-                self?.checkSilence()
+                self?.updateAudioLevel()
             }
         }
     }
     
-    private func checkSilence() {
-        guard state == .listening, hasDetectedSpeech else { return }
+    private func updateAudioLevel() {
+        guard let recorder = audioRecorder, recorder.isRecording else { return }
         
-        let silenceDuration = Date().timeIntervalSince(lastSpeechTime)
+        recorder.updateMeters()
+        let level = recorder.averagePower(forChannel: 0)
         
-        // If we have speech and enough silence, send the message
-        if silenceDuration >= silenceTimeout && !lastTranscript.isEmpty {
-            sendCurrentTranscript()
+        // Convert dB to linear (0-1 range)
+        let linearLevel = pow(10, level / 20)
+        audioLevel = min(linearLevel * 3, 1.0)  // Amplify for visibility
+        
+        // Detect speech
+        if linearLevel > silenceThreshold {
+            hasDetectedSpeech = true
+            lastSpeechTime = Date()
+        }
+        
+        // Check for silence after speech
+        if hasDetectedSpeech {
+            let silenceDuration = Date().timeIntervalSince(lastSpeechTime)
+            let recordingDuration = Date().timeIntervalSince(recordingStartTime ?? Date())
+            
+            if silenceDuration >= silenceTimeout && recordingDuration >= minRecordingDuration {
+                // Enough silence after speech - send the recording
+                stopRecording(send: true)
+            }
         }
     }
     
-    private func sendCurrentTranscript() {
-        let transcript = lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !transcript.isEmpty else {
+    private func sendRecording() {
+        guard let recordingURL = recordingURL else { return }
+        
+        state = .transcribing
+        
+        do {
+            let audioData = try Data(contentsOf: recordingURL)
+            let base64 = audioData.base64EncodedString()
+            
+            print("📤 Sending audio: \(audioData.count / 1024)KB")
+            sendJSON(["type": "audio", "data": base64])
+            
+        } catch {
+            errorMessage = "Kon opname niet lezen"
             if isConversationActive {
-                startListening()
+                startRecording()
+            } else {
+                state = isConnected ? .idle : .disconnected
             }
-            return
         }
-        
-        stopListeningQuietly()
-        sendText(transcript)
     }
     
-    // MARK: - Send Message
+    // MARK: - Send Text (manual input)
     
     func sendText(_ text: String) {
         guard !text.isEmpty, isConnected else { return }
@@ -466,7 +474,7 @@ class VoiceManager: ObservableObject {
             // Continue listening after I finish speaking
             Task {
                 try? await Task.sleep(for: .milliseconds(300))
-                startListening()
+                startRecording()
             }
         } else {
             state = isConnected ? .idle : .disconnected

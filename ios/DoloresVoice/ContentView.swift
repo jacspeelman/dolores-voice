@@ -89,21 +89,29 @@ struct ContentView: View {
     // MARK: - Connection Status
     
     private var connectionStatus: some View {
-        HStack(spacing: 8) {
-            Circle()
-                .fill(voiceManager.isConnected ? Color.green : Color.red)
-                .frame(width: 10, height: 10)
-            
-            Text(voiceManager.isConnected ? "Verbonden" : "Niet verbonden")
-                .font(.subheadline)
-                .foregroundColor(.gray)
-            
-            if !voiceManager.isConnected && voiceManager.state != .connecting {
-                Button("Opnieuw") {
-                    voiceManager.reconnect()
+        VStack(spacing: 4) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(voiceManager.isConnected ? Color.green : Color.red)
+                    .frame(width: 10, height: 10)
+                
+                Text(voiceManager.isConnected ? "Verbonden" : "Niet verbonden")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                
+                if !voiceManager.isConnected && voiceManager.state != .connecting {
+                    Button("Opnieuw") {
+                        voiceManager.reconnect()
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.blue)
                 }
-                .font(.subheadline)
-                .foregroundColor(.blue)
+            }
+            
+            if voiceManager.isConnected && !voiceManager.ttsProvider.isEmpty {
+                Text("🎤 \(voiceManager.ttsProvider) · \(voiceManager.ttsVoice) \(voiceManager.ttsFlag)")
+                    .font(.caption2)
+                    .foregroundColor(.cyan.opacity(0.7))
             }
         }
     }
