@@ -289,25 +289,67 @@ class VoiceManager: ObservableObject {
     /// Start listening to user's voice
     func startRecording() {
         guard state == .idle, isConnected else { return }
-        guard let speechRecognizer = speechRecognizer, speechRecognizer.isAvailable else {
+        
+        // Check speech recognizer on main thread
+        guard let speechRecognizer = speechRecognizer else {
+            errorMessage = "Spraakherkenning niet geconfigureerd"
+            return
+        }
+        
+        guard speechRecognizer.isAvailable else {
             errorMessage = "Spraakherkenning niet beschikbaar"
             return
         }
         
+        // Stop any existing audio engine
+        audioEngine?.stop()
+        audioEngine?.inputNode.removeTap(onBus: 0)
+        recognitionRequest?.endAudio()
+        recognitionTask?.cancel()
+        
+        state = .listening
+        lastTranscript = ""
+        
+        // Setup audio in background to avoid blocking UI
+        Task.detached { [weak self] in
+            do {
+                try await self?.setupAudioSessionAsync()
+                await self?.startAudioEngine(speechRecognizer: speechRecognizer)
+            } catch {
+                await MainActor.run {
+                    print("❌ Recording error: \(error)")
+                    self?.errorMessage = "Kon opname niet starten: \(error.localizedDescription)"
+                    self?.state = .idle
+                }
+            }
+        }
+    }
+    
+    private func setupAudioSessionAsync() async throws {
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
+        try session.setActive(true, options: .notifyOthersOnDeactivation)
+    }
+    
+    @MainActor
+    private func startAudioEngine(speechRecognizer: SFSpeechRecognizer) {
         do {
-            try setupAudioSession()
-            
             audioEngine = AVAudioEngine()
             guard let audioEngine = audioEngine else { return }
             
             let inputNode = audioEngine.inputNode
-            recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+            let recordingFormat = inputNode.outputFormat(forBus: 0)
             
+            // Check if format is valid
+            guard recordingFormat.sampleRate > 0 else {
+                errorMessage = "Ongeldige audio configuratie"
+                state = .idle
+                return
+            }
+            
+            recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
             guard let recognitionRequest = recognitionRequest else { return }
             recognitionRequest.shouldReportPartialResults = true
-            
-            state = .listening
-            lastTranscript = ""
             
             recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
                 Task { @MainActor in
@@ -315,13 +357,12 @@ class VoiceManager: ObservableObject {
                         self?.lastTranscript = result.bestTranscription.formattedString
                     }
                     
-                    if error != nil || (result?.isFinal ?? false) {
-                        // Recognition finished
+                    if let error = error {
+                        print("⚠️ Recognition error: \(error)")
                     }
                 }
             }
             
-            let recordingFormat = inputNode.outputFormat(forBus: 0)
             inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, _ in
                 self?.recognitionRequest?.append(buffer)
                 
@@ -338,8 +379,8 @@ class VoiceManager: ObservableObject {
             print("🎤 Recording started")
             
         } catch {
-            print("❌ Recording error: \(error)")
-            errorMessage = "Kon opname niet starten"
+            print("❌ Audio engine error: \(error)")
+            errorMessage = "Audio fout: \(error.localizedDescription)"
             state = .idle
         }
     }
@@ -385,7 +426,7 @@ class VoiceManager: ObservableObject {
     private func setupAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
-        try session.setActive(true)
+        try session.setActive(true, options: .notifyOthersOnDeactivation)
     }
     
     // MARK: - Send Message
