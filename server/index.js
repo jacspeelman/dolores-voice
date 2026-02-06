@@ -3,6 +3,8 @@
  * 
  * WebSocket server for real-time voice communication
  * Uses Azure Neural TTS (Fenna) for natural Dutch voice
+ * 
+ * v2: Streaming support for text and audio
  */
 
 import { WebSocketServer } from 'ws';
@@ -17,9 +19,9 @@ const PORT = process.env.PORT || 8765;
 const AZURE_SPEECH_KEY = process.env.AZURE_SPEECH_KEY;
 const AZURE_SPEECH_REGION = process.env.AZURE_SPEECH_REGION || 'westeurope';
 const AZURE_VOICE = process.env.AZURE_VOICE || 'nl-NL-FennaNeural';
-const AZURE_RATE = process.env.AZURE_RATE || '+5%';      // -50% to +50%, or slow/medium/fast
-const AZURE_PITCH = process.env.AZURE_PITCH || '+0%';    // -50% to +50%, or low/medium/high
-const AZURE_STYLE = process.env.AZURE_STYLE || '';       // cheerful, sad, angry, friendly, etc.
+const AZURE_RATE = process.env.AZURE_RATE || '+5%';
+const AZURE_PITCH = process.env.AZURE_PITCH || '+0%';
+const AZURE_STYLE = process.env.AZURE_STYLE || '';
 
 // Fallback to ElevenLabs if Azure not configured
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
@@ -31,6 +33,9 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 // OpenClaw Gateway config
 const OPENCLAW_URL = process.env.OPENCLAW_URL || 'http://127.0.0.1:18789';
 const OPENCLAW_TOKEN = process.env.OPENCLAW_TOKEN;
+
+// Streaming config
+const ENABLE_STREAMING = process.env.ENABLE_STREAMING !== 'false'; // Default true
 
 if (!OPENCLAW_TOKEN) {
   console.error('❌ OPENCLAW_TOKEN not set');
@@ -48,7 +53,7 @@ function fetchWithTimeout(url, options, timeoutMs = 60000) {
     .finally(() => clearTimeout(timeout));
 }
 
-// Known Whisper hallucinations (appears on silent/unclear audio)
+// Known Whisper hallucinations
 const WHISPER_HALLUCINATIONS = [
   'ondertitels ingediend door de amara.org gemeenschap',
   'ondertiteling door de amara.org community',
@@ -67,15 +72,13 @@ async function whisperTranscribe(audioBase64) {
     throw new Error('OpenAI API key not configured');
   }
 
-  // Convert base64 to buffer
   const audioBuffer = Buffer.from(audioBase64, 'base64');
   
-  // Create form data with the audio file
   const formData = new FormData();
   const audioBlob = new Blob([audioBuffer], { type: 'audio/m4a' });
   formData.append('file', audioBlob, 'audio.m4a');
   formData.append('model', 'whisper-1');
-  formData.append('language', 'nl');  // Dutch
+  formData.append('language', 'nl');
   formData.append('response_format', 'text');
 
   const response = await fetchWithTimeout(
@@ -87,7 +90,7 @@ async function whisperTranscribe(audioBase64) {
       },
       body: formData
     },
-    30000  // 30 second timeout
+    30000
   );
 
   if (!response.ok) {
@@ -98,7 +101,6 @@ async function whisperTranscribe(audioBase64) {
   const transcript = await response.text();
   const cleaned = transcript.trim();
   
-  // Filter known hallucinations
   if (WHISPER_HALLUCINATIONS.some(h => cleaned.toLowerCase().includes(h))) {
     console.log(`⚠️ Filtered Whisper hallucination: "${cleaned}"`);
     return '';
@@ -108,10 +110,28 @@ async function whisperTranscribe(audioBase64) {
 }
 
 /**
- * Call OpenClaw Gateway - talks to the REAL Dolores!
+ * Detect sentence boundaries for streaming TTS
  */
-async function callOpenClaw(userMessage) {
-  // Prepend voice instruction to keep responses short
+function extractCompleteSentences(text) {
+  // Match sentences ending with . ! ? followed by space or end
+  const sentenceRegex = /[^.!?]*[.!?]+(?:\s|$)/g;
+  const sentences = [];
+  let match;
+  let lastIndex = 0;
+  
+  while ((match = sentenceRegex.exec(text)) !== null) {
+    sentences.push(match[0].trim());
+    lastIndex = match.index + match[0].length;
+  }
+  
+  const remaining = text.slice(lastIndex).trim();
+  return { sentences, remaining };
+}
+
+/**
+ * Call OpenClaw Gateway with streaming
+ */
+async function* callOpenClawStreaming(userMessage) {
   const voiceMessage = `[VOICE] ${userMessage}
 
 (Dit is een voice gesprek - antwoord KORT in 1-3 zinnen, geen markdown/bullets, praat natuurlijk)`;
@@ -126,9 +146,70 @@ async function callOpenClaw(userMessage) {
     body: JSON.stringify({
       model: 'openclaw',
       messages: [{ role: 'user', content: voiceMessage }],
-      user: 'voice-jac'  // Stable session key
+      user: 'voice-jac',
+      stream: true
     })
-  }, 90000); // 90 second timeout for LLM (tool calls can take time)
+  }, 90000);
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`OpenClaw error: ${response.status} - ${error}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    
+    // Process SSE lines
+    const lines = buffer.split('\n');
+    buffer = lines.pop(); // Keep incomplete line in buffer
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') return;
+        
+        try {
+          const json = JSON.parse(data);
+          const delta = json.choices?.[0]?.delta?.content;
+          if (delta) {
+            yield delta;
+          }
+        } catch (e) {
+          // Skip malformed JSON
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Call OpenClaw Gateway - non-streaming fallback
+ */
+async function callOpenClaw(userMessage) {
+  const voiceMessage = `[VOICE] ${userMessage}
+
+(Dit is een voice gesprek - antwoord KORT in 1-3 zinnen, geen markdown/bullets, praat natuurlijk)`;
+
+  const response = await fetchWithTimeout(`${OPENCLAW_URL}/v1/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${OPENCLAW_TOKEN}`,
+      'x-openclaw-agent-id': 'main'
+    },
+    body: JSON.stringify({
+      model: 'openclaw',
+      messages: [{ role: 'user', content: voiceMessage }],
+      user: 'voice-jac'
+    })
+  }, 90000);
 
   if (!response.ok) {
     const error = await response.text();
@@ -140,13 +221,19 @@ async function callOpenClaw(userMessage) {
 }
 
 /**
- * Azure Neural TTS - Fenna (Dutch)
+ * Get Azure TTS access token
  */
-async function azureTTS(text) {
+let azureTokenCache = { token: null, expiry: 0 };
+
+async function getAzureToken() {
+  // Tokens are valid for 10 minutes, cache for 9
+  if (azureTokenCache.token && Date.now() < azureTokenCache.expiry) {
+    return azureTokenCache.token;
+  }
+
   const tokenUrl = `https://${AZURE_SPEECH_REGION}.api.cognitive.microsoft.com/sts/v1.0/issueToken`;
   
-  // Get access token (10 second timeout)
-  const tokenResponse = await fetchWithTimeout(tokenUrl, {
+  const response = await fetchWithTimeout(tokenUrl, {
     method: 'POST',
     headers: {
       'Ocp-Apim-Subscription-Key': AZURE_SPEECH_KEY,
@@ -154,13 +241,21 @@ async function azureTTS(text) {
     }
   }, 10000);
   
-  if (!tokenResponse.ok) {
-    throw new Error(`Azure token error: ${tokenResponse.status}`);
+  if (!response.ok) {
+    throw new Error(`Azure token error: ${response.status}`);
   }
   
-  const accessToken = await tokenResponse.text();
+  const token = await response.text();
+  azureTokenCache = { token, expiry: Date.now() + 9 * 60 * 1000 };
+  return token;
+}
+
+/**
+ * Azure Neural TTS - returns full audio buffer
+ */
+async function azureTTS(text) {
+  const accessToken = await getAzureToken();
   
-  // Generate speech with prosody and optional style
   const styleTag = AZURE_STYLE 
     ? `<mstts:express-as style="${AZURE_STYLE}">` 
     : '';
@@ -171,7 +266,7 @@ async function azureTTS(text) {
            xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='nl-NL'>
       <voice name='${AZURE_VOICE}'>
         ${styleTag}
-        <prosody rate='${AZURE_RATE}' pitch='${AZURE_PITCH}'>${text}</prosody>
+        <prosody rate='${AZURE_RATE}' pitch='${AZURE_PITCH}'>${escapeXml(text)}</prosody>
         ${styleClose}
       </voice>
     </speak>
@@ -179,8 +274,7 @@ async function azureTTS(text) {
   
   const ttsUrl = `https://${AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`;
   
-  // Generate speech (30 second timeout)
-  const ttsResponse = await fetchWithTimeout(ttsUrl, {
+  const response = await fetchWithTimeout(ttsUrl, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -191,13 +285,74 @@ async function azureTTS(text) {
     body: ssml
   }, 30000);
   
-  if (!ttsResponse.ok) {
-    const error = await ttsResponse.text();
-    throw new Error(`Azure TTS error: ${ttsResponse.status} - ${error}`);
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Azure TTS error: ${response.status} - ${error}`);
   }
   
-  const audioBuffer = await ttsResponse.arrayBuffer();
+  const audioBuffer = await response.arrayBuffer();
   return Buffer.from(audioBuffer);
+}
+
+/**
+ * Azure TTS with streaming - yields audio chunks
+ */
+async function* azureTTSStreaming(text) {
+  const accessToken = await getAzureToken();
+  
+  const styleTag = AZURE_STYLE 
+    ? `<mstts:express-as style="${AZURE_STYLE}">` 
+    : '';
+  const styleClose = AZURE_STYLE ? '</mstts:express-as>' : '';
+  
+  const ssml = `
+    <speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' 
+           xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='nl-NL'>
+      <voice name='${AZURE_VOICE}'>
+        ${styleTag}
+        <prosody rate='${AZURE_RATE}' pitch='${AZURE_PITCH}'>${escapeXml(text)}</prosody>
+        ${styleClose}
+      </voice>
+    </speak>
+  `;
+  
+  const ttsUrl = `https://${AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`;
+  
+  const response = await fetchWithTimeout(ttsUrl, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/ssml+xml',
+      'X-Microsoft-OutputFormat': 'audio-16khz-32kbitrate-mono-mp3', // Smaller chunks
+      'User-Agent': 'DoloresVoice'
+    },
+    body: ssml
+  }, 30000);
+  
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Azure TTS error: ${response.status} - ${error}`);
+  }
+  
+  const reader = response.body.getReader();
+  
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    yield Buffer.from(value);
+  }
+}
+
+/**
+ * Escape XML special characters
+ */
+function escapeXml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }
 
 /**
@@ -223,7 +378,7 @@ async function elevenLabsTTS(text) {
         }
       })
     },
-    30000 // 30 second timeout
+    30000
   );
 
   if (!response.ok) {
@@ -254,6 +409,102 @@ function sendMessage(ws, message) {
   }
 }
 
+/**
+ * Handle text message with streaming support
+ */
+async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = true) {
+  console.log(`📝 [${connectionId}] Jac: "${text}" (audio: ${wantsAudio}, streaming: true)`);
+
+  try {
+    console.log(`🦋 [${connectionId}] Asking OpenClaw (streaming)...`);
+    const startLLM = Date.now();
+    
+    let fullResponse = '';
+    let sentenceBuffer = '';
+    let audioQueue = []; // Queue of TTS promises
+    let sentenceCount = 0;
+    
+    // Stream text from OpenClaw
+    for await (const chunk of callOpenClawStreaming(text)) {
+      fullResponse += chunk;
+      sentenceBuffer += chunk;
+      
+      // Send text delta to client
+      sendMessage(ws, { type: 'text_delta', delta: chunk });
+      
+      // Check for complete sentences for TTS
+      if (wantsAudio) {
+        const { sentences, remaining } = extractCompleteSentences(sentenceBuffer);
+        
+        for (const sentence of sentences) {
+          if (sentence.length > 2) { // Skip tiny fragments
+            sentenceCount++;
+            console.log(`🔊 [${connectionId}] TTS queued sentence ${sentenceCount}: "${sentence.substring(0, 50)}..."`);
+            
+            // Start TTS for this sentence immediately (parallel)
+            const ttsPromise = textToSpeech(sentence).catch(err => {
+              console.error(`⚠️ [${connectionId}] TTS error for sentence: ${err.message}`);
+              return null;
+            });
+            audioQueue.push(ttsPromise);
+          }
+        }
+        
+        sentenceBuffer = remaining;
+      }
+    }
+    
+    // Send text_done
+    sendMessage(ws, { type: 'text_done' });
+    console.log(`🦋 [${connectionId}] Dolores (${Date.now() - startLLM}ms): "${fullResponse.substring(0, 100)}..."`);
+    
+    // Also send full response for backwards compatibility
+    sendMessage(ws, { type: 'response', text: fullResponse });
+    
+    // Handle remaining text for TTS
+    if (wantsAudio && sentenceBuffer.trim().length > 2) {
+      console.log(`🔊 [${connectionId}] TTS queued final: "${sentenceBuffer.substring(0, 50)}..."`);
+      audioQueue.push(textToSpeech(sentenceBuffer.trim()).catch(err => null));
+    }
+    
+    // Send audio chunks as they complete (in order)
+    if (wantsAudio && audioQueue.length > 0) {
+      console.log(`🔊 [${connectionId}] Sending ${audioQueue.length} audio chunks...`);
+      
+      // Send audio_start to prepare client
+      sendMessage(ws, { type: 'audio_start', chunks: audioQueue.length });
+      
+      let chunkIndex = 0;
+      for (const ttsPromise of audioQueue) {
+        const audioData = await ttsPromise;
+        if (audioData) {
+          sendMessage(ws, { 
+            type: 'audio_chunk', 
+            data: audioData.toString('base64'),
+            index: chunkIndex,
+            total: audioQueue.length
+          });
+          console.log(`🔊 [${connectionId}] Sent audio chunk ${chunkIndex + 1}/${audioQueue.length} (${audioData.length} bytes)`);
+        }
+        chunkIndex++;
+      }
+      
+      // Signal audio complete
+      sendMessage(ws, { type: 'audio_done' });
+      console.log(`🔊 [${connectionId}] Audio streaming complete`);
+    }
+
+  } catch (error) {
+    console.error(`❌ [${connectionId}] Streaming error:`, error.message);
+    // Fallback to non-streaming
+    console.log(`↩️ [${connectionId}] Falling back to non-streaming...`);
+    await handleTextMessage(ws, text, connectionId, wantsAudio);
+  }
+}
+
+/**
+ * Handle text message - non-streaming fallback
+ */
 async function handleTextMessage(ws, text, connectionId, wantsAudio = true) {
   console.log(`📝 [${connectionId}] Jac: "${text}" (audio: ${wantsAudio})`);
 
@@ -265,7 +516,6 @@ async function handleTextMessage(ws, text, connectionId, wantsAudio = true) {
 
     sendMessage(ws, { type: 'response', text: response });
 
-    // Only generate audio if requested
     if (wantsAudio) {
       console.log(`🔊 [${connectionId}] Generating voice...`);
       const startTTS = Date.now();
@@ -286,11 +536,10 @@ async function handleTextMessage(ws, text, connectionId, wantsAudio = true) {
   }
 }
 
-async function handleAudioMessage(ws, audioBase64, connectionId) {
+async function handleAudioMessage(ws, audioBase64, connectionId, useStreaming = true) {
   console.log(`🎙️ [${connectionId}] Received audio (${Math.round(audioBase64.length / 1024)}KB)`);
   
   try {
-    // Transcribe with Whisper
     console.log(`🎙️ [${connectionId}] Transcribing with Whisper...`);
     const startSTT = Date.now();
     const transcript = await whisperTranscribe(audioBase64);
@@ -302,11 +551,14 @@ async function handleAudioMessage(ws, audioBase64, connectionId) {
       return;
     }
     
-    // Send transcript back to client
     sendMessage(ws, { type: 'transcript', text: transcript });
     
-    // Process as text message
-    await handleTextMessage(ws, transcript, connectionId);
+    // Use streaming if enabled
+    if (useStreaming && ENABLE_STREAMING) {
+      await handleTextMessageStreaming(ws, transcript, connectionId, true);
+    } else {
+      await handleTextMessage(ws, transcript, connectionId, true);
+    }
     
   } catch (error) {
     console.error(`❌ [${connectionId}] STT Error:`, error.message);
@@ -317,7 +569,7 @@ async function handleAudioMessage(ws, audioBase64, connectionId) {
 function startServer() {
   const wss = new WebSocketServer({ host: '0.0.0.0', port: PORT });
   let connectionCounter = 0;
-  const activeConnections = new Map(); // Track active connections
+  const activeConnections = new Map();
 
   const ttsProvider = AZURE_SPEECH_KEY ? 'Azure Fenna 🇳🇱' : (ELEVENLABS_API_KEY ? 'ElevenLabs' : 'None');
 
@@ -325,10 +577,9 @@ function startServer() {
   console.log(`🔗 OpenClaw: ${OPENCLAW_URL}`);
   console.log(`🔑 Auth: ✓`);
   console.log(`🎤 TTS: ${ttsProvider}`);
+  console.log(`📡 Streaming: ${ENABLE_STREAMING ? 'enabled' : 'disabled'}`);
 
-  // Server-side heartbeat to detect dead connections
-  const HEARTBEAT_INTERVAL = 30000; // 30 seconds
-  const HEARTBEAT_TIMEOUT = 10000;  // 10 seconds to respond
+  const HEARTBEAT_INTERVAL = 30000;
   
   const heartbeatInterval = setInterval(() => {
     wss.clients.forEach((ws) => {
@@ -337,7 +588,7 @@ function startServer() {
         return ws.terminate();
       }
       ws.isAlive = false;
-      ws.ping(); // Send ping, expect pong
+      ws.ping();
     });
   }, HEARTBEAT_INTERVAL);
 
@@ -350,17 +601,14 @@ function startServer() {
     const clientIP = request.socket.remoteAddress;
     console.log(`🔌 [${connectionId}] Connected from ${clientIP}`);
     
-    // Track connection
     ws.isAlive = true;
     ws.connectionId = connectionId;
     activeConnections.set(connectionId, { ws, connectedAt: Date.now() });
 
-    // Handle pong responses (for heartbeat)
     ws.on('pong', () => {
       ws.isAlive = true;
     });
     
-    // Send config info to client
     const ttsInfo = AZURE_SPEECH_KEY 
       ? { provider: 'Azure Speech', voice: 'Fenna', flag: '🇳🇱', rate: AZURE_RATE, pitch: AZURE_PITCH, style: AZURE_STYLE || 'default' }
       : ELEVENLABS_API_KEY 
@@ -372,18 +620,25 @@ function startServer() {
       tts: ttsInfo,
       stt: OPENAI_API_KEY ? { provider: 'Whisper', flag: '🎙️' } : { provider: 'Local', flag: '📱' },
       region: AZURE_SPEECH_REGION || 'n/a',
-      backend: 'OpenClaw'  // De echte Dolores!
+      backend: 'OpenClaw',
+      streaming: ENABLE_STREAMING
     });
 
     ws.on('message', async (data) => {
-      ws.isAlive = true; // Any message counts as alive
+      ws.isAlive = true;
       try {
         const message = JSON.parse(data.toString());
+        const useStreaming = message.streaming !== false && ENABLE_STREAMING;
+        
         if (message.type === 'text') {
-          const wantsAudio = message.wantsAudio !== false; // Default true for backwards compatibility
-          await handleTextMessage(ws, message.text, connectionId, wantsAudio);
+          const wantsAudio = message.wantsAudio !== false;
+          if (useStreaming) {
+            await handleTextMessageStreaming(ws, message.text, connectionId, wantsAudio);
+          } else {
+            await handleTextMessage(ws, message.text, connectionId, wantsAudio);
+          }
         } else if (message.type === 'audio') {
-          await handleAudioMessage(ws, message.data, connectionId);
+          await handleAudioMessage(ws, message.data, connectionId, useStreaming);
         } else if (message.type === 'ping') {
           sendMessage(ws, { type: 'pong' });
         }

@@ -3,6 +3,7 @@
 //  DoloresVoice
 //
 //  Voice assistant with Whisper transcription
+//  v2: Streaming text and audio support
 //
 
 import SwiftUI
@@ -12,7 +13,7 @@ import AVFoundation
 struct ChatMessage: Identifiable {
     let id = UUID()
     let isUser: Bool
-    let text: String
+    var text: String
     let timestamp = Date()
 }
 
@@ -24,6 +25,7 @@ enum VoiceState: String {
     case listening = "Luisteren..."
     case transcribing = "Transcriberen..."
     case processing = "Denken..."
+    case streaming = "Antwoord..."
     case speaking = "Spreken..."
     case error = "Fout"
     
@@ -35,6 +37,7 @@ enum VoiceState: String {
         case .listening: return .green
         case .transcribing: return .cyan
         case .processing: return .orange
+        case .streaming: return .yellow
         case .speaking: return .purple
         case .error: return .red
         }
@@ -48,9 +51,112 @@ enum VoiceState: String {
         case .listening: return "waveform.circle.fill"
         case .transcribing: return "text.bubble"
         case .processing: return "brain"
+        case .streaming: return "text.bubble.fill"
         case .speaking: return "speaker.wave.3.fill"
         case .error: return "exclamationmark.triangle.fill"
         }
+    }
+}
+
+/// Streaming audio player using AVAudioEngine
+class StreamingAudioPlayer {
+    private var audioEngine: AVAudioEngine?
+    private var playerNode: AVAudioPlayerNode?
+    private var audioChunks: [Data] = []
+    private var isPlaying = false
+    private var currentChunkIndex = 0
+    private var onComplete: (() -> Void)?
+    
+    func prepare() {
+        audioEngine = AVAudioEngine()
+        playerNode = AVAudioPlayerNode()
+        
+        guard let engine = audioEngine, let player = playerNode else { return }
+        
+        engine.attach(player)
+        
+        // Standard format for MP3 decoded audio
+        let format = AVAudioFormat(standardFormatWithSampleRate: 16000, channels: 1)!
+        engine.connect(player, to: engine.mainMixerNode, format: format)
+        
+        do {
+            try engine.start()
+        } catch {
+            print("⚠️ AudioEngine start failed: \(error)")
+        }
+    }
+    
+    func addChunk(_ data: Data) {
+        audioChunks.append(data)
+        
+        // Start playing if not already
+        if !isPlaying {
+            playNextChunk()
+        }
+    }
+    
+    func finalize(onComplete: @escaping () -> Void) {
+        self.onComplete = onComplete
+        
+        // If all chunks are already played, complete immediately
+        if currentChunkIndex >= audioChunks.count && !isPlaying {
+            cleanup()
+            onComplete()
+        }
+    }
+    
+    private func playNextChunk() {
+        guard currentChunkIndex < audioChunks.count else {
+            isPlaying = false
+            if onComplete != nil {
+                cleanup()
+                onComplete?()
+                onComplete = nil
+            }
+            return
+        }
+        
+        isPlaying = true
+        let chunkData = audioChunks[currentChunkIndex]
+        currentChunkIndex += 1
+        
+        // Decode and play MP3 chunk
+        // For simplicity, we'll use AVAudioPlayer for each chunk
+        // A more advanced implementation would decode to PCM and schedule buffers
+        DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+            do {
+                let player = try AVAudioPlayer(data: chunkData)
+                player.prepareToPlay()
+                player.play()
+                
+                // Wait for playback to complete
+                while player.isPlaying {
+                    Thread.sleep(forTimeInterval: 0.05)
+                }
+                
+                DispatchQueue.main.async {
+                    self?.playNextChunk()
+                }
+            } catch {
+                print("⚠️ Chunk playback failed: \(error)")
+                DispatchQueue.main.async {
+                    self?.playNextChunk()
+                }
+            }
+        }
+    }
+    
+    func stop() {
+        cleanup()
+    }
+    
+    private func cleanup() {
+        audioEngine?.stop()
+        audioEngine = nil
+        playerNode = nil
+        audioChunks.removeAll()
+        currentChunkIndex = 0
+        isPlaying = false
     }
 }
 
@@ -60,15 +166,16 @@ class VoiceManager: ObservableObject {
     
     private let serverURL = URL(string: "ws://192.168.1.214:8765")!
     private let maxReconnectAttempts = 5
-    private let silenceThreshold: Float = 0.015  // Audio level below this = silence
-    private let silenceTimeout: TimeInterval = 1.5  // Seconds of silence before sending
-    private let minRecordingDuration: TimeInterval = 0.5  // Minimum recording length
+    private let silenceThreshold: Float = 0.015
+    private let silenceTimeout: TimeInterval = 1.5
+    private let minRecordingDuration: TimeInterval = 0.5
     
     // MARK: - Published State
     
     @Published var state: VoiceState = .disconnected
     @Published var lastTranscript: String = ""
     @Published var lastResponse: String = ""
+    @Published var streamingResponse: String = ""  // For progressive display
     @Published var errorMessage: String?
     @Published var isConnected: Bool = false
     @Published var isConversationActive: Bool = false
@@ -80,6 +187,7 @@ class VoiceManager: ObservableObject {
     @Published var sttFlag: String = ""
     @Published var canUseSpeech: Bool = false
     @Published var messages: [ChatMessage] = []
+    @Published var streamingEnabled: Bool = true
     
     // MARK: - Private Properties
     
@@ -89,6 +197,12 @@ class VoiceManager: ObservableObject {
     private var audioPlayer: AVAudioPlayer?
     private var audioPlayerDelegate: AudioPlayerDelegate?
     private let synthesizer = AVSpeechSynthesizer()
+    
+    // Streaming audio
+    private var streamingAudioPlayer: StreamingAudioPlayer?
+    private var expectedAudioChunks = 0
+    private var receivedAudioChunks = 0
+    private var currentStreamingMessageId: UUID?
     
     // Audio Recording
     private var audioRecorder: AVAudioRecorder?
@@ -115,7 +229,6 @@ class VoiceManager: ObservableObject {
     func checkPermissions() {
         Task {
             let granted = await AVAudioApplication.requestRecordPermission()
-            // No speech recognition permission needed - using Whisper server-side
             canUseSpeech = granted
             if !granted {
                 errorMessage = "Microfoon toegang vereist"
@@ -229,10 +342,8 @@ class VoiceManager: ObservableObject {
         
         switch type {
         case "transcript":
-            // Whisper transcript received
             if let transcript = json["text"] as? String {
                 if transcript.isEmpty {
-                    // Empty transcript - continue listening
                     lastTranscript = ""
                     if isConversationActive {
                         startRecording()
@@ -241,22 +352,91 @@ class VoiceManager: ObservableObject {
                     }
                 } else {
                     messages.append(ChatMessage(isUser: true, text: transcript))
-                    lastTranscript = ""  // Clear after adding to messages
+                    lastTranscript = ""
                     state = .processing
                 }
             }
             
+        case "text_delta":
+            // Streaming text chunk
+            if let delta = json["delta"] as? String {
+                if state != .streaming {
+                    state = .streaming
+                    streamingResponse = ""
+                    // Add placeholder message for streaming response
+                    let newMessage = ChatMessage(isUser: false, text: "")
+                    currentStreamingMessageId = newMessage.id
+                    messages.append(newMessage)
+                }
+                
+                streamingResponse += delta
+                
+                // Update the last message with streaming content
+                if let msgId = currentStreamingMessageId,
+                   let index = messages.firstIndex(where: { $0.id == msgId }) {
+                    messages[index].text = streamingResponse
+                }
+            }
+            
+        case "text_done":
+            // Streaming text complete
+            lastResponse = streamingResponse
+            currentStreamingMessageId = nil
+            // State will change when audio starts or if no audio
+            
         case "response":
+            // Full response (backwards compatibility or fallback)
             if let responseText = json["text"] as? String {
-                lastResponse = responseText
-                messages.append(ChatMessage(isUser: false, text: responseText))
-                // If not in conversation mode, go back to idle (no audio expected)
-                if !isConversationActive {
+                // Only add if we didn't already stream it
+                if streamingResponse.isEmpty {
+                    lastResponse = responseText
+                    messages.append(ChatMessage(isUser: false, text: responseText))
+                }
+                streamingResponse = ""
+                
+                // If not waiting for audio, go back to idle
+                if expectedAudioChunks == 0 && !isConversationActive {
                     state = isConnected ? .idle : .disconnected
                 }
             }
             
+        case "audio_start":
+            // Prepare for streaming audio
+            state = .speaking
+            expectedAudioChunks = json["chunks"] as? Int ?? 1
+            receivedAudioChunks = 0
+            streamingAudioPlayer = StreamingAudioPlayer()
+            streamingAudioPlayer?.prepare()
+            
+            // Setup audio session for playback
+            do {
+                let session = AVAudioSession.sharedInstance()
+                try session.setCategory(.playback)
+                try session.setActive(true)
+            } catch {
+                print("⚠️ Audio session setup failed: \(error)")
+            }
+            
+        case "audio_chunk":
+            // Streaming audio chunk
+            if let base64 = json["data"] as? String,
+               let audioData = Data(base64Encoded: base64) {
+                receivedAudioChunks += 1
+                streamingAudioPlayer?.addChunk(audioData)
+            }
+            
+        case "audio_done":
+            // All audio chunks received
+            streamingAudioPlayer?.finalize { [weak self] in
+                Task { @MainActor in
+                    self?.onAudioFinished()
+                }
+            }
+            expectedAudioChunks = 0
+            receivedAudioChunks = 0
+            
         case "audio":
+            // Non-streaming audio (backwards compatibility)
             state = .speaking
             if let base64 = json["data"] as? String,
                let audioData = Data(base64Encoded: base64) {
@@ -269,6 +449,8 @@ class VoiceManager: ObservableObject {
             if let error = json["error"] as? String {
                 errorMessage = error
                 state = .error
+                streamingResponse = ""
+                currentStreamingMessageId = nil
                 Task {
                     try? await Task.sleep(for: .seconds(2))
                     if isConversationActive {
@@ -293,6 +475,9 @@ class VoiceManager: ObservableObject {
                 sttProvider = stt["provider"] as? String ?? ""
                 sttFlag = stt["flag"] as? String ?? ""
             }
+            if let streaming = json["streaming"] as? Bool {
+                streamingEnabled = streaming
+            }
             
         default:
             break
@@ -301,21 +486,20 @@ class VoiceManager: ObservableObject {
     
     // MARK: - Conversation Mode
     
-    /// Start continuous conversation
     func startConversation() {
         guard isConnected else { return }
         isConversationActive = true
         startRecording()
     }
     
-    /// Stop conversation
     func stopConversation() {
         isConversationActive = false
         stopRecording(send: false)
+        streamingAudioPlayer?.stop()
+        streamingAudioPlayer = nil
         state = isConnected ? .idle : .disconnected
     }
     
-    /// Toggle conversation on/off
     func toggleConversation() {
         if isConversationActive {
             stopConversation()
@@ -330,7 +514,6 @@ class VoiceManager: ObservableObject {
         guard isConnected else { return }
         guard let recordingURL = recordingURL else { return }
         
-        // Clean up any existing recording
         stopRecording(send: false)
         
         state = .listening
@@ -343,7 +526,6 @@ class VoiceManager: ObservableObject {
             try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
             
-            // Recording settings for M4A (AAC) - good quality, small size
             let settings: [String: Any] = [
                 AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
                 AVSampleRateKey: 16000,
@@ -351,14 +533,12 @@ class VoiceManager: ObservableObject {
                 AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
             ]
             
-            // Delete old recording if exists
             try? FileManager.default.removeItem(at: recordingURL)
             
             audioRecorder = try AVAudioRecorder(url: recordingURL, settings: settings)
             audioRecorder?.isMeteringEnabled = true
             audioRecorder?.record()
             
-            // Start level monitoring
             startLevelMonitoring()
             
         } catch {
@@ -397,23 +577,19 @@ class VoiceManager: ObservableObject {
         recorder.updateMeters()
         let level = recorder.averagePower(forChannel: 0)
         
-        // Convert dB to linear (0-1 range)
         let linearLevel = pow(10, level / 20)
-        audioLevel = min(linearLevel * 3, 1.0)  // Amplify for visibility
+        audioLevel = min(linearLevel * 3, 1.0)
         
-        // Detect speech
         if linearLevel > silenceThreshold {
             hasDetectedSpeech = true
             lastSpeechTime = Date()
         }
         
-        // Check for silence after speech
         if hasDetectedSpeech {
             let silenceDuration = Date().timeIntervalSince(lastSpeechTime)
             let recordingDuration = Date().timeIntervalSince(recordingStartTime ?? Date())
             
             if silenceDuration >= silenceTimeout && recordingDuration >= minRecordingDuration {
-                // Enough silence after speech - send the recording
                 stopRecording(send: true)
             }
         }
@@ -429,7 +605,7 @@ class VoiceManager: ObservableObject {
             let base64 = audioData.base64EncodedString()
             
             print("📤 Sending audio: \(audioData.count / 1024)KB")
-            sendJSON(["type": "audio", "data": base64])
+            sendJSON(["type": "audio", "data": base64, "streaming": streamingEnabled])
             
         } catch {
             errorMessage = "Kon opname niet lezen"
@@ -447,9 +623,14 @@ class VoiceManager: ObservableObject {
         guard !text.isEmpty, isConnected else { return }
         
         state = .processing
+        streamingResponse = ""
         messages.append(ChatMessage(isUser: true, text: text))
-        // Only request audio if conversation mode is active
-        sendJSON(["type": "text", "text": text, "wantsAudio": isConversationActive])
+        sendJSON([
+            "type": "text",
+            "text": text,
+            "wantsAudio": isConversationActive,
+            "streaming": streamingEnabled
+        ])
     }
     
     // MARK: - Audio Playback
@@ -487,8 +668,9 @@ class VoiceManager: ObservableObject {
     }
     
     private func onAudioFinished() {
+        streamingAudioPlayer = nil
+        
         if isConversationActive {
-            // Continue listening after I finish speaking
             Task {
                 try? await Task.sleep(for: .milliseconds(300))
                 startRecording()

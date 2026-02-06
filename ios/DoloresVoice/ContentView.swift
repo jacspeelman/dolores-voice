@@ -3,6 +3,7 @@
 //  DoloresVoice
 //
 //  Telegram-style chat UI
+//  v2: Streaming text support
 //
 
 import SwiftUI
