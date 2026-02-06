@@ -3,17 +3,19 @@
 //  DoloresVoice
 //
 //  Manages communication with the Dolores backend
-//  Simplified version - text input only, audio output
+//  With speech recognition support
 //
 
 import SwiftUI
 import AVFoundation
+import Speech
 
 /// Voice interaction state
 enum VoiceState: String {
     case disconnected = "Niet verbonden"
     case connecting = "Verbinden..."
-    case idle = "Klaar"
+    case idle = "Tik om te praten"
+    case listening = "Luisteren..."
     case processing = "Denken..."
     case speaking = "Spreken..."
     case error = "Fout"
@@ -23,6 +25,7 @@ enum VoiceState: String {
         case .disconnected: return .gray
         case .connecting: return .orange
         case .idle: return .blue
+        case .listening: return .red
         case .processing: return .orange
         case .speaking: return .green
         case .error: return .red
@@ -33,7 +36,8 @@ enum VoiceState: String {
         switch self {
         case .disconnected: return "wifi.slash"
         case .connecting: return "arrow.triangle.2.circlepath"
-        case .idle: return "text.bubble.fill"
+        case .idle: return "mic.circle.fill"
+        case .listening: return "waveform.circle.fill"
         case .processing: return "brain"
         case .speaking: return "speaker.wave.3.fill"
         case .error: return "exclamationmark.triangle.fill"
@@ -55,6 +59,7 @@ class VoiceManager: ObservableObject {
     @Published var lastResponse: String = ""
     @Published var errorMessage: String?
     @Published var isConnected: Bool = false
+    @Published var canUseSpeech: Bool = false
     
     // MARK: - Private Properties
     
@@ -62,7 +67,61 @@ class VoiceManager: ObservableObject {
     private var reconnectAttempts = 0
     private var reconnectTask: Task<Void, Never>?
     private var audioPlayer: AVAudioPlayer?
+    private var audioPlayerDelegate: AudioPlayerDelegate?
     private let synthesizer = AVSpeechSynthesizer()
+    
+    // Speech Recognition
+    private var speechRecognizer: SFSpeechRecognizer?
+    private var audioEngine: AVAudioEngine?
+    private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
+    private var recognitionTask: SFSpeechRecognitionTask?
+    
+    // MARK: - Initialization
+    
+    init() {
+        speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "nl-NL"))
+    }
+    
+    // MARK: - Permissions
+    
+    func checkPermissions() {
+        // Check microphone
+        switch AVAudioApplication.shared.recordPermission {
+        case .granted:
+            checkSpeechPermission()
+        case .denied:
+            canUseSpeech = false
+        case .undetermined:
+            AVAudioApplication.shared.requestRecordPermission { [weak self] granted in
+                Task { @MainActor in
+                    if granted {
+                        self?.checkSpeechPermission()
+                    } else {
+                        self?.canUseSpeech = false
+                    }
+                }
+            }
+        @unknown default:
+            canUseSpeech = false
+        }
+    }
+    
+    private func checkSpeechPermission() {
+        switch SFSpeechRecognizer.authorizationStatus() {
+        case .authorized:
+            canUseSpeech = true
+        case .denied, .restricted:
+            canUseSpeech = false
+        case .notDetermined:
+            SFSpeechRecognizer.requestAuthorization { [weak self] status in
+                Task { @MainActor in
+                    self?.canUseSpeech = (status == .authorized)
+                }
+            }
+        @unknown default:
+            canUseSpeech = false
+        }
+    }
     
     // MARK: - Connection Management
     
@@ -163,6 +222,7 @@ class VoiceManager: ObservableObject {
     private func handleDisconnection() {
         isConnected = false
         webSocketTask = nil
+        stopListening()
         scheduleReconnect()
     }
     
@@ -206,6 +266,105 @@ class VoiceManager: ObservableObject {
         }
     }
     
+    // MARK: - Speech Recognition
+    
+    func startListening() {
+        guard state == .idle, isConnected else { return }
+        guard canUseSpeech else {
+            errorMessage = "Spraak niet beschikbaar"
+            return
+        }
+        guard let speechRecognizer = speechRecognizer, speechRecognizer.isAvailable else {
+            errorMessage = "Spraakherkenning niet beschikbaar"
+            return
+        }
+        
+        // Reset
+        stopListening()
+        lastTranscript = ""
+        state = .listening
+        
+        do {
+            // Configure audio session
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            
+            // Create audio engine
+            audioEngine = AVAudioEngine()
+            guard let audioEngine = audioEngine else {
+                throw NSError(domain: "VoiceManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not create audio engine"])
+            }
+            
+            // Create recognition request
+            recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+            guard let recognitionRequest = recognitionRequest else {
+                throw NSError(domain: "VoiceManager", code: 2, userInfo: [NSLocalizedDescriptionKey: "Could not create recognition request"])
+            }
+            recognitionRequest.shouldReportPartialResults = true
+            
+            // Get input node and format
+            let inputNode = audioEngine.inputNode
+            let recordingFormat = inputNode.outputFormat(forBus: 0)
+            
+            // Install tap
+            inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, _ in
+                self?.recognitionRequest?.append(buffer)
+            }
+            
+            // Start recognition task
+            recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
+                Task { @MainActor in
+                    if let result = result {
+                        self?.lastTranscript = result.bestTranscription.formattedString
+                    }
+                    if error != nil {
+                        // Ignore errors during active listening
+                    }
+                }
+            }
+            
+            // Start engine
+            audioEngine.prepare()
+            try audioEngine.start()
+            
+            print("🎤 Listening started")
+            
+        } catch {
+            print("❌ Failed to start listening: \(error)")
+            errorMessage = "Kon niet starten"
+            state = .idle
+            stopListening()
+        }
+    }
+    
+    func stopListening() {
+        // Stop audio engine
+        audioEngine?.stop()
+        audioEngine?.inputNode.removeTap(onBus: 0)
+        audioEngine = nil
+        
+        // End recognition
+        recognitionRequest?.endAudio()
+        recognitionRequest = nil
+        recognitionTask?.cancel()
+        recognitionTask = nil
+        
+        // Deactivate audio session
+        try? AVAudioSession.sharedInstance().setActive(false)
+        
+        // If we have a transcript, send it
+        if state == .listening {
+            let transcript = lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !transcript.isEmpty {
+                print("🎤 Sending transcript: \(transcript)")
+                sendText(transcript)
+            } else {
+                state = isConnected ? .idle : .disconnected
+            }
+        }
+    }
+    
     // MARK: - Send Message
     
     func sendText(_ text: String) {
@@ -225,14 +384,14 @@ class VoiceManager: ObservableObject {
             try session.setActive(true)
             
             audioPlayer = try AVAudioPlayer(data: data)
+            audioPlayerDelegate = AudioPlayerDelegate { [weak self] in
+                Task { @MainActor in
+                    self?.state = self?.isConnected == true ? .idle : .disconnected
+                }
+            }
+            audioPlayer?.delegate = audioPlayerDelegate
             audioPlayer?.play()
             
-            // Return to idle when done
-            let duration = audioPlayer?.duration ?? 2.0
-            Task {
-                try? await Task.sleep(for: .seconds(duration + 0.3))
-                state = isConnected ? .idle : .disconnected
-            }
         } catch {
             speakWithSystemTTS(lastResponse)
         }
@@ -248,5 +407,19 @@ class VoiceManager: ObservableObject {
             try? await Task.sleep(for: .seconds(Double(text.count) / 12.0))
             state = isConnected ? .idle : .disconnected
         }
+    }
+}
+
+// MARK: - Audio Player Delegate
+
+class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
+    let onFinish: () -> Void
+    
+    init(onFinish: @escaping () -> Void) {
+        self.onFinish = onFinish
+    }
+    
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        onFinish()
     }
 }
