@@ -251,3 +251,72 @@
 ⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
 🎙️ [1] Whisper (687ms): ""
 ⚠️ [1] Empty transcript, ignoring
+🚀 Dolores Voice Server starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+📡 Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.66
+🔌 [1] Disconnected (code: 1006, reason: )
+🔌 [2] Connected from 192.168.1.66
+🎙️ [2] Received audio (62KB)
+🎙️ [2] Transcribing with Whisper...
+🎙️ [2] Whisper (754ms): "Kun je een verhaaltje vertellen van 300 woorden?"
+📝 [2] Jac: "Kun je een verhaaltje vertellen van 300 woorden?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Er was eens een vuurtorenwachter genaamd Willem di..."
+🔊 [2] Sent audio chunk 1 (89280 bytes)
+🔊 [2] TTS starting sentence 2: "Elke avond stak hij het licht aan en elke ochtend ..."
+🔊 [2] Sent audio chunk 2 (66240 bytes)
+🔊 [2] TTS starting sentence 3: "Hij kende de zee zoals je een oud familielid kent,..."
+🔊 [2] Sent audio chunk 3 (78912 bytes)
+🔊 [2] TTS starting sentence 4: "Op een stormachtige novembernacht zag Willem iets ..."
+🔊 [2] Sent audio chunk 4 (57024 bytes)
+🔊 [2] TTS starting sentence 5: "Tussen de golven dreef een houten kist, die tegen ..."
+🔊 [2] Sent audio chunk 5 (69696 bytes)
+🔊 [2] TTS starting sentence 6: "De volgende ochtend klauterde hij naar beneden en ..."
+🔊 [2] Sent audio chunk 6 (60480 bytes)
+🔊 [2] TTS starting sentence 7: "Erin lag geen goud of juwelen, maar honderden brie..."
+🔊 [2] TTS starting sentence 8: "Willem begon te lezen...."
+🔊 [2] Sent audio chunk 7 (116352 bytes)
+🔊 [2] Sent audio chunk 8 (33408 bytes)
+🔊 [2] TTS starting sentence 9: "De ene brief was van een moeder aan haar ongeboren..."
+🔊 [2] Sent audio chunk 9 (55872 bytes)
+🔊 [2] TTS starting sentence 10: "Een andere van een oude man die zijn excuses aanbo..."
+🔊 [2] Sent audio chunk 10 (85248 bytes)
+🔊 [2] TTS starting sentence 11: "Er was een liefdesbrief die nooit verstuurd was, e..."
+🔊 [2] TTS starting sentence 12: "Weken ging Willem door met lezen...."
+🔊 [2] Sent audio chunk 11 (88704 bytes)
+🔊 [2] Sent audio chunk 12 (40320 bytes)
+🔊 [2] TTS starting sentence 13: "En iets vreemds gebeurde...."
+🔊 [2] Sent audio chunk 13 (32832 bytes)
+🔊 [2] TTS starting sentence 14: "Na dertig jaar eenzaamheid voelde hij zich voor he..."
+🔊 [2] Sent audio chunk 14 (63360 bytes)
+🔊 [2] TTS starting sentence 15: "Al deze mensen, verspreid over de wereld, hadden h..."
+🔊 [2] TTS starting sentence 16: "En de zee had ze naar hem gebracht...."
+🔊 [2] Sent audio chunk 15 (90432 bytes)
+🔊 [2] Sent audio chunk 16 (40320 bytes)
+🔊 [2] TTS starting sentence 17: "Willem begon terug te schrijven...."
+🔊 [2] Sent audio chunk 17 (38592 bytes)
+🔊 [2] TTS starting sentence 18: "Brieven aan onbekenden, vol wijsheid van een man d..."
+🔊 [2] Sent audio chunk 18 (87552 bytes)
+🔊 [2] TTS starting sentence 19: "Hij stopte ze in flessen en gooide ze in zee...."
+🔊 [2] Sent audio chunk 19 (50688 bytes)
+🔊 [2] TTS starting sentence 20: "Jaren later, toen Willem allang gestorven was, von..."
+🔊 [2] Sent audio chunk 20 (97344 bytes)
+🔊 [2] TTS starting sentence 21: "De brief binnenin begon zo: beste onbekende vriend..."
+🔊 [2] Sent audio chunk 21 (79488 bytes)
+🔊 [2] TTS starting sentence 22: "Dat ben je nooit geweest...."
+🔊 [2] Sent audio chunk 22 (33408 bytes)
+🔊 [2] TTS starting sentence 23: "Ze huilde, en begreep niet waarom...."
+🔊 [2] Sent audio chunk 23 (44352 bytes)
+🔊 [2] TTS starting sentence 24: "Maar die nacht sliep ze voor het eerst in maanden ..."
+🦋 [2] Dolores (16224ms): "Er was eens een vuurtorenwachter genaamd Willem die al dertig jaar alleen op een rots in de Noordzee..."
+🔊 [2] Sent audio chunk 24 (53568 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Received audio (49KB)
+🎙️ [2] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [2] Whisper (833ms): ""
+⚠️ [2] Empty transcript, ignoring

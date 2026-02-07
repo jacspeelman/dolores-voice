@@ -360,7 +360,8 @@ class VoiceManager: ObservableObject {
         case "text_delta":
             // Streaming text chunk
             if let delta = json["delta"] as? String {
-                if state != .streaming {
+                // Only create new message if we don't have one yet
+                if currentStreamingMessageId == nil {
                     state = .streaming
                     streamingResponse = ""
                     // Add placeholder message for streaming response
