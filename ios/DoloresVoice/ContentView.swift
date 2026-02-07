@@ -3,7 +3,7 @@
 //  DoloresVoice
 //
 //  Telegram-style chat UI
-//  v2: Streaming text support
+//  v3: Real-time STT streaming with interim transcripts
 //
 
 import SwiftUI
@@ -30,9 +30,11 @@ struct ContentView: View {
                                 chatBubble(message: message)
                             }
                             
-                            // Current transcript (typing indicator)
-                            if voiceManager.state == .listening && !voiceManager.lastTranscript.isEmpty {
-                                currentTranscript
+                            // Real-time transcript while speaking
+                            if voiceManager.state == .listening {
+                                if !voiceManager.interimTranscript.isEmpty || !voiceManager.lastTranscript.isEmpty {
+                                    liveTranscript
+                                }
                             }
                         }
                         .padding(.horizontal)
@@ -49,6 +51,14 @@ struct ContentView: View {
                         // Auto-scroll while streaming text
                         if let lastMessage = voiceManager.messages.last {
                             proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                        }
+                    }
+                    .onChange(of: voiceManager.interimTranscript) { _ in
+                        // Auto-scroll while receiving real-time transcript
+                        if let lastMessage = voiceManager.messages.last {
+                            withAnimation(.easeOut(duration: 0.1)) {
+                                proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                            }
                         }
                     }
                 }
@@ -86,6 +96,13 @@ struct ContentView: View {
                     Text(voiceManager.isConnected ? "Verbonden" : "Niet verbonden")
                         .font(.caption2)
                         .foregroundColor(.gray)
+                    
+                    // STT streaming indicator
+                    if voiceManager.isConnected && voiceManager.sttStreamingAvailable {
+                        Text("• Live")
+                            .font(.caption2)
+                            .foregroundColor(.cyan)
+                    }
                 }
             }
             
@@ -122,7 +139,40 @@ struct ContentView: View {
         .id(message.id)
     }
     
-    // MARK: - Current Transcript
+    // MARK: - Live Transcript (Real-time STT)
+    
+    private var liveTranscript: some View {
+        HStack {
+            Spacer(minLength: 60)
+            HStack(spacing: 0) {
+                // Final transcript (confirmed, won't change)
+                if !voiceManager.lastTranscript.isEmpty {
+                    Text(voiceManager.lastTranscript)
+                        .foregroundColor(.white)
+                }
+                
+                // Interim transcript (may still change)
+                if !voiceManager.interimTranscript.isEmpty {
+                    Text((voiceManager.lastTranscript.isEmpty ? "" : " ") + voiceManager.interimTranscript)
+                        .foregroundColor(.white.opacity(0.5))
+                        .italic()
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(
+                LinearGradient(
+                    colors: [Color.blue.opacity(0.6), Color.blue.opacity(0.4)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .cornerRadius(18)
+            .animation(.easeInOut(duration: 0.15), value: voiceManager.interimTranscript)
+        }
+    }
+    
+    // MARK: - Current Transcript (Legacy, for Whisper fallback)
     
     private var currentTranscript: some View {
         HStack {

@@ -2,8 +2,8 @@
 //  VoiceManager.swift
 //  DoloresVoice
 //
-//  Voice assistant with Whisper transcription
-//  v2: Streaming text and audio support
+//  Voice assistant with real-time transcription
+//  v3: Real-time Speech-to-Text streaming with Azure
 //
 
 import SwiftUI
@@ -174,6 +174,7 @@ class VoiceManager: ObservableObject {
     
     @Published var state: VoiceState = .disconnected
     @Published var lastTranscript: String = ""
+    @Published var interimTranscript: String = ""  // Real-time interim (can change)
     @Published var lastResponse: String = ""
     @Published var streamingResponse: String = ""  // For progressive display
     @Published var errorMessage: String?
@@ -188,6 +189,8 @@ class VoiceManager: ObservableObject {
     @Published var canUseSpeech: Bool = false
     @Published var messages: [ChatMessage] = []
     @Published var streamingEnabled: Bool = true
+    @Published var sttStreamingEnabled: Bool = false
+    @Published var sttStreamingAvailable: Bool = false
     
     // MARK: - Private Properties
     
@@ -212,6 +215,14 @@ class VoiceManager: ObservableObject {
     private var recordingStartTime: Date?
     private var lastSpeechTime: Date = Date()
     private var hasDetectedSpeech: Bool = false
+    
+    // STT Streaming
+    private var audioEngine: AVAudioEngine?
+    private var isSTTStreamingActive: Bool = false
+    private var sttStreamStarted: Bool = false
+    private var audioChunkTimer: Timer?
+    private var pcmBuffer: Data = Data()
+    private let audioChunkIntervalMs: Double = 150  // Send chunks every 150ms
     
     // MARK: - Initialization
     
@@ -475,9 +486,62 @@ class VoiceManager: ObservableObject {
             if let stt = json["stt"] as? [String: Any] {
                 sttProvider = stt["provider"] as? String ?? ""
                 sttFlag = stt["flag"] as? String ?? ""
+                sttStreamingAvailable = stt["streaming"] as? Bool ?? false
             }
             if let streaming = json["streaming"] as? Bool {
                 streamingEnabled = streaming
+            }
+            if let sttStreaming = json["sttStreaming"] as? Bool {
+                sttStreamingEnabled = sttStreaming
+                sttStreamingAvailable = sttStreaming
+            }
+            
+        case "stt_stream_started":
+            // Server confirmed STT streaming is active
+            sttStreamStarted = true
+            print("🎙️ STT streaming confirmed by server")
+            
+        case "stt_stream_unavailable":
+            // Server doesn't support STT streaming, fallback to Whisper
+            sttStreamingEnabled = false
+            sttStreamingAvailable = false
+            print("⚠️ STT streaming unavailable, using Whisper fallback")
+            stopSTTStreaming()
+            // Fall back to regular recording
+            startRecordingForWhisper()
+            
+        case "stt_stream_error":
+            // Error during STT streaming, fallback to Whisper
+            if let error = json["error"] as? String {
+                print("⚠️ STT stream error: \(error)")
+            }
+            stopSTTStreaming()
+            startRecordingForWhisper()
+            
+        case "transcript_interim":
+            // Real-time interim transcript (can change)
+            if let interim = json["text"] as? String {
+                interimTranscript = interim
+            }
+            
+        case "transcript_final":
+            // Final segment of transcript (won't change)
+            if let final = json["text"] as? String {
+                // Append to lastTranscript for display
+                if lastTranscript.isEmpty {
+                    lastTranscript = final
+                } else {
+                    lastTranscript += " " + final
+                }
+                // Clear interim since we have final
+                interimTranscript = ""
+            }
+            
+        case "transcript_complete":
+            // Complete transcript from streaming session
+            if let complete = json["text"] as? String {
+                lastTranscript = complete
+                interimTranscript = ""
             }
             
         default:
@@ -496,8 +560,10 @@ class VoiceManager: ObservableObject {
     func stopConversation() {
         isConversationActive = false
         stopRecording(send: false)
+        stopSTTStreaming()
         streamingAudioPlayer?.stop()
         streamingAudioPlayer = nil
+        interimTranscript = ""
         state = isConnected ? .idle : .disconnected
     }
     
@@ -513,14 +579,28 @@ class VoiceManager: ObservableObject {
     
     private func startRecording() {
         guard isConnected else { return }
-        guard let recordingURL = recordingURL else { return }
         
-        stopRecording(send: false)
-        
-        state = .listening
+        // Reset state
+        lastTranscript = ""
+        interimTranscript = ""
         hasDetectedSpeech = false
         lastSpeechTime = Date()
         recordingStartTime = Date()
+        state = .listening
+        
+        // Use STT streaming if available, otherwise fall back to Whisper
+        if sttStreamingEnabled && sttStreamingAvailable {
+            startSTTStreaming()
+        } else {
+            startRecordingForWhisper()
+        }
+    }
+    
+    /// Start recording for Whisper (traditional approach)
+    private func startRecordingForWhisper() {
+        guard let recordingURL = recordingURL else { return }
+        
+        stopRecording(send: false)
         
         do {
             let audioSession = AVAudioSession.sharedInstance()
@@ -548,18 +628,197 @@ class VoiceManager: ObservableObject {
         }
     }
     
+    /// Start real-time STT streaming with AVAudioEngine
+    private func startSTTStreaming() {
+        stopSTTStreaming()
+        
+        isSTTStreamingActive = true
+        sttStreamStarted = false
+        pcmBuffer = Data()
+        
+        // Tell server to start STT streaming session
+        sendJSON(["type": "audio_stream_start"])
+        
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            
+            audioEngine = AVAudioEngine()
+            guard let engine = audioEngine else { return }
+            
+            let inputNode = engine.inputNode
+            let recordingFormat = inputNode.outputFormat(forBus: 0)
+            
+            // Target format: 16kHz, 16-bit mono PCM (Azure requirement)
+            guard let targetFormat = AVAudioFormat(commonFormat: .pcmFormatInt16,
+                                                   sampleRate: 16000,
+                                                   channels: 1,
+                                                   interleaved: true) else {
+                print("⚠️ Failed to create target audio format")
+                startRecordingForWhisper()
+                return
+            }
+            
+            // Audio converter for format conversion
+            guard let converter = AVAudioConverter(from: recordingFormat, to: targetFormat) else {
+                print("⚠️ Failed to create audio converter")
+                startRecordingForWhisper()
+                return
+            }
+            
+            // Install tap to capture audio
+            inputNode.installTap(onBus: 0, bufferSize: 4096, format: recordingFormat) { [weak self] buffer, time in
+                guard let self = self, self.isSTTStreamingActive else { return }
+                
+                // Convert to 16kHz 16-bit PCM
+                let frameCount = AVAudioFrameCount(Double(buffer.frameLength) * 16000.0 / recordingFormat.sampleRate)
+                guard let convertedBuffer = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: frameCount) else { return }
+                
+                var error: NSError?
+                let inputBlock: AVAudioConverterInputBlock = { inNumPackets, outStatus in
+                    outStatus.pointee = .haveData
+                    return buffer
+                }
+                
+                converter.convert(to: convertedBuffer, error: &error, withInputFrom: inputBlock)
+                
+                if error == nil, let channelData = convertedBuffer.int16ChannelData {
+                    let byteCount = Int(convertedBuffer.frameLength) * 2  // 16-bit = 2 bytes
+                    let data = Data(bytes: channelData[0], count: byteCount)
+                    
+                    DispatchQueue.main.async {
+                        self.pcmBuffer.append(data)
+                        
+                        // Calculate audio level for UI
+                        var sum: Float = 0
+                        for i in 0..<Int(convertedBuffer.frameLength) {
+                            let sample = Float(channelData[0][i]) / Float(Int16.max)
+                            sum += sample * sample
+                        }
+                        let rms = sqrt(sum / Float(convertedBuffer.frameLength))
+                        self.audioLevel = min(rms * 5, 1.0)
+                        
+                        // Update silence detection
+                        if rms > self.silenceThreshold {
+                            self.hasDetectedSpeech = true
+                            self.lastSpeechTime = Date()
+                        }
+                    }
+                }
+            }
+            
+            engine.prepare()
+            try engine.start()
+            
+            // Start timer to send audio chunks periodically
+            audioChunkTimer = Timer.scheduledTimer(withTimeInterval: audioChunkIntervalMs / 1000.0, repeats: true) { [weak self] _ in
+                Task { @MainActor in
+                    self?.sendAudioChunk()
+                }
+            }
+            
+            // Start silence monitoring
+            startSilenceMonitoring()
+            
+            print("🎙️ STT streaming started with AVAudioEngine")
+            
+        } catch {
+            print("⚠️ AVAudioEngine setup failed: \(error)")
+            isSTTStreamingActive = false
+            startRecordingForWhisper()
+        }
+    }
+    
+    /// Send accumulated PCM audio chunk to server
+    private func sendAudioChunk() {
+        guard isSTTStreamingActive, !pcmBuffer.isEmpty else { return }
+        
+        let chunk = pcmBuffer
+        pcmBuffer = Data()
+        
+        let base64 = chunk.base64EncodedString()
+        sendJSON(["type": "audio_stream_chunk", "data": base64])
+    }
+    
+    /// Stop STT streaming
+    private func stopSTTStreaming() {
+        isSTTStreamingActive = false
+        sttStreamStarted = false
+        
+        audioChunkTimer?.invalidate()
+        audioChunkTimer = nil
+        
+        audioEngine?.inputNode.removeTap(onBus: 0)
+        audioEngine?.stop()
+        audioEngine = nil
+        
+        pcmBuffer = Data()
+    }
+    
+    /// Monitor silence during STT streaming
+    private func startSilenceMonitoring() {
+        silenceTimer?.invalidate()
+        silenceTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.checkSilenceForSTTStreaming()
+            }
+        }
+    }
+    
+    /// Check for silence to end STT streaming
+    private func checkSilenceForSTTStreaming() {
+        guard isSTTStreamingActive else { return }
+        
+        let recordingDuration = Date().timeIntervalSince(recordingStartTime ?? Date())
+        
+        if hasDetectedSpeech {
+            let silenceDuration = Date().timeIntervalSince(lastSpeechTime)
+            
+            if silenceDuration >= silenceTimeout && recordingDuration >= minRecordingDuration {
+                // End STT streaming
+                endSTTStreaming()
+            }
+        }
+    }
+    
+    /// End STT streaming and request final transcript
+    private func endSTTStreaming() {
+        guard isSTTStreamingActive else { return }
+        
+        state = .transcribing
+        
+        // Send any remaining audio
+        sendAudioChunk()
+        
+        // Tell server to end the session
+        sendJSON(["type": "audio_stream_end"])
+        
+        stopSTTStreaming()
+    }
+    
     private func stopRecording(send: Bool) {
         levelTimer?.invalidate()
         levelTimer = nil
         silenceTimer?.invalidate()
         silenceTimer = nil
         
+        // Stop STT streaming if active
+        if isSTTStreamingActive {
+            if send {
+                endSTTStreaming()
+            } else {
+                stopSTTStreaming()
+            }
+        }
+        
+        // Stop traditional recording
         audioRecorder?.stop()
         audioRecorder = nil
         
         try? AVAudioSession.sharedInstance().setActive(false)
         
-        if send {
+        if send && !isSTTStreamingActive {
             sendRecording()
         }
     }

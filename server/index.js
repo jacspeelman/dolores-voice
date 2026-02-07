@@ -4,11 +4,12 @@
  * WebSocket server for real-time voice communication
  * Uses Azure Neural TTS (Fenna) for natural Dutch voice
  * 
- * v2: Streaming support for text and audio
+ * v3: Real-time Speech-to-Text streaming with Azure
  */
 
 import { WebSocketServer } from 'ws';
 import { config } from 'dotenv';
+import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 
 // Load environment variables
 config();
@@ -36,11 +37,165 @@ const OPENCLAW_TOKEN = process.env.OPENCLAW_TOKEN;
 
 // Streaming config
 const ENABLE_STREAMING = process.env.ENABLE_STREAMING !== 'false'; // Default true
+const ENABLE_STT_STREAMING = process.env.ENABLE_STT_STREAMING !== 'false'; // Default true
 
 if (!OPENCLAW_TOKEN) {
   console.error('❌ OPENCLAW_TOKEN not set');
   process.exit(1);
 }
+
+/**
+ * Azure Speech-to-Text Streaming Session Manager
+ * Manages real-time transcription sessions per connection
+ */
+class AzureSTTSession {
+  constructor(connectionId, onInterim, onFinal, onError) {
+    this.connectionId = connectionId;
+    this.onInterim = onInterim;
+    this.onFinal = onFinal;
+    this.onError = onError;
+    this.pushStream = null;
+    this.recognizer = null;
+    this.isActive = false;
+    this.lastInterim = '';
+    this.finalTranscript = '';
+  }
+
+  start() {
+    if (!AZURE_SPEECH_KEY) {
+      this.onError('Azure Speech key not configured');
+      return false;
+    }
+
+    try {
+      // Create push stream for audio input
+      const audioFormat = sdk.AudioStreamFormat.getWaveFormatPCM(16000, 16, 1);
+      this.pushStream = sdk.AudioInputStream.createPushStream(audioFormat);
+      
+      // Configure speech recognition
+      const speechConfig = sdk.SpeechConfig.fromSubscription(AZURE_SPEECH_KEY, AZURE_SPEECH_REGION);
+      speechConfig.speechRecognitionLanguage = 'nl-NL';
+      speechConfig.setProperty(sdk.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, '15000');
+      speechConfig.setProperty(sdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, '2000');
+      
+      const audioConfig = sdk.AudioConfig.fromStreamInput(this.pushStream);
+      this.recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+
+      // Handle recognizing events (interim results)
+      this.recognizer.recognizing = (s, e) => {
+        if (e.result.reason === sdk.ResultReason.RecognizingSpeech) {
+          const interim = e.result.text;
+          if (interim && interim !== this.lastInterim) {
+            this.lastInterim = interim;
+            console.log(`🎙️ [${this.connectionId}] Interim: "${interim}"`);
+            this.onInterim(interim);
+          }
+        }
+      };
+
+      // Handle recognized events (final results)
+      this.recognizer.recognized = (s, e) => {
+        if (e.result.reason === sdk.ResultReason.RecognizedSpeech) {
+          const final = e.result.text;
+          if (final && final.trim()) {
+            this.finalTranscript += (this.finalTranscript ? ' ' : '') + final;
+            this.lastInterim = '';
+            console.log(`🎙️ [${this.connectionId}] Final segment: "${final}"`);
+            this.onFinal(final, false); // Not end of stream yet
+          }
+        } else if (e.result.reason === sdk.ResultReason.NoMatch) {
+          console.log(`🎙️ [${this.connectionId}] No speech recognized`);
+        }
+      };
+
+      // Handle session stopped
+      this.recognizer.sessionStopped = (s, e) => {
+        console.log(`🎙️ [${this.connectionId}] Session stopped`);
+        this.cleanup();
+      };
+
+      // Handle canceled
+      this.recognizer.canceled = (s, e) => {
+        if (e.reason === sdk.CancellationReason.Error) {
+          console.error(`🎙️ [${this.connectionId}] STT Error: ${e.errorDetails}`);
+          this.onError(e.errorDetails);
+        }
+        this.cleanup();
+      };
+
+      // Start continuous recognition
+      this.recognizer.startContinuousRecognitionAsync(
+        () => {
+          console.log(`🎙️ [${this.connectionId}] STT streaming started`);
+          this.isActive = true;
+        },
+        (err) => {
+          console.error(`🎙️ [${this.connectionId}] STT start failed: ${err}`);
+          this.onError(err);
+        }
+      );
+
+      return true;
+    } catch (error) {
+      console.error(`🎙️ [${this.connectionId}] STT setup error: ${error.message}`);
+      this.onError(error.message);
+      return false;
+    }
+  }
+
+  pushAudio(audioData) {
+    if (this.pushStream && this.isActive) {
+      // audioData should be raw PCM 16kHz 16-bit mono
+      this.pushStream.write(audioData);
+    }
+  }
+
+  async stop() {
+    return new Promise((resolve) => {
+      if (!this.isActive || !this.recognizer) {
+        resolve(this.finalTranscript);
+        return;
+      }
+
+      // Close the push stream to signal end of audio
+      if (this.pushStream) {
+        this.pushStream.close();
+      }
+
+      // Stop recognition
+      this.recognizer.stopContinuousRecognitionAsync(
+        () => {
+          console.log(`🎙️ [${this.connectionId}] STT streaming stopped, final: "${this.finalTranscript}"`);
+          const result = this.finalTranscript;
+          this.cleanup();
+          resolve(result);
+        },
+        (err) => {
+          console.error(`🎙️ [${this.connectionId}] STT stop error: ${err}`);
+          const result = this.finalTranscript;
+          this.cleanup();
+          resolve(result);
+        }
+      );
+    });
+  }
+
+  cleanup() {
+    this.isActive = false;
+    if (this.recognizer) {
+      try {
+        this.recognizer.close();
+      } catch (e) {}
+      this.recognizer = null;
+    }
+    this.pushStream = null;
+    this.lastInterim = '';
+    this.finalTranscript = '';
+  }
+}
+
+// Active STT sessions per connection
+const sttSessions = new Map();
 
 /**
  * Create fetch with timeout
@@ -592,6 +747,113 @@ async function handleAudioMessage(ws, audioBase64, connectionId, useStreaming = 
   }
 }
 
+/**
+ * Start real-time STT streaming session
+ */
+function handleAudioStreamStart(ws, connectionId, useStreaming) {
+  // Clean up any existing session
+  const existingSession = sttSessions.get(connectionId);
+  if (existingSession) {
+    existingSession.cleanup();
+    sttSessions.delete(connectionId);
+  }
+
+  if (!ENABLE_STT_STREAMING || !AZURE_SPEECH_KEY) {
+    console.log(`⚠️ [${connectionId}] STT streaming not available, client should use Whisper fallback`);
+    sendMessage(ws, { type: 'stt_stream_unavailable' });
+    return;
+  }
+
+  console.log(`🎙️ [${connectionId}] Starting STT streaming session...`);
+
+  const session = new AzureSTTSession(
+    connectionId,
+    // onInterim callback
+    (interimText) => {
+      sendMessage(ws, { type: 'transcript_interim', text: interimText });
+    },
+    // onFinal callback
+    (finalText, isEnd) => {
+      sendMessage(ws, { type: 'transcript_final', text: finalText, isEnd });
+    },
+    // onError callback
+    (error) => {
+      console.error(`❌ [${connectionId}] STT error: ${error}`);
+      sendMessage(ws, { type: 'stt_stream_error', error });
+      sttSessions.delete(connectionId);
+    }
+  );
+
+  if (session.start()) {
+    sttSessions.set(connectionId, session);
+    sendMessage(ws, { type: 'stt_stream_started' });
+  } else {
+    sendMessage(ws, { type: 'stt_stream_unavailable' });
+  }
+}
+
+/**
+ * Handle incoming audio chunk for STT streaming
+ */
+function handleAudioStreamChunk(ws, audioBase64, connectionId) {
+  const session = sttSessions.get(connectionId);
+  if (!session) {
+    // Session not active, ignore chunk
+    return;
+  }
+
+  try {
+    // Decode base64 to raw PCM audio
+    const audioBuffer = Buffer.from(audioBase64, 'base64');
+    session.pushAudio(audioBuffer);
+  } catch (error) {
+    console.error(`❌ [${connectionId}] Audio chunk error: ${error.message}`);
+  }
+}
+
+/**
+ * End STT streaming and process the final transcript
+ */
+async function handleAudioStreamEnd(ws, connectionId, useStreaming) {
+  const session = sttSessions.get(connectionId);
+  
+  if (!session) {
+    console.log(`⚠️ [${connectionId}] No active STT session to end`);
+    sendMessage(ws, { type: 'transcript', text: '' });
+    return;
+  }
+
+  try {
+    console.log(`🎙️ [${connectionId}] Ending STT streaming session...`);
+    const finalTranscript = await session.stop();
+    sttSessions.delete(connectionId);
+
+    // Send the complete transcript
+    sendMessage(ws, { type: 'transcript_complete', text: finalTranscript || '' });
+
+    if (!finalTranscript || finalTranscript.length === 0) {
+      console.log(`⚠️ [${connectionId}] Empty transcript from streaming`);
+      sendMessage(ws, { type: 'transcript', text: '' });
+      return;
+    }
+
+    // Also send legacy transcript for backwards compatibility
+    sendMessage(ws, { type: 'transcript', text: finalTranscript });
+
+    // Process the response
+    if (useStreaming && ENABLE_STREAMING) {
+      await handleTextMessageStreaming(ws, finalTranscript, connectionId, true);
+    } else {
+      await handleTextMessage(ws, finalTranscript, connectionId, true);
+    }
+
+  } catch (error) {
+    console.error(`❌ [${connectionId}] STT stream end error:`, error.message);
+    sttSessions.delete(connectionId);
+    sendMessage(ws, { type: 'error', error: `STT streaming mislukt: ${error.message}` });
+  }
+}
+
 function startServer() {
   const wss = new WebSocketServer({ host: '0.0.0.0', port: PORT });
   let connectionCounter = 0;
@@ -599,11 +861,17 @@ function startServer() {
 
   const ttsProvider = AZURE_SPEECH_KEY ? 'Azure Fenna 🇳🇱' : (ELEVENLABS_API_KEY ? 'ElevenLabs' : 'None');
 
-  console.log(`🚀 Dolores Voice Server starting...`);
+  const sttProvider = AZURE_SPEECH_KEY && ENABLE_STT_STREAMING 
+    ? 'Azure Speech (realtime)' 
+    : (OPENAI_API_KEY ? 'Whisper' : 'None');
+
+  console.log(`🚀 Dolores Voice Server v3 starting...`);
   console.log(`🔗 OpenClaw: ${OPENCLAW_URL}`);
   console.log(`🔑 Auth: ✓`);
   console.log(`🎤 TTS: ${ttsProvider}`);
+  console.log(`🎙️ STT: ${sttProvider}`);
   console.log(`📡 Streaming: ${ENABLE_STREAMING ? 'enabled' : 'disabled'}`);
+  console.log(`🔴 STT Streaming: ${ENABLE_STT_STREAMING && AZURE_SPEECH_KEY ? 'enabled' : 'disabled'}`);
 
   const HEARTBEAT_INTERVAL = 30000;
   
@@ -641,13 +909,20 @@ function startServer() {
         ? { provider: 'ElevenLabs', voice: 'Custom', flag: '🎭' }
         : { provider: 'None', voice: '-', flag: '❌' };
     
+    const sttInfo = AZURE_SPEECH_KEY && ENABLE_STT_STREAMING
+      ? { provider: 'Azure Speech', flag: '🎙️', streaming: true }
+      : OPENAI_API_KEY 
+        ? { provider: 'Whisper', flag: '🎙️', streaming: false } 
+        : { provider: 'Local', flag: '📱', streaming: false };
+    
     sendMessage(ws, { 
       type: 'config', 
       tts: ttsInfo,
-      stt: OPENAI_API_KEY ? { provider: 'Whisper', flag: '🎙️' } : { provider: 'Local', flag: '📱' },
+      stt: sttInfo,
       region: AZURE_SPEECH_REGION || 'n/a',
       backend: 'OpenClaw',
-      streaming: ENABLE_STREAMING
+      streaming: ENABLE_STREAMING,
+      sttStreaming: AZURE_SPEECH_KEY && ENABLE_STT_STREAMING
     });
 
     ws.on('message', async (data) => {
@@ -665,6 +940,15 @@ function startServer() {
           }
         } else if (message.type === 'audio') {
           await handleAudioMessage(ws, message.data, connectionId, useStreaming);
+        } else if (message.type === 'audio_stream_start') {
+          // Start real-time STT streaming session
+          handleAudioStreamStart(ws, connectionId, useStreaming);
+        } else if (message.type === 'audio_stream_chunk') {
+          // Receive audio chunk for STT streaming
+          handleAudioStreamChunk(ws, message.data, connectionId);
+        } else if (message.type === 'audio_stream_end') {
+          // End STT streaming and process final transcript
+          await handleAudioStreamEnd(ws, connectionId, useStreaming);
         } else if (message.type === 'ping') {
           sendMessage(ws, { type: 'pong' });
         }
@@ -682,6 +966,13 @@ function startServer() {
       const reasonStr = reason ? reason.toString() : 'no reason';
       console.log(`🔌 [${connectionId}] Disconnected (code: ${code}, reason: ${reasonStr})`);
       activeConnections.delete(connectionId);
+      
+      // Cleanup any active STT session
+      const sttSession = sttSessions.get(connectionId);
+      if (sttSession) {
+        sttSession.cleanup();
+        sttSessions.delete(connectionId);
+      }
     });
   });
 
