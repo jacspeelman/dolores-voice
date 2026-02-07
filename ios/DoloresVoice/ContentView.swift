@@ -45,6 +45,12 @@ struct ContentView: View {
                             }
                         }
                     }
+                    .onChange(of: voiceManager.streamingResponse) { _ in
+                        // Auto-scroll while streaming text
+                        if let lastMessage = voiceManager.messages.last {
+                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                        }
+                    }
                 }
                 
                 // Bottom bar with button and input

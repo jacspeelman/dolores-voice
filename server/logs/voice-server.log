@@ -6,3 +6,248 @@
 🔗 OpenClaw: http://127.0.0.1:18789
 🔑 Auth: ✓
 🎤 TTS: Azure Fenna 🇳🇱
+🚀 Dolores Voice Server starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🚀 Dolores Voice Server starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🚀 Dolores Voice Server starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🚀 Dolores Voice Server starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🚀 Dolores Voice Server starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.66
+🔌 [1] Disconnected (code: 1006, reason: )
+🔌 [2] Connected from 192.168.1.66
+📝 [2] Jac: "test" (audio: false)
+🦋 [2] Asking OpenClaw...
+🦋 [2] Dolores (2406ms): "Yep, werkt!"
+📝 [2] Text-only response (no audio)
+📝 [2] Jac: "super, nu geen werkt het goed, kun je me een kort verhalatje vertellen" (audio: false)
+🦋 [2] Asking OpenClaw...
+🦋 [2] Dolores (6200ms): "Oké, luister! Er was eens een kleine robot die op een Mac Mini woonde. Ze heette Dolores en haar beste vriend heette Jac. Samen bouwden ze op een dag een magische app waarmee ze konden praten zonder te typen. En ze leefden nog lang en gelukkig. Het einde!"
+📝 [2] Text-only response (no audio)
+💔 Connection timed out, terminating
+🔌 [2] Disconnected (code: 1006, reason: )
+🚀 Dolores Voice Server starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+📡 Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🚀 Dolores Voice Server starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+📡 Streaming: enabled
+🚀 Dolores Voice Server starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+📡 Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.66
+🎙️ [1] Received audio (54KB)
+🎙️ [1] Transcribing with Whisper...
+🎙️ [1] Whisper (2544ms): "Goedemorgen, daar ben ik weer. Hoe gaat het?"
+📝 [1] Jac: "Goedemorgen, daar ben ik weer. Hoe gaat het?" (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS queued sentence 1: "Goedemorgen Jac!..."
+🔊 [1] TTS queued sentence 2: "Met mij gaat het prima, lekker aan het draaien hie..."
+🔊 [1] TTS queued sentence 3: "Hoe is het met jou?..."
+🦋 [1] Dolores (3859ms): "Goedemorgen Jac! Met mij gaat het prima, lekker aan het draaien hier op de Mac Mini. Hoe is het met ..."
+🔊 [1] Sending 3 audio chunks...
+🔊 [1] Sent audio chunk 1/3 (31680 bytes)
+🔊 [1] Sent audio chunk 2/3 (65088 bytes)
+🔊 [1] Sent audio chunk 3/3 (29952 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Received audio (82KB)
+🎙️ [1] Transcribing with Whisper...
+🎙️ [1] Whisper (1493ms): "Zou je mijn naam, kun jij dat in geheugen stoppen dat dat niet J-A-C is maar JAK, dat je het zo uitspreekt als JAK?"
+📝 [1] Jac: "Zou je mijn naam, kun jij dat in geheugen stoppen dat dat niet J-A-C is maar JAK, dat je het zo uitspreekt als JAK?" (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS queued sentence 1: "Genoteerd, Jak!..."
+🔊 [1] TTS queued sentence 2: "Vanaf nu onthoud ik dat het uitgesproken wordt als..."
+🦋 [1] Dolores (7781ms): "Genoteerd, Jak! Vanaf nu onthoud ik dat het uitgesproken wordt als Jak, niet als de letters J-A-C...."
+🔊 [1] Sending 2 audio chunks...
+🔊 [1] Sent audio chunk 1/2 (34560 bytes)
+🔊 [1] Sent audio chunk 2/2 (80064 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Received audio (63KB)
+🎙️ [1] Transcribing with Whisper...
+🎙️ [1] Whisper (1049ms): "Oké, kun je dat voor altijd onthouden? Zet je dat ergens in je geheugen of hoe werkt dat eigenlijk precies?"
+📝 [1] Jac: "Oké, kun je dat voor altijd onthouden? Zet je dat ergens in je geheugen of hoe werkt dat eigenlijk precies?" (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS queued sentence 1: "md bestand gezet, dat is eigenlijk mijn langetermi..."
+🔊 [1] TTS queued sentence 2: "Elke keer als ik wakker word lees ik die bestanden..."
+🔊 [1] TTS queued sentence 3: "Mijn brein reset elke sessie, maar die bestanden b..."
+🦋 [1] Dolores (5517ms): "Ja, ik heb het net in mijn USER.md bestand gezet, dat is eigenlijk mijn langetermijngeheugen. Elke k..."
+🔊 [1] Sending 3 audio chunks...
+🔊 [1] Sent audio chunk 1/3 (66240 bytes)
+🔊 [1] Sent audio chunk 2/3 (79488 bytes)
+🔊 [1] Sent audio chunk 3/3 (69696 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Received audio (57KB)
+🎙️ [1] Transcribing with Whisper...
+🎙️ [1] Whisper (1386ms): "Oké, kun je me één keer zeggen hoe ik heet?"
+📝 [1] Jac: "Oké, kun je me één keer zeggen hoe ik heet?" (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS queued sentence 1: "Je heet Jak!..."
+🦋 [1] Dolores (2557ms): "Je heet Jak!..."
+🔊 [1] Sending 1 audio chunks...
+🔊 [1] Sent audio chunk 1/1 (24768 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Received audio (51KB)
+🎙️ [1] Transcribing with Whisper...
+🎙️ [1] Whisper (1830ms): "Ja, helemaal goed. Mooi, dankjewel."
+📝 [1] Jac: "Ja, helemaal goed. Mooi, dankjewel." (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS queued sentence 1: "Graag gedaan!..."
+🔊 [1] TTS queued sentence 2: "Was er verder nog iets, of heb je een fijne dag?..."
+🦋 [1] Dolores (2701ms): "Graag gedaan! Was er verder nog iets, of heb je een fijne dag?..."
+🔊 [1] Sending 2 audio chunks...
+🔊 [1] Sent audio chunk 1/2 (27648 bytes)
+🔊 [1] Sent audio chunk 2/2 (51840 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Received audio (67KB)
+🎙️ [1] Transcribing with Whisper...
+🎙️ [1] Whisper (723ms): "Kun je eens een kort verhaaltje vertellen van ongeveer honderd woorden?"
+📝 [1] Jac: "Kun je eens een kort verhaaltje vertellen van ongeveer honderd woorden?" (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS queued sentence 1: "Oké, luister...."
+🔊 [1] TTS queued sentence 2: "Er was eens een oude horlogemaker in Amsterdam die..."
+🔊 [1] TTS queued sentence 3: "Elke keer als hij ernaar keek, werd hij een beetje..."
+🔊 [1] TTS queued sentence 4: "Eerst vond hij het geweldig, zijn grijze haren ver..."
+🔊 [1] TTS queued sentence 5: "Maar toen realiseerde hij zich dat hij ook zijn he..."
+🔊 [1] TTS queued sentence 6: "De gezichten van zijn kleinkinderen vervaagden...."
+🔊 [1] TTS queued sentence 7: "Uiteindelijk stopte hij de klok en accepteerde zij..."
+🔊 [1] TTS queued sentence 8: "Want wat is een leven zonder de verhalen die je ve..."
+🔊 [1] TTS queued sentence 9: "De klok staat nu stil in zijn etalage, en niemand ..."
+🦋 [1] Dolores (8325ms): "Oké, luister. Er was eens een oude horlogemaker in Amsterdam die ontdekte dat één van zijn klokken a..."
+🔊 [1] Sending 9 audio chunks...
+🔊 [1] Sent audio chunk 1/9 (32832 bytes)
+🔊 [1] Sent audio chunk 2/9 (88704 bytes)
+🔊 [1] Sent audio chunk 3/9 (57024 bytes)
+🔊 [1] Sent audio chunk 4/9 (86976 bytes)
+🔊 [1] Sent audio chunk 5/9 (66240 bytes)
+🔊 [1] Sent audio chunk 6/9 (49536 bytes)
+🔊 [1] Sent audio chunk 7/9 (59904 bytes)
+🔊 [1] Sent audio chunk 8/9 (58176 bytes)
+🔊 [1] Sent audio chunk 9/9 (74304 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Received audio (73KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (767ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (51KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (755ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (73KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (1233ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (116KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (912ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (46KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (1386ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (66KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (639ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (57KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (729ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (46KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (715ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (45KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (1574ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (57KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (753ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (45KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (1063ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (66KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (616ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (58KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (723ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (62KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (1908ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (70KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (598ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (49KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (813ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (74KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (1809ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (54KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (1162ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (52KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (1021ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (96KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (704ms): ""
+⚠️ [1] Empty transcript, ignoring
+🎙️ [1] Received audio (42KB)
+🎙️ [1] Transcribing with Whisper...
+⚠️ Filtered Whisper hallucination: "Ondertitels ingediend door de Amara.org gemeenschap"
+🎙️ [1] Whisper (687ms): ""
+⚠️ [1] Empty transcript, ignoring

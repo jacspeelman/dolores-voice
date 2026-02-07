@@ -421,8 +421,33 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
     
     let fullResponse = '';
     let sentenceBuffer = '';
-    let audioQueue = []; // Queue of TTS promises
     let sentenceCount = 0;
+    let audioChunkIndex = 0;
+    let audioSent = false;
+    
+    // Queue for ordered audio sending (TTS may complete out of order)
+    const audioResults = [];
+    let nextAudioToSend = 0;
+    
+    // Function to send audio chunks in order as they become ready
+    const trySendAudioChunks = () => {
+      while (audioResults[nextAudioToSend] !== undefined) {
+        const audioData = audioResults[nextAudioToSend];
+        if (audioData) {
+          if (!audioSent) {
+            sendMessage(ws, { type: 'audio_start' });
+            audioSent = true;
+          }
+          sendMessage(ws, { 
+            type: 'audio_chunk', 
+            data: audioData.toString('base64'),
+            index: nextAudioToSend
+          });
+          console.log(`🔊 [${connectionId}] Sent audio chunk ${nextAudioToSend + 1} (${audioData.length} bytes)`);
+        }
+        nextAudioToSend++;
+      }
+    };
     
     // Stream text from OpenClaw
     for await (const chunk of callOpenClawStreaming(text)) {
@@ -432,21 +457,25 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
       // Send text delta to client
       sendMessage(ws, { type: 'text_delta', delta: chunk });
       
-      // Check for complete sentences for TTS
+      // Check for complete sentences for TTS - start immediately!
       if (wantsAudio) {
         const { sentences, remaining } = extractCompleteSentences(sentenceBuffer);
         
         for (const sentence of sentences) {
           if (sentence.length > 2) { // Skip tiny fragments
+            const myIndex = sentenceCount;
             sentenceCount++;
-            console.log(`🔊 [${connectionId}] TTS queued sentence ${sentenceCount}: "${sentence.substring(0, 50)}..."`);
+            console.log(`🔊 [${connectionId}] TTS starting sentence ${myIndex + 1}: "${sentence.substring(0, 50)}..."`);
             
-            // Start TTS for this sentence immediately (parallel)
-            const ttsPromise = textToSpeech(sentence).catch(err => {
-              console.error(`⚠️ [${connectionId}] TTS error for sentence: ${err.message}`);
-              return null;
+            // Start TTS immediately and send as soon as ready
+            textToSpeech(sentence).then(audioData => {
+              audioResults[myIndex] = audioData;
+              trySendAudioChunks();
+            }).catch(err => {
+              console.error(`⚠️ [${connectionId}] TTS error: ${err.message}`);
+              audioResults[myIndex] = null;
+              trySendAudioChunks();
             });
-            audioQueue.push(ttsPromise);
           }
         }
         
@@ -463,35 +492,32 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
     
     // Handle remaining text for TTS
     if (wantsAudio && sentenceBuffer.trim().length > 2) {
-      console.log(`🔊 [${connectionId}] TTS queued final: "${sentenceBuffer.substring(0, 50)}..."`);
-      audioQueue.push(textToSpeech(sentenceBuffer.trim()).catch(err => null));
-    }
-    
-    // Send audio chunks as they complete (in order)
-    if (wantsAudio && audioQueue.length > 0) {
-      console.log(`🔊 [${connectionId}] Sending ${audioQueue.length} audio chunks...`);
+      const myIndex = sentenceCount;
+      sentenceCount++;
+      console.log(`🔊 [${connectionId}] TTS starting final: "${sentenceBuffer.substring(0, 50)}..."`);
       
-      // Send audio_start to prepare client
-      sendMessage(ws, { type: 'audio_start', chunks: audioQueue.length });
-      
-      let chunkIndex = 0;
-      for (const ttsPromise of audioQueue) {
-        const audioData = await ttsPromise;
-        if (audioData) {
-          sendMessage(ws, { 
-            type: 'audio_chunk', 
-            data: audioData.toString('base64'),
-            index: chunkIndex,
-            total: audioQueue.length
-          });
-          console.log(`🔊 [${connectionId}] Sent audio chunk ${chunkIndex + 1}/${audioQueue.length} (${audioData.length} bytes)`);
+      textToSpeech(sentenceBuffer.trim()).then(audioData => {
+        audioResults[myIndex] = audioData;
+        trySendAudioChunks();
+        // After final chunk, send audio_done
+        if (nextAudioToSend >= sentenceCount) {
+          sendMessage(ws, { type: 'audio_done' });
+          console.log(`🔊 [${connectionId}] Audio streaming complete`);
         }
-        chunkIndex++;
-      }
-      
-      // Signal audio complete
-      sendMessage(ws, { type: 'audio_done' });
-      console.log(`🔊 [${connectionId}] Audio streaming complete`);
+      }).catch(err => {
+        audioResults[myIndex] = null;
+        trySendAudioChunks();
+      });
+    } else if (wantsAudio && sentenceCount > 0) {
+      // Wait for pending audio to finish, then send audio_done
+      const checkComplete = setInterval(() => {
+        trySendAudioChunks();
+        if (nextAudioToSend >= sentenceCount) {
+          clearInterval(checkComplete);
+          sendMessage(ws, { type: 'audio_done' });
+          console.log(`🔊 [${connectionId}] Audio streaming complete`);
+        }
+      }, 100);
     }
 
   } catch (error) {
