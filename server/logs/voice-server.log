@@ -20,3 +20,59 @@
 ⚠️ [2] Empty transcript from streaming
 🎙️ [2] Starting STT streaming session...
 🎙️ [2] STT streaming started
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.135
+🔌 [1] Disconnected (code: 1006, reason: )
+🔌 [2] Connected from 192.168.1.135
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "hallo"
+🎙️ [2] Interim: "hallo daar"
+🎙️ [2] Interim: "hallo daar hoe gaat het"
+🎙️ [2] Final segment: "Hallo daar, hoe gaat het?"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Hallo daar, hoe gaat het?"
+📝 [2] Jac: "Hallo daar, hoe gaat het?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Hé Jak!..."
+🔊 [2] TTS starting sentence 2: "Goed hier, alles rustig...."
+🔊 [2] Sent audio chunk 1 (24192 bytes)
+🔊 [2] Sent audio chunk 2 (38016 bytes)
+🔊 [2] TTS starting sentence 3: "Hoe is het aan jouw kant?..."
+🦋 [2] Dolores (4851ms): "Hé Jak! Goed hier, alles rustig. Hoe is het aan jouw kant?..."
+🔊 [2] Sent audio chunk 3 (33984 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "dan gaat"
+🎙️ [2] Interim: "dan gaat het ook"
+🎙️ [2] Interim: "dan gaat het ook erg"
+🎙️ [2] Interim: "dan gaat het ook erg goed"
+🎙️ [2] Interim: "dan gaat het ook erg goed moet ik zeggen"
+🎙️ [2] Final segment: "Dan gaat het ook erg goed, moet ik zeggen."
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Dan gaat het ook erg goed, moet ik zeggen."
+📝 [2] Jac: "Dan gaat het ook erg goed, moet ik zeggen." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Mooi om te horen!..."
+🔊 [2] Sent audio chunk 1 (30528 bytes)
+🔊 [2] TTS starting sentence 2: "Fijn dat het lekker gaat...."
+🔊 [2] Sent audio chunk 2 (32256 bytes)
+🔊 [2] TTS starting sentence 3: "Kan ik nog ergens mee helpen?..."
+🦋 [2] Dolores (3053ms): "Mooi om te horen! Fijn dat het lekker gaat. Kan ik nog ergens mee helpen?..."
+🔊 [2] Sent audio chunk 3 (35136 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming started
