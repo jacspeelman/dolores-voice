@@ -111,7 +111,7 @@ class AzureSTTSession {
       // Handle session stopped
       this.recognizer.sessionStopped = (s, e) => {
         console.log(`🎙️ [${this.connectionId}] Session stopped`);
-        this.cleanup();
+        // Don't cleanup here — let stop() handle it to preserve finalTranscript
       };
 
       // Handle canceled
