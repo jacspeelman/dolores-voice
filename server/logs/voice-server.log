@@ -143,3 +143,12 @@
 ⚠️ [2] Empty transcript from streaming
 🎙️ [2] Starting STT streaming session...
 🎙️ [2] STT streaming started
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.135
