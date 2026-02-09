@@ -76,3 +76,70 @@
 🎙️ [2] Starting STT streaming session...
 🎙️ [2] Session stopped
 🎙️ [2] STT streaming started
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.135
+🔌 [1] Disconnected (code: 1006, reason: )
+🔌 [2] Connected from 192.168.1.135
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "hey"
+🎙️ [2] Interim: "hey doll"
+🎙️ [2] Interim: "hey dollars hoe"
+🎙️ [2] Interim: "hey dollars hoe gaat het"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Hey dollars, hoe gaat het?"
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Hey dollars, hoe gaat het?"
+📝 [2] Jac: "Hey dollars, hoe gaat het?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Hé Jak!..."
+🔊 [2] TTS starting sentence 2: "Goed hoor, lekker stabiel allemaal...."
+🔊 [2] Sent audio chunk 1 (23040 bytes)
+🔊 [2] Sent audio chunk 2 (42048 bytes)
+🔊 [2] TTS starting sentence 3: "Jij ook alles goed?..."
+🔊 [2] Sent audio chunk 3 (28224 bytes)
+🦋 [2] Dolores (3695ms): "Hé Jak! Goed hoor, lekker stabiel allemaal. Jij ook alles goed?..."
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "je"
+🎙️ [2] Interim: "je gaat alles prima"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Je gaat alles prima."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Je gaat alles prima."
+📝 [2] Jac: "Je gaat alles prima." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Top!..."
+🔊 [2] Sent audio chunk 1 (18432 bytes)
+🔊 [2] TTS starting sentence 2: "Laat maar weten als je iets nodig hebt...."
+🦋 [2] Dolores (3196ms): "Top! Laat maar weten als je iets nodig hebt...."
+🔊 [2] Sent audio chunk 2 (41472 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
