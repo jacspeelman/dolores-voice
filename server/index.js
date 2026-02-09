@@ -289,7 +289,7 @@ function extractCompleteSentences(text) {
 async function* callOpenClawStreaming(userMessage) {
   const voiceMessage = `[VOICE] ${userMessage}
 
-(Dit is een voice gesprek - antwoord KORT in 1-3 zinnen, geen markdown/bullets, praat natuurlijk)`;
+(Dit is een voice gesprek via de Dolores Voice app. Antwoord KORT in 1-3 zinnen, geen markdown/bullets, praat natuurlijk. GEBRUIK GEEN tts tool — de voice app regelt zelf de spraaksynthese.)`;
 
   const response = await fetchWithTimeout(`${OPENCLAW_URL}/v1/chat/completions`, {
     method: 'POST',
@@ -334,6 +334,11 @@ async function* callOpenClawStreaming(userMessage) {
           const json = JSON.parse(data);
           const delta = json.choices?.[0]?.delta?.content;
           if (delta) {
+            // Filter out MEDIA: paths (OpenClaw TTS tool output — voice server handles TTS itself)
+            if (delta.startsWith('MEDIA:') || delta.match(/^MEDIA:[\/\w\-\.]+\.(mp3|ogg|wav)$/)) {
+              console.log(`⏭️ Filtered MEDIA path from response`);
+              continue;
+            }
             yield delta;
           }
         } catch (e) {
@@ -350,7 +355,7 @@ async function* callOpenClawStreaming(userMessage) {
 async function callOpenClaw(userMessage) {
   const voiceMessage = `[VOICE] ${userMessage}
 
-(Dit is een voice gesprek - antwoord KORT in 1-3 zinnen, geen markdown/bullets, praat natuurlijk)`;
+(Dit is een voice gesprek via de Dolores Voice app. Antwoord KORT in 1-3 zinnen, geen markdown/bullets, praat natuurlijk. GEBRUIK GEEN tts tool — de voice app regelt zelf de spraaksynthese.)`;
 
   const response = await fetchWithTimeout(`${OPENCLAW_URL}/v1/chat/completions`, {
     method: 'POST',
@@ -372,7 +377,10 @@ async function callOpenClaw(userMessage) {
   }
 
   const data = await response.json();
-  return data.choices[0].message.content;
+  let content = data.choices[0].message.content;
+  // Filter out MEDIA: paths (OpenClaw TTS tool output — voice server handles TTS itself)
+  content = content.replace(/MEDIA:[\/\w\-\.]+\.(mp3|ogg|wav)/g, '').trim();
+  return content;
 }
 
 /**

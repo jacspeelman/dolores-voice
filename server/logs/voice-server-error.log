@@ -5,3 +5,21 @@
 ❌ Server error: listen EADDRINUSE: address already in use 0.0.0.0:8765
 ❌ Server error: listen EADDRINUSE: address already in use 0.0.0.0:8765
 ❌ Server error: listen EADDRINUSE: address already in use 0.0.0.0:8765
+🎙️ [2] STT Error: InvalidOperation: Payload must be ArrayBuffer
+❌ [2] STT error: InvalidOperation: Payload must be ArrayBuffer
+🎙️ [3] STT Error: InvalidOperation: Payload must be ArrayBuffer
+❌ [3] STT error: InvalidOperation: Payload must be ArrayBuffer
+🎙️ [3] STT Error: InvalidOperation: Payload must be ArrayBuffer
+❌ [3] STT error: InvalidOperation: Payload must be ArrayBuffer
+🎙️ [3] STT Error: InvalidOperation: Payload must be ArrayBuffer
+❌ [3] STT error: InvalidOperation: Payload must be ArrayBuffer
+🎙️ [4] STT Error: InvalidOperation: Payload must be ArrayBuffer
+❌ [4] STT error: InvalidOperation: Payload must be ArrayBuffer
+🎙️ [4] STT Error: InvalidOperation: Payload must be ArrayBuffer
+❌ [4] STT error: InvalidOperation: Payload must be ArrayBuffer
+🎙️ [4] STT Error: InvalidOperation: Payload must be ArrayBuffer
+❌ [4] STT error: InvalidOperation: Payload must be ArrayBuffer
+🎙️ [5] STT Error: InvalidOperation: Payload must be ArrayBuffer
+❌ [5] STT error: InvalidOperation: Payload must be ArrayBuffer
+🎙️ [5] STT Error: InvalidOperation: Payload must be ArrayBuffer
+❌ [5] STT error: InvalidOperation: Payload must be ArrayBuffer
