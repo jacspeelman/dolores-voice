@@ -180,8 +180,8 @@ class VoiceManager: ObservableObject {
     
     private let serverURL = URL(string: "ws://192.168.1.214:8765")!
     private let maxReconnectAttempts = 5
-    private let silenceThreshold: Float = 0.012
-    private let silenceTimeout: TimeInterval = 1.5  // Allow natural pauses in speech
+    private let silenceThreshold: Float = 0.01
+    private let silenceTimeout: TimeInterval = 2.5  // Allow natural pauses between sentences
     private let minRecordingDuration: TimeInterval = 0.5
     
     // MARK: - Published State
@@ -549,6 +549,9 @@ class VoiceManager: ObservableObject {
             // Real-time interim transcript (can change)
             if let interim = json["text"] as? String {
                 interimTranscript = interim
+                // Reset silence timer — user is actively speaking
+                lastSpeechTime = Date()
+                hasDetectedSpeech = true
             }
             
         case "transcript_final":
@@ -562,6 +565,9 @@ class VoiceManager: ObservableObject {
                 }
                 // Clear interim since we have final
                 interimTranscript = ""
+                // Reset silence timer — user just finished a phrase, might continue
+                lastSpeechTime = Date()
+                hasDetectedSpeech = true
             }
             
         case "transcript_complete":

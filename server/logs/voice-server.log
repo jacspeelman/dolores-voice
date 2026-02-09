@@ -1742,3 +1742,231 @@ Hij keek naar de brief in zijn hand...."
 🔊 [5] Audio streaming complete
 🎙️ [5] Starting STT streaming session...
 🎙️ [5] STT streaming started
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.124
+🔌 [1] Disconnected (code: 1006, reason: )
+🔌 [2] Connected from 192.168.1.124
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "hoi daar ben ik"
+🎙️ [2] Interim: "hoi daar ben ik weer"
+🎙️ [2] Final segment: "Hoi, daar ben ik weer."
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Interim: "kun je"
+🎙️ [2] Final segment: "Kun je."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Hoi, daar ben ik weer. Kun je."
+📝 [2] Jac: "Hoi, daar ben ik weer. Kun je." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Hé Jak!..."
+🔊 [2] Sent audio chunk 1 (21888 bytes)
+🔊 [2] TTS starting bundled 2: "Je zin viel weg, wat wou je vragen?..."
+🦋 [2] Dolores (2462ms): "Hé Jak! Je zin viel weg, wat wou je vragen?..."
+🔊 [2] Sent audio chunk 2 (42624 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "ik"
+🎙️ [2] Interim: "ik ga het"
+🎙️ [2] Interim: "ik ga het nog een keer"
+🎙️ [2] Interim: "ik ga het nog een keer te"
+🎙️ [2] Interim: "ik ga het nog een keer testen"
+🎙️ [2] Interim: "ik ga het nog een keer testen w"
+🎙️ [2] Interim: "ik ga het nog een keer testen want"
+🎙️ [2] Interim: "ik ga het nog een keer testen want bij"
+🎙️ [2] Interim: "ik ga het nog een keer testen want bij de man"
+🎙️ [2] Interim: "ik ga het nog een keer testen want bij de manier"
+🎙️ [2] Interim: "ik ga het nog een keer testen want bij de manier breekt"
+🎙️ [2] Interim: "ik ga het nog een keer testen want bij de manier breekt ie steeds"
+🎙️ [2] Interim: "ik ga het nog een keer testen want bij de manier breekt ie steeds af"
+🎙️ [2] Interim: "ik ga het nog een keer testen want bij de manier breekt ie steeds af en"
+🎙️ [2] Interim: "ik ga het nog een keer testen want bij de manier breekt ie steeds af en dat"
+🎙️ [2] Interim: "ik ga het nog een keer testen want bij de manier breekt ie steeds af en dat heeft misschien"
+🎙️ [2] Interim: "ik ga het nog een keer testen want bij de manier breekt ie steeds af en dat heeft misschien te maken"
+🎙️ [2] Final segment: "Ik ga het nog een keer testen, want bij de manier breekt ie steeds af en dat heeft Misschien te maken."
+🎙️ [2] Interim: "als"
+🎙️ [2] Interim: "als ik iets"
+🎙️ [2] Interim: "als ik iets te laat pauzeer"
+🎙️ [2] Final segment: "Als ik iets te laat pauzeer?"
+🎙️ [2] Interim: "hallo"
+🎙️ [2] Interim: "hallo ben"
+🎙️ [2] Interim: "hallo ben je er nog"
+🎙️ [2] Final segment: "Hallo, ben je er nog?"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Ik ga het nog een keer testen, want bij de manier breekt ie steeds af en dat heeft Misschien te maken. Als ik iets te laat pauzeer? Hallo, ben je er nog?"
+📝 [2] Jac: "Ik ga het nog een keer testen, want bij de manier breekt ie steeds af en dat heeft Misschien te maken. Als ik iets te laat pauzeer? Hallo, ben je er nog?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Ja, ik ben er!..."
+🔊 [2] Sent audio chunk 1 (28800 bytes)
+🔊 [2] TTS starting bundled 2: "Het klinkt alsof de spraakherkenning te snel afkap..."
+🔊 [2] Sent audio chunk 2 (63936 bytes)
+🔊 [2] TTS starting bundled 3: "Misschien moet de silence-timeout iets langer inge..."
+🦋 [2] Dolores (5174ms): "Ja, ik ben er! Het klinkt alsof de spraakherkenning te snel afkapt als je even pauzeert. Misschien m..."
+🔊 [2] Sent audio chunk 3 (91584 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "ja dat"
+🎙️ [2] Interim: "ja dat lijkt"
+🎙️ [2] Interim: "ja dat lijkt mij"
+🎙️ [2] Interim: "ja dat lijkt mij wel een"
+🎙️ [2] Interim: "ja dat lijkt mij wel een goed plan"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Interim: "ja dat lijkt mij wel een goed plan eigenlijk"
+🎙️ [2] Final segment: "Ja, dat lijkt mij wel een goed plan eigenlijk."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Ja, dat lijkt mij wel een goed plan eigenlijk."
+📝 [2] Jac: "Ja, dat lijkt mij wel een goed plan eigenlijk." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Zal ik even kijken in de dolores-voice code wat de..."
+🦋 [2] Dolores (4011ms): "Zal ik even kijken in de dolores-voice code wat de huidige silence-timeout is en die wat langer zett..."
+🔊 [2] Sent audio chunk 1 (80064 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "wacht"
+🎙️ [2] Interim: "wacht maar"
+🎙️ [2] Interim: "wacht maar even"
+🎙️ [2] Interim: "wacht maar even ik"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Interim: "wacht maar even ik doe het wel"
+🎙️ [2] Interim: "wacht maar even ik doe het wel even via teller"
+🎙️ [2] Final segment: "Wacht maar even, ik doe het wel even via teller."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Wacht maar even, ik doe het wel even via teller."
+📝 [2] Jac: "Wacht maar even, ik doe het wel even via teller." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Oké, doe je ding!..."
+🔊 [2] Sent audio chunk 1 (31104 bytes)
+🔊 [2] TTS starting bundled 2: "Laat maar weten als je weer wil testen...."
+🦋 [2] Dolores (2867ms): "Oké, doe je ding! Laat maar weten als je weer wil testen...."
+🔊 [2] Sent audio chunk 2 (39744 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "nou"
+🎙️ [2] Interim: "nou laten"
+🎙️ [2] Interim: "nou laten we nog"
+🎙️ [2] Interim: "nou laten we nog even een"
+🎙️ [2] Interim: "nou laten we nog even een keer testen"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Nou, Laten we nog even een keer testen."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Nou, Laten we nog even een keer testen."
+📝 [2] Jac: "Nou, Laten we nog even een keer testen." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Top, ga je gang!..."
+🔊 [2] TTS starting bundled 2: "Ik luister...."
+🔊 [2] Sent audio chunk 1 (29376 bytes)
+🦋 [2] Dolores (2256ms): "Top, ga je gang! Ik luister...."
+🔊 [2] Sent audio chunk 2 (22464 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "oké"
+🎙️ [2] Interim: "oké ik"
+🎙️ [2] Interim: "oké ik zou"
+🎙️ [2] Interim: "oké ik zou graag"
+🎙️ [2] Interim: "oké ik zou graag dat je"
+🎙️ [2] Interim: "oké ik zou graag dat je een ver"
+🎙️ [2] Interim: "oké ik zou graag dat je een verhaaltje"
+🎙️ [2] Interim: "oké ik zou graag dat je een verhaaltje vertelt"
+🎙️ [2] Interim: "oké ik zou graag dat je een verhaaltje vertelt met"
+🎙️ [2] Interim: "oké ik zou graag dat je een verhaaltje vertelt met 50"
+🎙️ [2] Interim: "oké ik zou graag dat je een verhaaltje vertelt met 50 woorden"
+🎙️ [2] Interim: "oké ik zou graag dat je een verhaaltje vertelt met 50 woorden en"
+🎙️ [2] Interim: "oké ik zou graag dat je een verhaaltje vertelt met 50 woorden en dit keer"
+🎙️ [2] Interim: "oké ik zou graag dat je een verhaaltje vertelt met 50 woorden en dit keer in het spaans"
+🎙️ [2] Interim: "oké ik zou graag dat je een verhaaltje vertelt met 50 woorden en dit keer in het spaans zou je dat"
+🎙️ [2] Interim: "oké ik zou graag dat je een verhaaltje vertelt met 50 woorden en dit keer in het spaans zou je dat kunnen"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Oké, ik zou graag dat je een verhaaltje vertelt met 50 woorden en dit keer in het Spaans zou je dat kunnen."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Oké, ik zou graag dat je een verhaaltje vertelt met 50 woorden en dit keer in het Spaans zou je dat kunnen."
+📝 [2] Jac: "Oké, ik zou graag dat je een verhaaltje vertelt met 50 woorden en dit keer in het Spaans zou je dat kunnen." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "En un pequeño pueblo junto al mar, vivía un viejo ..."
+🔊 [2] Sent audio chunk 1 (96768 bytes)
+🔊 [2] TTS starting bundled 2: "Cada mañana salía con su barca, se sentaba en medi..."
+🔊 [2] Sent audio chunk 2 (93888 bytes)
+🔊 [2] TTS starting bundled 3: "Los peces saltaban a su alrededor como si bailaran..."
+🔊 [2] Sent audio chunk 3 (64512 bytes)
+🔊 [2] TTS starting bundled 4: "La gente pensaba que estaba loco...."
+🔊 [2] Sent audio chunk 4 (43776 bytes)
+🔊 [2] TTS starting bundled 5: "Pero él era el único que sonreía cada día...."
+🦋 [2] Dolores (4524ms): "En un pequeño pueblo junto al mar, vivía un viejo pescador que nunca pescaba peces. Cada mañana salí..."
+🔊 [2] Sent audio chunk 5 (55296 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "heel goed"
+🎙️ [2] Interim: "heel goed je"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Interim: "heel goed je kan al aar"
+🎙️ [2] Interim: "heel goed je kan al aardig"
+🎙️ [2] Final segment: "Heel goed, je kan al aardig."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Heel goed, je kan al aardig."
+📝 [2] Jac: "Heel goed, je kan al aardig." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Haha, gracias!..."
+🔊 [2] Sent audio chunk 1 (34560 bytes)
+🔊 [2] TTS starting bundled 2: "Ik doe mijn best...."
+🔊 [2] Sent audio chunk 2 (24768 bytes)
+🔊 [2] TTS starting bundled 3: "Nog een taal die je wil testen?..."
+🦋 [2] Dolores (3070ms): "Haha, gracias! Ik doe mijn best. Nog een taal die je wil testen?..."
+🔊 [2] Sent audio chunk 3 (33984 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "ik"
+🎙️ [2] Interim: "ik ga"
+🎙️ [2] Interim: "ik ga nog e"
+🎙️ [2] Interim: "ik ga nog even"
+🎙️ [2] Interim: "ik ga nog even testen"
+🎙️ [2] Interim: "ik ga nog even testen want"
+🎙️ [2] Interim: "ik ga nog even testen want op"
+🎙️ [2] Interim: "ik ga nog even testen want op de"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt die toch"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt die toch mijn"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt die toch mijn zin"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt die toch mijn zin af"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt die toch mijn zin af en toe"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt die toch mijn zin af en toe af"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt die toch mijn zin af en toe af dat"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt die toch mijn zin af en toe af dat is"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt die toch mijn zin af en toe af dat is een be"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt die toch mijn zin af en toe af dat is een beetje ver"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt die toch mijn zin af en toe af dat is een beetje vervelen"
+🎙️ [2] Interim: "ik ga nog even testen want op de één of andere manier kapt die toch mijn zin af en toe af dat is een beetje vervelend dus"
+🎙️ [2] Final segment: "Ik ga nog even testen, want op de één of andere manier kapt die toch mijn zin af en toe af. Dat is een beetje vervelend dus."
+🎙️ [2] Interim: "eens"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Interim: "eens k"
+🎙️ [2] Interim: "eens kijken of die dit"
+🎙️ [2] Final segment: "Eens kijken of die dit?"
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Ik ga nog even testen, want op de één of andere manier kapt die toch mijn zin af en toe af. Dat is een beetje vervelend dus. Eens kijken of die dit?"
+📝 [2] Jac: "Ik ga nog even testen, want op de één of andere manier kapt die toch mijn zin af en toe af. Dat is een beetje vervelend dus. Eens kijken of die dit?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Ja, hij kapt nog steeds af zie ik...."
+🔊 [2] Sent audio chunk 1 (41472 bytes)
+🔊 [2] TTS starting bundled 2: "Als je wil kan ik de silence-timeout in de server-..."
+🔊 [2] TTS starting bundled 3: "Zeg het maar!..."
+🦋 [2] Dolores (3413ms): "Ja, hij kapt nog steeds af zie ik. Als je wil kan ik de silence-timeout in de server-code ophogen, d..."
+🔊 [2] Sent audio chunk 2 (77184 bytes)
+🔊 [2] Sent audio chunk 3 (22464 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
