@@ -239,3 +239,59 @@
 🔊 [2] Audio streaming complete
 🎙️ [2] Starting STT streaming session...
 🎙️ [2] STT streaming started
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.135
+🔌 [1] Disconnected (code: 1006, reason: )
+🔌 [2] Connected from 192.168.1.135
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "hoi"
+🎙️ [2] Interim: "hoi even"
+🎙️ [2] Interim: "hoi even testen"
+🎙️ [2] Interim: "hoi even testen hoe dit werkt"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Hoi even testen hoe dit werkt."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Hoi even testen hoe dit werkt."
+📝 [2] Jac: "Hoi even testen hoe dit werkt." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Hé, klinkt goed!..."
+🔊 [2] TTS starting sentence 2: "De verbinding werkt, ik hoor je...."
+🔊 [2] Sent audio chunk 1 (30528 bytes)
+🔊 [2] TTS starting sentence 3: "Test gerust verder!..."
+🔊 [2] Sent audio chunk 2 (37440 bytes)
+🦋 [2] Dolores (2810ms): "Hé, klinkt goed! De verbinding werkt, ik hoor je. Test gerust verder!..."
+🔊 [2] Sent audio chunk 3 (27648 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "kun je"
+🎙️ [2] Interim: "kun je een verhaaltje"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen van 50"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen van 50 woorden"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Kun je een verhaaltje vertellen van 50 woorden?"
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Kun je een verhaaltje vertellen van 50 woorden?"
+📝 [2] Jac: "Kun je een verhaaltje vertellen van 50 woorden?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Een oude man vond een fles op het strand...."
+🔊 [2] Sent audio chunk 1 (40896 bytes)
+🔊 [2] TTS starting sentence 2: "" Hij draaide het om...."
+🔊 [2] Sent audio chunk 2 (27072 bytes)
+🔊 [2] TTS starting sentence 3: "" Hij stopte het briefje in zijn zak en liep fluit..."
+🔊 [2] Sent audio chunk 3 (54720 bytes)
+🔊 [2] TTS starting sentence 4: "Voor het eerst in jaren...."
+🦋 [2] Dolores (5126ms): "Een oude man vond een fles op het strand. Er zat geen geest in, maar een briefje: "Ik ben gelukkig."..."
+🔊 [2] Sent audio chunk 4 (30528 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started

@@ -622,25 +622,59 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
       // Send text delta to client
       sendMessage(ws, { type: 'text_delta', delta: chunk });
       
-      // Check for complete sentences for TTS - start immediately!
+      // Check for complete sentences for TTS
       if (wantsAudio) {
         const { sentences, remaining } = extractCompleteSentences(sentenceBuffer);
         
-        for (const sentence of sentences) {
-          if (sentence.length > 2) { // Skip tiny fragments
-            const myIndex = sentenceCount;
-            sentenceCount++;
-            console.log(`🔊 [${connectionId}] TTS starting sentence ${myIndex + 1}: "${sentence.substring(0, 50)}..."`);
-            
-            // Start TTS immediately and send as soon as ready
-            textToSpeech(sentence).then(audioData => {
-              audioResults[myIndex] = audioData;
-              trySendAudioChunks();
-            }).catch(err => {
-              console.error(`⚠️ [${connectionId}] TTS error: ${err.message}`);
-              audioResults[myIndex] = null;
-              trySendAudioChunks();
-            });
+        if (sentences.length > 0) {
+          // Bundle all available sentences into one TTS call for seamless speech
+          // But send first sentence immediately for low latency on first chunk
+          if (sentenceCount === 0 && sentences.length >= 1) {
+            // First sentence: send immediately for fast start
+            const firstSentence = sentences[0];
+            if (firstSentence.length > 2) {
+              const myIndex = sentenceCount;
+              sentenceCount++;
+              console.log(`🔊 [${connectionId}] TTS starting sentence ${myIndex + 1}: "${firstSentence.substring(0, 50)}..."`);
+              textToSpeech(firstSentence).then(audioData => {
+                audioResults[myIndex] = audioData;
+                trySendAudioChunks();
+              }).catch(err => {
+                audioResults[myIndex] = null;
+                trySendAudioChunks();
+              });
+            }
+            // Bundle remaining sentences
+            if (sentences.length > 1) {
+              const bundled = sentences.slice(1).join(' ');
+              if (bundled.length > 2) {
+                const myIndex = sentenceCount;
+                sentenceCount++;
+                console.log(`🔊 [${connectionId}] TTS starting bundled ${myIndex + 1}: "${bundled.substring(0, 50)}..."`);
+                textToSpeech(bundled).then(audioData => {
+                  audioResults[myIndex] = audioData;
+                  trySendAudioChunks();
+                }).catch(err => {
+                  audioResults[myIndex] = null;
+                  trySendAudioChunks();
+                });
+              }
+            }
+          } else {
+            // Subsequent sentences: bundle all together
+            const bundled = sentences.join(' ');
+            if (bundled.length > 2) {
+              const myIndex = sentenceCount;
+              sentenceCount++;
+              console.log(`🔊 [${connectionId}] TTS starting bundled ${myIndex + 1}: "${bundled.substring(0, 50)}..."`);
+              textToSpeech(bundled).then(audioData => {
+                audioResults[myIndex] = audioData;
+                trySendAudioChunks();
+              }).catch(err => {
+                audioResults[myIndex] = null;
+                trySendAudioChunks();
+              });
+            }
           }
         }
         
