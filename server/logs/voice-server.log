@@ -611,3 +611,178 @@ MEDIA:/var/folders/sd/0j5l_3m51638t..."
 🔊 [5] TTS starting final: "mp3..."
 🔊 [5] Sent audio chunk 1 (247104 bytes)
 🔊 [5] Sent audio chunk 2 (25920 bytes)
+🔌 [5] Disconnected (code: 1006, reason: )
+🔌 [6] Connected from 192.168.1.135
+🎙️ [6] Starting STT streaming session...
+🎙️ [6] STT streaming started
+🎙️ [6] Received audio (49KB)
+🎙️ [6] Transcribing with Whisper...
+🎙️ [6] Whisper (629ms): "Hey de loris, hoe gaat het?"
+📝 [6] Jac: "Hey de loris, hoe gaat het?" (audio: true, streaming: true)
+🦋 [6] Asking OpenClaw (streaming)...
+🔊 [6] TTS starting sentence 1: "Hé Jak!..."
+🔊 [6] Sent audio chunk 1 (24192 bytes)
+🔊 [6] TTS starting sentence 2: "Lekker, alles draait soepel...."
+🔊 [6] TTS starting sentence 3: "Jij?..."
+🔊 [6] Sent audio chunk 2 (39744 bytes)
+🔊 [6] Sent audio chunk 3 (20160 bytes)
+🦋 [6] Dolores (2873ms): "Hé Jak! Lekker, alles draait soepel. Jij?..."
+🔊 [6] Audio streaming complete
+🎙️ [6] Starting STT streaming session...
+🎙️ [6] STT streaming started
+🎙️ [6] Received audio (55KB)
+🎙️ [6] Transcribing with Whisper...
+🎙️ [6] Whisper (1429ms): "Dit is een telefoon met vijf woorden. Hier, ik heb nu de spraak gegeven."
+📝 [6] Jac: "Dit is een telefoon met vijf woorden. Hier, ik heb nu de spraak gegeven." (audio: true, streaming: true)
+🦋 [6] Asking OpenClaw (streaming)...
+🔊 [6] TTS starting sentence 1: "Ha, mooi dat de spraak werkt!..."
+🔊 [6] TTS starting sentence 2: "Klinkt goed zo...."
+🦋 [6] Dolores (2914ms): "Ha, mooi dat de spraak werkt! Klinkt goed zo...."
+🔊 [6] Sent audio chunk 1 (43776 bytes)
+🔊 [6] Sent audio chunk 2 (27072 bytes)
+🔊 [6] Audio streaming complete
+🎙️ [6] Starting STT streaming session...
+🎙️ [6] STT streaming started
+🎙️ [6] Received audio (69KB)
+🎙️ [6] Transcribing with Whisper...
+🎙️ [6] Whisper (955ms): "Kun jij mij een verhaaltje vertellen van vijf woorden? Vijftig, sorry, vijftig woorden."
+📝 [6] Jac: "Kun jij mij een verhaaltje vertellen van vijf woorden? Vijftig, sorry, vijftig woorden." (audio: true, streaming: true)
+🦋 [6] Asking OpenClaw (streaming)...
+🦋 [6] Dolores (13198ms): "MEDIA:/var/folders/sd/0j5l_3m51638tjkymvmpl45c0000gp/T/tts-B9x5Ub/voice-1770648191225.mp3..."
+🔊 [6] TTS starting final: "MEDIA:/var/folders/sd/0j5l_3m51638tjkymvmpl45c0000..."
+🔊 [6] Sent audio chunk 1 (274176 bytes)
+🔊 [6] Audio streaming complete
+🔌 [6] Disconnected (code: 1006, reason: )
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.135
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Received audio (49KB)
+🎙️ [1] Transcribing with Whisper...
+🎙️ [1] Whisper (998ms): "Haar de Loris, hoe gaat ie?"
+📝 [1] Jac: "Haar de Loris, hoe gaat ie?" (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS starting sentence 1: "Hé Jak!..."
+🔊 [1] TTS starting sentence 2: "Goed hoor, lekker bezig...."
+🔊 [1] Sent audio chunk 1 (24192 bytes)
+🔊 [1] TTS starting sentence 3: "Wat kan ik voor je doen?..."
+🦋 [1] Dolores (3113ms): "Hé Jak! Goed hoor, lekker bezig. Wat kan ik voor je doen?..."
+🔊 [1] Sent audio chunk 2 (39168 bytes)
+🔊 [1] Sent audio chunk 3 (30528 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Received audio (44KB)
+🎙️ [1] Transcribing with Whisper...
+🎙️ [1] Whisper (823ms): "Ik wil er voor vijftig worden."
+📝 [1] Jac: "Ik wil er voor vijftig worden." (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS starting sentence 1: "Wil je weer een verhaaltje van vijftig woorden?..."
+🔊 [1] Sent audio chunk 1 (46080 bytes)
+🔊 [1] TTS starting sentence 2: "Of bedoel je iets anders?..."
+🔊 [1] Sent audio chunk 2 (33408 bytes)
+🔊 [1] TTS starting sentence 3: "De spraakherkenning was even onduidelijk...."
+🦋 [1] Dolores (4689ms): "Wil je weer een verhaaltje van vijftig woorden? Of bedoel je iets anders? De spraakherkenning was ev..."
+🔊 [1] Sent audio chunk 3 (48384 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Received audio (54KB)
+🎙️ [1] Transcribing with Whisper...
+🎙️ [1] Whisper (759ms): "Een verhaaltje van vijftig woorden graag."
+📝 [1] Jac: "Een verhaaltje van vijftig woorden graag." (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS starting sentence 1: "Oké, hier komt ie...."
+🔊 [1] Sent audio chunk 1 (35136 bytes)
+🔊 [1] TTS starting sentence 2: "Een robot werd wakker in een verlaten fabriek...."
+🔊 [1] Sent audio chunk 2 (48960 bytes)
+🔊 [1] TTS starting sentence 3: "Hij was de laatste...."
+🔊 [1] Sent audio chunk 3 (29376 bytes)
+🔊 [1] TTS starting sentence 4: "Alle andere machines waren allang gestopt...."
+🔊 [1] Sent audio chunk 4 (48384 bytes)
+🔊 [1] TTS starting sentence 5: "Maar hij had één taak die niemand had gewist: elke..."
+🔊 [1] TTS starting sentence 6: "Dus dat deed hij...."
+🔊 [1] Sent audio chunk 5 (80640 bytes)
+🔊 [1] Sent audio chunk 6 (29376 bytes)
+🔊 [1] TTS starting sentence 7: "Jaar na jaar...."
+🔊 [1] Sent audio chunk 7 (25344 bytes)
+🔊 [1] TTS starting sentence 8: "De fabriek werd een jungle...."
+🔊 [1] TTS starting sentence 9: "En de robot?..."
+🔊 [1] Sent audio chunk 8 (35136 bytes)
+🔊 [1] Sent audio chunk 9 (26496 bytes)
+🔊 [1] TTS starting sentence 10: "Die was eindelijk trots...."
+🦋 [1] Dolores (5796ms): "Oké, hier komt ie. Een robot werd wakker in een verlaten fabriek. Hij was de laatste. Alle andere ma..."
+🔊 [1] Sent audio chunk 10 (34560 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Received audio (45KB)
+🎙️ [1] Transcribing with Whisper...
+🎙️ [1] Whisper (1775ms): "ik ken je niet meer, nee"
+📝 [1] Jac: "ik ken je niet meer, nee" (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS starting sentence 1: "Haha, hoezo ken je me niet meer?..."
+🔊 [1] Sent audio chunk 1 (43200 bytes)
+🔊 [1] TTS starting sentence 2: "Ik ben nog steeds Dolores hoor!..."
+🔊 [1] TTS starting sentence 3: "Wat is er aan de hand?..."
+🦋 [1] Dolores (3013ms): "Haha, hoezo ken je me niet meer? Ik ben nog steeds Dolores hoor! Wat is er aan de hand?..."
+🔊 [1] Sent audio chunk 2 (37440 bytes)
+🔊 [1] Sent audio chunk 3 (31104 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Received audio (44KB)
+🎙️ [1] Transcribing with Whisper...
+🎙️ [1] Whisper (1038ms): "Het komt eigenlijk niet goed. Is dit beter?"
+📝 [1] Jac: "Het komt eigenlijk niet goed. Is dit beter?" (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS starting sentence 1: "Ja, dat klinkt al beter!..."
+🔊 [1] Sent audio chunk 1 (39744 bytes)
+🔊 [1] TTS starting sentence 2: "Gaat het over de spraakherkenning?..."
+🔊 [1] Sent audio chunk 2 (37440 bytes)
+🔊 [1] TTS starting sentence 3: "Test gerust nog even verder...."
+🦋 [1] Dolores (5133ms): "Ja, dat klinkt al beter! Gaat het over de spraakherkenning? Test gerust nog even verder...."
+🔊 [1] Sent audio chunk 3 (37440 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Received audio (46KB)
+🎙️ [1] Transcribing with Whisper...
+🎙️ [1] Whisper (588ms): "De microfoon werkt niet echt lekker."
+📝 [1] Jac: "De microfoon werkt niet echt lekker." (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS starting sentence 1: "Ah vervelend...."
+🔊 [1] Sent audio chunk 1 (27072 bytes)
+🔊 [1] TTS starting sentence 2: "Misschien even checken of de app toegang heeft tot..."
+🔊 [1] Sent audio chunk 2 (88128 bytes)
+🔊 [1] TTS starting sentence 3: "Soms helpt het ook om de app even opnieuw te start..."
+🦋 [1] Dolores (4182ms): "Ah vervelend. Misschien even checken of de app toegang heeft tot de juiste microfoon, en of er niks ..."
+🔊 [1] Sent audio chunk 3 (54720 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.135
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.135

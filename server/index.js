@@ -146,7 +146,9 @@ class AzureSTTSession {
   pushAudio(audioData) {
     if (this.pushStream && this.isActive) {
       // audioData should be raw PCM 16kHz 16-bit mono
-      this.pushStream.write(audioData);
+      // Azure SDK requires ArrayBuffer, not Node.js Buffer
+      const arrayBuffer = audioData.buffer.slice(audioData.byteOffset, audioData.byteOffset + audioData.byteLength);
+      this.pushStream.write(arrayBuffer);
     }
   }
 
