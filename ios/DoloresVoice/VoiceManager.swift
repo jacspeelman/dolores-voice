@@ -240,8 +240,8 @@ class VoiceManager: ObservableObject {
     
     // Barge-in support
     private var bargeInDetectionStartTime: Date?
-    private let bargeInThreshold: Float = 0.08  // High enough to ignore speaker bleed, low enough for close-mic speech
-    private let bargeInDurationMs: Double = 120  // Slightly longer to avoid false triggers from speaker peaks
+    private let bargeInThreshold: Float = 0.04  // Tuned for real iPhone with echo cancellation
+    private let bargeInDurationMs: Double = 100  // 100ms to confirm speech
     
     // MARK: - Initialization
     
@@ -1005,7 +1005,8 @@ class VoiceManager: ObservableObject {
             
             bargeInRecorder = try AVAudioRecorder(url: bargeInURL, settings: settings)
             bargeInRecorder?.isMeteringEnabled = true
-            bargeInRecorder?.record()
+            let started = bargeInRecorder?.record() ?? false
+            print("🎙️ Barge-in recorder started: \(started)")
             
             // Poll levels at ~20Hz
             bargeInTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
@@ -1015,6 +1016,10 @@ class VoiceManager: ObservableObject {
                     let power = self.bargeInRecorder?.averagePower(forChannel: 0) ?? -160
                     // Convert dB to linear (same scale as silenceThreshold)
                     let linear = pow(10, power / 20)
+                    // Log periodically for debugging (every ~0.5s)
+                    if Int(Date().timeIntervalSince1970 * 2) % 2 == 0 {
+                        print("🎙️ Barge-in level: \(String(format: "%.4f", linear)) (threshold: \(self.bargeInThreshold))")
+                    }
                     self.checkBargeIn(level: linear)
                 }
             }

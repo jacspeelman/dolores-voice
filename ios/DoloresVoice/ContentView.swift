@@ -36,29 +36,31 @@ struct ContentView: View {
                                     liveTranscript
                                 }
                             }
+                            
+                            // Invisible anchor at the bottom for scrolling
+                            Color.clear
+                                .frame(height: 1)
+                                .id("bottomAnchor")
                         }
                         .padding(.horizontal)
                         .padding(.vertical, 10)
                     }
                     .onChange(of: voiceManager.messages.count) { _ in
-                        if let lastMessage = voiceManager.messages.last {
-                            withAnimation {
-                                proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                            }
+                        withAnimation {
+                            proxy.scrollTo("bottomAnchor", anchor: .bottom)
                         }
                     }
                     .onChange(of: voiceManager.streamingResponse) { _ in
-                        // Auto-scroll while streaming text
-                        if let lastMessage = voiceManager.messages.last {
-                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                        }
+                        proxy.scrollTo("bottomAnchor", anchor: .bottom)
                     }
                     .onChange(of: voiceManager.interimTranscript) { _ in
-                        // Auto-scroll while receiving real-time transcript
-                        if let lastMessage = voiceManager.messages.last {
-                            withAnimation(.easeOut(duration: 0.1)) {
-                                proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                            }
+                        withAnimation(.easeOut(duration: 0.1)) {
+                            proxy.scrollTo("bottomAnchor", anchor: .bottom)
+                        }
+                    }
+                    .onChange(of: voiceManager.lastTranscript) { _ in
+                        withAnimation(.easeOut(duration: 0.1)) {
+                            proxy.scrollTo("bottomAnchor", anchor: .bottom)
                         }
                     }
                 }
