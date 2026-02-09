@@ -537,6 +537,10 @@ class VoiceManager: ObservableObject {
             stopSTTStreaming()
             startRecordingForWhisper()
             
+        case "interrupted":
+            // Server confirmed interrupt — stop processing
+            print("✅ Server confirmed barge-in interrupt")
+            
         case "transcript_interim":
             // Real-time interim transcript (can change)
             if let interim = json["text"] as? String {
@@ -1039,15 +1043,24 @@ class VoiceManager: ObservableObject {
     }
     
     private func performBargeIn() {
+        print("🎤 Barge-in triggered!")
+        
         // Stop monitoring
         stopBargeInMonitoring()
         
         // Stop all audio playback immediately
         audioPlayer?.stop()
+        audioPlayer = nil
         streamingAudioPlayer?.stop()
         streamingAudioPlayer = nil
         
-        // Send interrupt to server
+        // Clear streaming text state
+        streamingResponse = ""
+        currentStreamingMessageId = nil
+        expectedAudioChunks = 0
+        receivedAudioChunks = 0
+        
+        // Send interrupt to server (stops text + audio streaming)
         sendJSON(["type": "interrupt"])
         
         // Start listening immediately

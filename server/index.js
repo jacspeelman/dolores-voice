@@ -636,6 +636,12 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
     
     // Stream text from OpenClaw
     for await (const chunk of callOpenClawStreaming(text)) {
+      // Stop streaming if interrupted (barge-in)
+      if (ws.interrupted) {
+        console.log(`⏸️ [${connectionId}] Text streaming interrupted by barge-in`);
+        break;
+      }
+      
       fullResponse += chunk;
       sentenceBuffer += chunk;
       
