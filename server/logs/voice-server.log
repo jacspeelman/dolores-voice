@@ -1456,3 +1456,289 @@ Stilte...."
 🎙️ [3] STT streaming started
 🎙️ [3] Interim: "ik kon slapen"
 🎙️ [3] Final segment: "Ik kon slapen."
+🔌 [3] Disconnected (code: 1006, reason: )
+🎙️ [3] Session stopped
+🔌 [4] Connected from 192.168.1.66
+🎙️ [4] Starting STT streaming session...
+🎙️ [4] STT streaming started
+🎙️ [4] Interim: "hallo"
+🎙️ [4] Interim: "hallo daar ben"
+🎙️ [4] Interim: "hallo daar ben ik weer"
+🎙️ [4] Interim: "hallo daar ben ik weer kun"
+🎙️ [4] Interim: "hallo daar ben ik weer kun je"
+🎙️ [4] Interim: "hallo daar ben ik weer kun je een verhaal"
+🎙️ [4] Interim: "hallo daar ben ik weer kun je een verhaaltje vertellen"
+🎙️ [4] Interim: "hallo daar ben ik weer kun je een verhaaltje vertellen van 100"
+🎙️ [4] Interim: "hallo daar ben ik weer kun je een verhaaltje vertellen van 100 woorden"
+🎙️ [4] Ending STT streaming session...
+🎙️ [4] Final segment: "Hallo, daar ben ik weer. Kun je een verhaaltje vertellen van 100 woorden?"
+🎙️ [4] Session stopped
+🎙️ [4] STT streaming stopped, final: "Hallo, daar ben ik weer. Kun je een verhaaltje vertellen van 100 woorden?"
+📝 [4] Jac: "Hallo, daar ben ik weer. Kun je een verhaaltje vertellen van 100 woorden?" (audio: true, streaming: true)
+🦋 [4] Asking OpenClaw (streaming)...
+🔊 [4] TTS starting sentence 1: "Er bestond een trein die op geen enkele kaart ston..."
+🔊 [4] Sent audio chunk 1 (47232 bytes)
+🔊 [4] TTS starting bundled 2: "Hij vertrok elke vrijdagnacht om kwart over drie v..."
+🔊 [4] Sent audio chunk 2 (81792 bytes)
+🔊 [4] TTS starting bundled 3: "Een oude conducteur knipte kaartjes die passagiers..."
+🔊 [4] Sent audio chunk 3 (63936 bytes)
+🔊 [4] TTS starting bundled 4: "In hun jaszak, altijd...."
+🔊 [4] Sent audio chunk 4 (35136 bytes)
+🔊 [4] TTS starting bundled 5: ""
+
+Iedereen kwam ergens anders aan...."
+🔊 [4] Sent audio chunk 5 (36864 bytes)
+🔊 [4] TTS starting bundled 6: "Een vrouw in een bloementuin...."
+🔊 [4] Sent audio chunk 6 (32256 bytes)
+🔊 [4] TTS starting bundled 7: "Een man op een verlaten strand...."
+🔊 [4] Sent audio chunk 7 (35136 bytes)
+🔊 [4] TTS starting bundled 8: "Een kind in de keuken van zijn oma die al tien jaa..."
+🔊 [4] Sent audio chunk 8 (55296 bytes)
+🔊 [4] TTS starting bundled 9: "De rit duurde precies zeven minuten...."
+🔊 [4] TTS starting bundled 10: "Niemand wist hoe...."
+🔊 [4] Sent audio chunk 9 (41472 bytes)
+🔊 [4] Sent audio chunk 10 (25344 bytes)
+🔊 [4] TTS starting bundled 11: "Bij aankomst rook iedereen iets uit hun kindertijd..."
+🔊 [4] Sent audio chunk 11 (49536 bytes)
+🔊 [4] TTS starting bundled 12: "Gemaaid gras...."
+🔊 [4] TTS starting bundled 13: "Pannenkoeken...."
+🔊 [4] Sent audio chunk 12 (25344 bytes)
+🔊 [4] Sent audio chunk 13 (22464 bytes)
+🔊 [4] TTS starting bundled 14: "Natte hond...."
+🔊 [4] Sent audio chunk 14 (23040 bytes)
+🔊 [4] TTS starting bundled 15: "Terugkomen kon niet...."
+⏸️ [4] Interrupted by user
+⏸️ [4] Text streaming interrupted by barge-in
+⏸️ [4] Skipping text_done/response — interrupted
+⏸️ [4] Audio sending interrupted, skipping remaining chunks
+🎙️ [4] Starting STT streaming session...
+🎙️ [4] STT streaming started
+🎙️ [4] Interim: "maar"
+🎙️ [4] Interim: "maar was als het"
+🎙️ [4] Interim: "maar was als het regende"
+🎙️ [4] Ending STT streaming session...
+🎙️ [4] Final segment: "Maar was Als het regende?"
+🎙️ [4] Session stopped
+🎙️ [4] STT streaming stopped, final: "Maar was Als het regende?"
+📝 [4] Jac: "Maar was Als het regende?" (audio: true, streaming: true)
+🦋 [4] Asking OpenClaw (streaming)...
+🔊 [4] TTS starting sentence 1: "Ja, in het verhaaltje was het perron alleen zichtb..."
+🔊 [4] Sent audio chunk 1 (61632 bytes)
+🔊 [4] TTS starting bundled 2: "Een beetje magie, je moet er maar net op het juist..."
+🦋 [4] Dolores (3582ms): "Ja, in het verhaaltje was het perron alleen zichtbaar als het regende. Een beetje magie, je moet er ..."
+🔊 [4] Sent audio chunk 2 (55296 bytes)
+🔊 [4] Audio streaming complete
+💔 Connection timed out, terminating
+🔌 [4] Disconnected (code: 1006, reason: )
+🔌 [5] Connected from 192.168.1.124
+🎙️ [5] Starting STT streaming session...
+🎙️ [5] STT streaming started
+🎙️ [5] Interim: "hallo"
+🎙️ [5] Ending STT streaming session...
+🎙️ [5] Interim: "hallo daar"
+🎙️ [5] Final segment: "Hallo daar."
+🎙️ [5] Session stopped
+🎙️ [5] STT streaming stopped, final: "Hallo daar."
+📝 [5] Jac: "Hallo daar." (audio: true, streaming: true)
+🦋 [5] Asking OpenClaw (streaming)...
+🔊 [5] TTS starting sentence 1: "Hé Jak!..."
+🔊 [5] Sent audio chunk 1 (21888 bytes)
+🔊 [5] TTS starting bundled 2: "Zeg het maar!..."
+🔊 [5] Sent audio chunk 2 (22464 bytes)
+🦋 [5] Dolores (4144ms): "Hé Jak! Zeg het maar!..."
+🔊 [5] Audio streaming complete
+🎙️ [5] Starting STT streaming session...
+🎙️ [5] STT streaming started
+🎙️ [5] Interim: "ver"
+🎙️ [5] Interim: "vertel eens"
+🎙️ [5] Interim: "vertel eens het"
+🎙️ [5] Interim: "vertel eens het verhaaltje"
+🎙️ [5] Ending STT streaming session...
+🎙️ [5] Interim: "vertel eens het verhaaltje van"
+🎙️ [5] Interim: "vertel eens het verhaaltje van ongeveer"
+🎙️ [5] Final segment: "Vertel eens het verhaaltje van ongeveer."
+🎙️ [5] Session stopped
+🎙️ [5] STT streaming stopped, final: "Vertel eens het verhaaltje van ongeveer."
+📝 [5] Jac: "Vertel eens het verhaaltje van ongeveer." (audio: true, streaming: true)
+🦋 [5] Asking OpenClaw (streaming)...
+🔊 [5] TTS starting sentence 1: "Je zin viel weg aan het einde!..."
+🔊 [5] Sent audio chunk 1 (34560 bytes)
+🔊 [5] TTS starting bundled 2: "Een verhaaltje van hoeveel woorden wil je?..."
+🦋 [5] Dolores (5021ms): "Je zin viel weg aan het einde! Een verhaaltje van hoeveel woorden wil je?..."
+🔊 [5] Sent audio chunk 2 (38592 bytes)
+🔊 [5] Audio streaming complete
+🎙️ [5] Starting STT streaming session...
+🎙️ [5] STT streaming started
+🎙️ [5] Interim: "ongeveer"
+🎙️ [5] Interim: "ongeveer 100"
+🎙️ [5] Ending STT streaming session...
+🎙️ [5] Final segment: "Ongeveer 100."
+🎙️ [5] Session stopped
+🎙️ [5] STT streaming stopped, final: "Ongeveer 100."
+📝 [5] Jac: "Ongeveer 100." (audio: true, streaming: true)
+🦋 [5] Asking OpenClaw (streaming)...
+🔊 [5] TTS starting sentence 1: "Er was een postbode die al veertig jaar brieven be..."
+🔊 [5] Sent audio chunk 1 (63936 bytes)
+🔊 [5] TTS starting bundled 2: "Hij kende elke brievenbus, elke hond, elke krakend..."
+🔊 [5] Sent audio chunk 2 (66816 bytes)
+🔊 [5] TTS starting bundled 3: "Maar er was één huis waar hij nooit iets bezorgde...."
+🔊 [5] TTS starting bundled 4: "Nummer dertien...."
+🔊 [5] Sent audio chunk 3 (45504 bytes)
+🔊 [5] Sent audio chunk 4 (24192 bytes)
+🔊 [5] TTS starting bundled 5: "Tot op een ochtend...."
+🔊 [5] Sent audio chunk 5 (26496 bytes)
+🔊 [5] TTS starting bundled 6: "" Hij klopte aan...."
+🔊 [5] Sent audio chunk 6 (25344 bytes)
+🔊 [5] TTS starting bundled 7: "De deur ging open...."
+🔊 [5] Sent audio chunk 7 (27648 bytes)
+🔊 [5] TTS starting bundled 8: "Daar stond een vrouw van zijn leeftijd die hem aan..."
+🔊 [5] TTS starting bundled 9: ""Eindelijk," zei ze...."
+🔊 [5] Sent audio chunk 8 (63360 bytes)
+🔊 [5] Sent audio chunk 9 (29376 bytes)
+🔊 [5] TTS starting bundled 10: ""
+
+Hij keek naar de brief in zijn hand...."
+🔊 [5] Sent audio chunk 10 (35712 bytes)
+🔊 [5] TTS starting bundled 11: "Zijn eigen naam stond erin...."
+🔊 [5] Sent audio chunk 11 (33984 bytes)
+🔊 [5] TTS starting bundled 12: "En daaronder honderden brieven die nooit waren ver..."
+🔊 [5] Sent audio chunk 12 (50112 bytes)
+🔊 [5] TTS starting bundled 13: "Over de postbode die elke dag langsliep...."
+🔊 [5] Sent audio chunk 13 (43776 bytes)
+🔊 [5] TTS starting bundled 14: "Over hoe ze hem zag fluiten in de regen...."
+🔊 [5] Sent audio chunk 14 (42624 bytes)
+🔊 [5] TTS starting bundled 15: "Hij ging zitten aan haar keukentafel...."
+🔊 [5] TTS starting bundled 16: "De thee stond al klaar...."
+🔊 [5] Sent audio chunk 15 (37440 bytes)
+🔊 [5] Sent audio chunk 16 (30528 bytes)
+🔊 [5] TTS starting bundled 17: "Alsof ze wist dat het vandaag zou zijn...."
+🦋 [5] Dolores (9567ms): "Er was een postbode die al veertig jaar brieven bezorgde in hetzelfde dorp. Hij kende elke brievenbu..."
+🔊 [5] Sent audio chunk 17 (40320 bytes)
+🔊 [5] Audio streaming complete
+⏸️ [5] Interrupted by user
+🎙️ [5] Starting STT streaming session...
+🎙️ [5] STT streaming started
+🎙️ [5] Interim: "stop"
+🎙️ [5] Interim: "stop stop st"
+🎙️ [5] Interim: "stop stop stop stop"
+🎙️ [5] Ending STT streaming session...
+🎙️ [5] Final segment: "Stop, stop, stop stop."
+🎙️ [5] Session stopped
+🎙️ [5] STT streaming stopped, final: "Stop, stop, stop stop."
+📝 [5] Jac: "Stop, stop, stop stop." (audio: true, streaming: true)
+🦋 [5] Asking OpenClaw (streaming)...
+🔊 [5] TTS starting sentence 1: "Oké, gestopt!..."
+🦋 [5] Dolores (2190ms): "Oké, gestopt!..."
+🔊 [5] Sent audio chunk 1 (30528 bytes)
+🔊 [5] Audio streaming complete
+🎙️ [5] Starting STT streaming session...
+🎙️ [5] STT streaming started
+🎙️ [5] Ending STT streaming session...
+🎙️ [5] Interim: "heb jij ook toegang tot"
+🎙️ [5] Final segment: "Heb jij ook toegang tot?"
+🎙️ [5] Session stopped
+🎙️ [5] STT streaming stopped, final: "Heb jij ook toegang tot?"
+📝 [5] Jac: "Heb jij ook toegang tot?" (audio: true, streaming: true)
+🦋 [5] Asking OpenClaw (streaming)...
+🔊 [5] TTS starting sentence 1: "Je zin viel weer weg!..."
+🔊 [5] TTS starting bundled 2: "Toegang tot wat?..."
+🔊 [5] Sent audio chunk 1 (30528 bytes)
+🔊 [5] Sent audio chunk 2 (24768 bytes)
+🔊 [5] TTS starting bundled 3: "Vraag het nog een keer...."
+🦋 [5] Dolores (3064ms): "Je zin viel weer weg! Toegang tot wat? Vraag het nog een keer...."
+🔊 [5] Sent audio chunk 3 (27648 bytes)
+🔊 [5] Audio streaming complete
+🎙️ [5] Starting STT streaming session...
+🎙️ [5] STT streaming started
+🎙️ [5] Interim: "heb"
+🎙️ [5] Interim: "heb jij ook"
+🎙️ [5] Interim: "heb jij ook toegang"
+🎙️ [5] Interim: "heb jij ook toegang tot mijn"
+🎙️ [5] Interim: "heb jij ook toegang tot mijn camera's"
+🎙️ [5] Final segment: "Heb jij ook toegang tot mijn camera's?"
+🎙️ [5] Interim: "heb"
+🎙️ [5] Interim: "heb jij ook"
+🎙️ [5] Interim: "heb jij ook toegang"
+🎙️ [5] Interim: "heb jij ook toegang tot mijn"
+🎙️ [5] Interim: "heb jij ook toegang tot mijn c"
+🎙️ [5] Interim: "heb jij ook toegang tot mijn camera's"
+🎙️ [5] Final segment: "Heb jij ook toegang tot mijn camera's?"
+🎙️ [5] Interim: "hallo"
+🎙️ [5] Interim: "hallo hallo"
+🎙️ [5] Ending STT streaming session...
+🎙️ [5] Final segment: "Hallo Hallo."
+🎙️ [5] Session stopped
+🎙️ [5] STT streaming stopped, final: "Heb jij ook toegang tot mijn camera's? Heb jij ook toegang tot mijn camera's? Hallo Hallo."
+📝 [5] Jac: "Heb jij ook toegang tot mijn camera's? Heb jij ook toegang tot mijn camera's? Hallo Hallo." (audio: true, streaming: true)
+🦋 [5] Asking OpenClaw (streaming)...
+🔊 [5] TTS starting sentence 1: "Ja, ik heb toegang tot je zes Dahua camera's!..."
+🔊 [5] Sent audio chunk 1 (52992 bytes)
+🔊 [5] TTS starting bundled 2: "Ik kan snapshots maken, het alarm aan en uitzetten..."
+🔊 [5] TTS starting bundled 3: "Wil je dat ik ergens even meekijk?..."
+🔊 [5] Sent audio chunk 2 (83520 bytes)
+🦋 [5] Dolores (4383ms): "Ja, ik heb toegang tot je zes Dahua camera's! Ik kan snapshots maken, het alarm aan en uitzetten, en..."
+🔊 [5] Sent audio chunk 3 (38016 bytes)
+🔊 [5] Audio streaming complete
+🎙️ [5] Starting STT streaming session...
+🎙️ [5] STT streaming started
+🎙️ [5] Interim: "kun je"
+🎙️ [5] Interim: "kun je 4"
+🎙️ [5] Interim: "kun je 4 jaar"
+🎙️ [5] Interim: "kun je 4 jaar teleg"
+🎙️ [5] Interim: "kun je 4 jaar telegram"
+🎙️ [5] Ending STT streaming session...
+🎙️ [5] Final segment: "Kun je 4 jaar Telegram?"
+🎙️ [5] Session stopped
+🎙️ [5] STT streaming stopped, final: "Kun je 4 jaar Telegram?"
+📝 [5] Jac: "Kun je 4 jaar Telegram?" (audio: true, streaming: true)
+🦋 [5] Asking OpenClaw (streaming)...
+🔊 [5] TTS starting sentence 1: "Dat kwam niet helemaal door, de spraakherkenning m..."
+🔊 [5] Sent audio chunk 1 (62208 bytes)
+🔊 [5] TTS starting bundled 2: "Bedoel je of ik iets via Telegram kan sturen?..."
+🦋 [5] Dolores (2946ms): "Dat kwam niet helemaal door, de spraakherkenning maakt er iets raars van. Bedoel je of ik iets via T..."
+🔊 [5] Sent audio chunk 2 (46656 bytes)
+🔊 [5] Audio streaming complete
+🎙️ [5] Starting STT streaming session...
+🎙️ [5] STT streaming started
+🎙️ [5] Interim: "ja"
+🎙️ [5] Interim: "ja een"
+🎙️ [5] Interim: "ja een snap"
+🎙️ [5] Interim: "ja een snapshot"
+🎙️ [5] Interim: "ja een snapshot van"
+🎙️ [5] Interim: "ja een snapshot van de"
+🎙️ [5] Interim: "ja een snapshot van de voordeur"
+🎙️ [5] Ending STT streaming session...
+🎙️ [5] Final segment: "Ja, een snapshot van de voordeur."
+🎙️ [5] Session stopped
+🎙️ [5] STT streaming stopped, final: "Ja, een snapshot van de voordeur."
+📝 [5] Jac: "Ja, een snapshot van de voordeur." (audio: true, streaming: true)
+🦋 [5] Asking OpenClaw (streaming)...
+🔊 [5] TTS starting sentence 1: "Gedaan!..."
+🔊 [5] Sent audio chunk 1 (21312 bytes)
+🔊 [5] TTS starting bundled 2: "Ik heb een snapshot van de voordeur naar je Telegr..."
+🔊 [5] Sent audio chunk 2 (53568 bytes)
+🔊 [5] TTS starting bundled 3: "Kijk maar even!..."
+🦋 [5] Dolores (34357ms): "Gedaan! Ik heb een snapshot van de voordeur naar je Telegram gestuurd. Kijk maar even!..."
+🔊 [5] Sent audio chunk 3 (25344 bytes)
+🔊 [5] Audio streaming complete
+🎙️ [5] Starting STT streaming session...
+🎙️ [5] STT streaming started
+🎙️ [5] Starting STT streaming session...
+🎙️ [5] Session stopped
+🎙️ [5] STT streaming started
+🎙️ [5] Ending STT streaming session...
+🎙️ [5] Interim: "OK"
+🎙️ [5] Interim: "OK kun je een verhaal"
+🎙️ [5] Final segment: "OK, kun je een verhaal?"
+🎙️ [5] Session stopped
+🎙️ [5] STT streaming stopped, final: "OK, kun je een verhaal?"
+📝 [5] Jac: "OK, kun je een verhaal?" (audio: true, streaming: true)
+🦋 [5] Asking OpenClaw (streaming)...
+🔊 [5] TTS starting sentence 1: "Tuurlijk!..."
+🔊 [5] Sent audio chunk 1 (20160 bytes)
+🔊 [5] TTS starting bundled 2: "Van hoeveel woorden wil je het deze keer?..."
+🦋 [5] Dolores (2312ms): "Tuurlijk! Van hoeveel woorden wil je het deze keer?..."
+🔊 [5] Sent audio chunk 2 (40896 bytes)
+🔊 [5] Audio streaming complete
+🎙️ [5] Starting STT streaming session...
+🎙️ [5] STT streaming started

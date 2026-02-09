@@ -76,7 +76,7 @@ class AzureSTTSession {
       const speechConfig = sdk.SpeechConfig.fromSubscription(AZURE_SPEECH_KEY, AZURE_SPEECH_REGION);
       speechConfig.speechRecognitionLanguage = 'nl-NL';
       speechConfig.setProperty(sdk.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, '10000');
-      speechConfig.setProperty(sdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, '800');
+      speechConfig.setProperty(sdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, '1500');
       
       const audioConfig = sdk.AudioConfig.fromStreamInput(this.pushStream);
       this.recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);

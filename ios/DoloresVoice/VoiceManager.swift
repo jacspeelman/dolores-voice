@@ -180,9 +180,9 @@ class VoiceManager: ObservableObject {
     
     private let serverURL = URL(string: "ws://192.168.1.214:8765")!
     private let maxReconnectAttempts = 5
-    private let silenceThreshold: Float = 0.015
-    private let silenceTimeout: TimeInterval = 0.8  // Faster response after silence
-    private let minRecordingDuration: TimeInterval = 0.3
+    private let silenceThreshold: Float = 0.012
+    private let silenceTimeout: TimeInterval = 1.5  // Allow natural pauses in speech
+    private let minRecordingDuration: TimeInterval = 0.5
     
     // MARK: - Published State
     
