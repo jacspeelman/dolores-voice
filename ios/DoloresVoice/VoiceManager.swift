@@ -1067,9 +1067,15 @@ class VoiceManager: ObservableObject {
         // Send interrupt to server (stops text + audio streaming)
         sendJSON(["type": "interrupt"])
         
-        // Start listening immediately
         state = .listening
-        startRecording()
+        
+        // Short delay before starting recording — let the speaker go fully silent
+        // to prevent echo/bleed from being captured by the mic
+        Task {
+            try? await Task.sleep(for: .milliseconds(150))
+            guard state == .listening, isConversationActive else { return }
+            startRecording()
+        }
     }
 }
 

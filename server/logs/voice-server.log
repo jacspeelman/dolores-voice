@@ -1270,3 +1270,134 @@ Stilte...."
 ⚠️ [2] Empty transcript from streaming
 🎙️ [2] Starting STT streaming session...
 🎙️ [2] STT streaming started
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.66
+🔌 [1] Disconnected (code: 1006, reason: )
+🔌 [2] Connected from 192.168.1.66
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "kun"
+🎙️ [2] Interim: "kun je een"
+🎙️ [2] Interim: "kun je een verhaaltje"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen van 100"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen van 100 woorden"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Kun je een verhaaltje vertellen van 100 woorden?"
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Kun je een verhaaltje vertellen van 100 woorden?"
+📝 [2] Jac: "Kun je een verhaaltje vertellen van 100 woorden?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Op de maan stond een tankstation...."
+🔊 [2] TTS starting bundled 2: "Niet voor raketten, maar voor dromen...."
+🔊 [2] Sent audio chunk 1 (36288 bytes)
+🔊 [2] Sent audio chunk 2 (40320 bytes)
+🔊 [2] TTS starting bundled 3: "Astronauten stopten er als ze niet meer wisten waa..."
+🔊 [2] Sent audio chunk 3 (65088 bytes)
+🔊 [2] TTS starting bundled 4: "De pompbediende was een oude vrouw met zilveren ha..."
+🔊 [2] Sent audio chunk 4 (48384 bytes)
+🔊 [2] TTS starting bundled 5: "Ze vroeg nooit wat je wilde...."
+🔊 [2] Sent audio chunk 5 (31680 bytes)
+⏸️ [2] Interrupted by user
+🎙️ [2] Starting STT streaming session...
+⏸️ [2] Text streaming interrupted by barge-in
+⏸️ [2] Skipping text_done/response — interrupted
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "stop maar"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Stop maar."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Stop maar."
+📝 [2] Jac: "Stop maar." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Oké!..."
+🔊 [2] Sent audio chunk 1 (20736 bytes)
+🔊 [2] TTS starting bundled 2: "Zeg het maar wanneer je weer iets wil...."
+🦋 [2] Dolores (5109ms): "Oké! Zeg het maar wanneer je weer iets wil...."
+🔊 [2] Sent audio chunk 2 (35712 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "ja"
+🎙️ [2] Interim: "ja doe het"
+🎙️ [2] Interim: "ja doe het nog"
+🎙️ [2] Interim: "ja doe het nog eens een keer"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Ja, doe het nog eens een keer."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Ja, doe het nog eens een keer."
+📝 [2] Jac: "Ja, doe het nog eens een keer." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Een schilder in Rotterdam had maar één kleur: blau..."
+🔊 [2] Sent audio chunk 1 (51840 bytes)
+🔊 [2] TTS starting bundled 2: "Niet omdat hij arm was, maar omdat hij geloofde da..."
+🔊 [2] Sent audio chunk 2 (72000 bytes)
+⏸️ [2] Interrupted by user
+🎙️ [2] Starting STT streaming session...
+⏸️ [2] Text streaming interrupted by barge-in
+⏸️ [2] Skipping text_done/response — interrupted
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "rotterdam"
+🎙️ [2] Interim: "rotterdam had maar één"
+🎙️ [2] Interim: "rotterdam had maar één kleur"
+🎙️ [2] Interim: "rotterdam had maar één kleur blauw"
+🎙️ [2] Final segment: "Rotterdam had maar één kleur, blauw."
+🎙️ [2] Interim: "wat heb je"
+🎙️ [2] Interim: "wat heb je nu gedaan"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Wat heb je nu gedaan?"
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Rotterdam had maar één kleur, blauw. Wat heb je nu gedaan?"
+📝 [2] Jac: "Rotterdam had maar één kleur, blauw. Wat heb je nu gedaan?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Ha, je herhaalde een stukje uit het verhaaltje!..."
+🔊 [2] Sent audio chunk 1 (48384 bytes)
+🔊 [2] TTS starting bundled 2: "Ik had net een nieuw verhaaltje verteld over een s..."
+🔊 [2] Sent audio chunk 2 (72576 bytes)
+⏸️ [2] Interrupted by user
+🎙️ [2] Starting STT streaming session...
+⏸️ [2] Text streaming interrupted by barge-in
+⏸️ [2] Skipping text_done/response — interrupted
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "je"
+🎙️ [2] Interim: "je her"
+🎙️ [2] Interim: "je herhaalde"
+🎙️ [2] Interim: "je herhaalde een"
+🎙️ [2] Interim: "je herhaalde een stukje"
+🎙️ [2] Interim: "je herhaalde een stukje uit"
+🎙️ [2] Interim: "je herhaalde een stukje uit het"
+🎙️ [2] Interim: "je herhaalde een stukje uit het verhaal"
+🎙️ [2] Interim: "je herhaalde een stukje uit het verhaaltje"
+🎙️ [2] Final segment: "Je herhaalde een stukje uit het verhaaltje."
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Je herhaalde een stukje uit het verhaaltje."
+📝 [2] Jac: "Je herhaalde een stukje uit het verhaaltje." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Ja klopt, het leek alsof de spraakherkenning een s..."
+🔊 [2] Sent audio chunk 1 (69696 bytes)
+🔊 [2] TTS starting bundled 2: "Geen zorgen, dat gebeurt soms...."
+🔊 [2] Sent audio chunk 2 (40320 bytes)
+⏸️ [2] Interrupted by user
+🎙️ [2] Starting STT streaming session...
+⏸️ [2] Text streaming interrupted by barge-in
+⏸️ [2] Skipping text_done/response — interrupted
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "ja klopt"
+🎙️ [2] Interim: "ja klopt het"
+🎙️ [2] Interim: "ja klopt het leek"
+🎙️ [2] Interim: "ja klopt het leek alsof"
+🎙️ [2] Interim: "ja klopt het leek alsof de spraakher"
+🎙️ [2] Interim: "ja klopt het leek alsof de spraakherkenning"
+🎙️ [2] Interim: "ja klopt het leek alsof de spraakherkenning een stuk"
+🎙️ [2] Interim: "ja klopt het leek alsof de spraakherkenning een stuk van mijn"
+🎙️ [2] Interim: "ja klopt het leek alsof de spraakherkenning een stuk van mijn verhaaltje op"
+🎙️ [2] Interim: "ja klopt het leek alsof de spraakherkenning een stuk van mijn verhaaltje oppakte"
+🎙️ [2] Final segment: "Ja klopt. Het leek alsof de spraakherkenning een stuk van mijn verhaaltje oppakte."
