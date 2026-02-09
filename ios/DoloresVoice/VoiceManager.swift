@@ -240,8 +240,8 @@ class VoiceManager: ObservableObject {
     
     // Barge-in support
     private var bargeInDetectionStartTime: Date?
-    private let bargeInThreshold: Float = 0.04  // Slightly above ambient to avoid speaker bleed
-    private let bargeInDurationMs: Double = 150  // 150ms to avoid false positives from speaker
+    private let bargeInThreshold: Float = 0.02  // Lower threshold now that echo cancellation is active
+    private let bargeInDurationMs: Double = 80   // Faster detection — echo cancellation prevents false positives
     
     // MARK: - Initialization
     
@@ -584,7 +584,7 @@ class VoiceManager: ObservableObject {
         // Setup audio session for playAndRecord once
         do {
             let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
+            try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.defaultToSpeaker, .allowBluetooth])
             try audioSession.setActive(true)
         } catch {
             print("⚠️ Audio session setup failed: \(error)")

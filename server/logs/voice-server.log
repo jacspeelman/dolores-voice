@@ -1077,3 +1077,196 @@ Stilte...."
 🎙️ [2] Interim: "mokkenmaker had het"
 🎙️ [2] Interim: "mokkenmaker had het al lang kunnen"
 🎙️ [2] Interim: "mokkenmaker had het al lang kunnen fixen"
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.66
+🔌 [1] Disconnected (code: 1006, reason: )
+🔌 [2] Connected from 192.168.1.66
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "hoi"
+🎙️ [2] Interim: "hoi daar ben"
+🎙️ [2] Interim: "hoi daar ben ik weer"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Hoi, daar ben ik weer."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Hoi, daar ben ik weer."
+📝 [2] Jac: "Hoi, daar ben ik weer." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Hé Jak!..."
+🔊 [2] TTS starting bundled 2: "Welkom terug, zeg het maar!..."
+🦋 [2] Dolores (2205ms): "Hé Jak! Welkom terug, zeg het maar!..."
+🔊 [2] Sent audio chunk 1 (21888 bytes)
+🔊 [2] Sent audio chunk 2 (36864 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "zou je"
+🎙️ [2] Interim: "zou je verhaal"
+🎙️ [2] Interim: "zou je verhaaltje kunnen"
+🎙️ [2] Interim: "zou je verhaaltje kunnen vertellen"
+🎙️ [2] Interim: "zou je verhaaltje kunnen vertellen van 100"
+🎙️ [2] Interim: "zou je verhaaltje kunnen vertellen van 100 or"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Zou je verhaaltje kunnen vertellen van 100 orde?"
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Zou je verhaaltje kunnen vertellen van 100 orde?"
+📝 [2] Jac: "Zou je verhaaltje kunnen vertellen van 100 orde?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Er was een kat die elke dag op het dak van de visw..."
+🔊 [2] Sent audio chunk 1 (50112 bytes)
+🔊 [2] TTS starting bundled 2: "Niet voor de vis, maar voor het uitzicht...."
+🔊 [2] Sent audio chunk 2 (41472 bytes)
+🔊 [2] TTS starting bundled 3: "Vanaf daar kon hij de hele haven zien...."
+🔊 [2] Sent audio chunk 3 (40896 bytes)
+⏸️ [2] Interrupted by user
+🎙️ [2] Starting STT streaming session...
+⏸️ [2] Text streaming interrupted by barge-in
+⏸️ [2] Skipping text_done/response — interrupted
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "stok"
+🎙️ [2] Interim: "stok maar even"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Interim: "stok maar even van de"
+🎙️ [2] Interim: "stok maar even van de viswinkel zat"
+🎙️ [2] Final segment: "Stok maar even van de viswinkel zat."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Stok maar even van de viswinkel zat."
+📝 [2] Jac: "Stok maar even van de viswinkel zat." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Sorry, dat kwam niet helemaal door...."
+🔊 [2] Sent audio chunk 1 (40896 bytes)
+🔊 [2] TTS starting bundled 2: "Kun je het nog een keer zeggen?..."
+🦋 [2] Dolores (7117ms): "Sorry, dat kwam niet helemaal door. Kun je het nog een keer zeggen?..."
+🔊 [2] Sent audio chunk 2 (31104 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "kun"
+🎙️ [2] Interim: "kun je een ver"
+🎙️ [2] Interim: "kun je een verhaaltje"
+🎙️ [2] Interim: "kun je een verhaaltje ver"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen van"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen van 100 woorden"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Kun je een verhaaltje vertellen van 100 woorden?"
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Kun je een verhaaltje vertellen van 100 woorden?"
+📝 [2] Jac: "Kun je een verhaaltje vertellen van 100 woorden?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "De oudste boom in het bos had een geheim...."
+🔊 [2] Sent audio chunk 1 (40896 bytes)
+🔊 [2] TTS starting bundled 2: "In zijn stam zat een deur...."
+🔊 [2] Sent audio chunk 2 (32256 bytes)
+🔊 [2] TTS starting bundled 3: "Niet groter dan een schoenendoos, maar het was een..."
+🔊 [2] Sent audio chunk 3 (62208 bytes)
+🔊 [2] TTS starting bundled 4: "Een meisje vond hem op een woensdag...."
+🔊 [2] TTS starting bundled 5: "Ze klopte...."
+🔊 [2] Sent audio chunk 4 (36864 bytes)
+⏸️ [2] Interrupted by user
+🎙️ [2] Starting STT streaming session...
+⏸️ [2] Audio sending interrupted, skipping remaining chunks
+🎙️ [2] STT streaming started
+⏸️ [2] Text streaming interrupted by barge-in
+⏸️ [2] Skipping text_done/response — interrupted
+🎙️ [2] Interim: "stop"
+🎙️ [2] Interim: "stop maar"
+🎙️ [2] Final segment: "Stop maar."
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Stop maar."
+📝 [2] Jac: "Stop maar." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Oké, gestopt!..."
+🔊 [2] Sent audio chunk 1 (30528 bytes)
+🔊 [2] TTS starting bundled 2: "Laat maar weten als je iets nodig hebt...."
+🦋 [2] Dolores (5852ms): "Oké, gestopt! Laat maar weten als je iets nodig hebt...."
+🔊 [2] Sent audio chunk 2 (39744 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: ""
+⚠️ [2] Empty transcript from streaming
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
