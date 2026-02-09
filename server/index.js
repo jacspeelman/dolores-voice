@@ -708,6 +708,12 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
       }
     }
     
+    // Don't send anything more if interrupted
+    if (ws.interrupted) {
+      console.log(`⏸️ [${connectionId}] Skipping text_done/response — interrupted`);
+      return;
+    }
+    
     // Send text_done
     sendMessage(ws, { type: 'text_done' });
     console.log(`🦋 [${connectionId}] Dolores (${Date.now() - startLLM}ms): "${fullResponse.substring(0, 100)}..."`);

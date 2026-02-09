@@ -388,6 +388,8 @@ class VoiceManager: ObservableObject {
             }
             
         case "text_delta":
+            // Ignore if we've barged in and are now listening
+            guard state != .listening else { break }
             // Streaming text chunk
             if let delta = json["delta"] as? String {
                 // Only create new message if we don't have one yet
@@ -416,6 +418,8 @@ class VoiceManager: ObservableObject {
             // State will change when audio starts or if no audio
             
         case "response":
+            // Ignore if we've barged in and are now listening
+            guard state != .listening else { break }
             // Full response (backwards compatibility or fallback)
             if let responseText = json["text"] as? String {
                 // Only add if we didn't already stream it

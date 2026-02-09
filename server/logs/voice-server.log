@@ -953,3 +953,127 @@ Hij kocht het boek...."
 🦋 [4] Dolores (5577ms): "Een oud café had één regel: geen telefoons. Iedereen klaagde, maar niemand vertrok. Want zodra je gi..."
 🔊 [4] Sent audio chunk 6 (34560 bytes)
 🔊 [4] Audio streaming complete
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.66
+🔌 [1] Disconnected (code: 1006, reason: )
+🔌 [2] Connected from 192.168.1.66
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "hal"
+🎙️ [2] Interim: "hallo"
+🎙️ [2] Interim: "hallo daar ben"
+🎙️ [2] Interim: "hallo daar ben ik weer"
+🎙️ [2] Interim: "hallo daar ben ik weer zou je een"
+🎙️ [2] Interim: "hallo daar ben ik weer zou je een verhaaltje"
+🎙️ [2] Interim: "hallo daar ben ik weer zou je een verhaaltje kunnen vertel"
+🎙️ [2] Interim: "hallo daar ben ik weer zou je een verhaaltje kunnen vertellen van"
+🎙️ [2] Interim: "hallo daar ben ik weer zou je een verhaaltje kunnen vertellen van 100 woorden"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Hallo, daar ben ik weer. Zou je een verhaaltje kunnen vertellen van 100 woorden?"
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Hallo, daar ben ik weer. Zou je een verhaaltje kunnen vertellen van 100 woorden?"
+📝 [2] Jac: "Hallo, daar ben ik weer. Zou je een verhaaltje kunnen vertellen van 100 woorden?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Op zolder vond een jongen een oude radio die op ge..."
+🔊 [2] TTS starting bundled 2: "Alleen ruis...."
+🔊 [2] Sent audio chunk 1 (63936 bytes)
+🔊 [2] Sent audio chunk 2 (24768 bytes)
+🔊 [2] TTS starting bundled 3: "Maar op een avond, precies om middernacht, hoorde ..."
+🔊 [2] TTS starting bundled 4: ""Hallo?..."
+🔊 [2] Sent audio chunk 3 (63360 bytes)
+🔊 [2] Sent audio chunk 4 (19584 bytes)
+🔊 [2] TTS starting bundled 5: ""
+
+Hij pakte de microfoon...."
+🔊 [2] Sent audio chunk 5 (31104 bytes)
+🔊 [2] TTS starting bundled 6: ""
+
+Stilte...."
+🔊 [2] Sent audio chunk 6 (21312 bytes)
+⏸️ [2] Interrupted by user
+🎙️ [2] Starting STT streaming session...
+⏸️ [2] Text streaming interrupted by barge-in
+🦋 [2] Dolores (4918ms): "Op zolder vond een jongen een oude radio die op geen enkele zender afstemde. Alleen ruis. Maar op ee..."
+🔊 [2] TTS starting final: "Toen: "Welk jaar is het bij jou?"
+
+"..."
+🎙️ [2] STT streaming started
+⏸️ [2] Audio sending interrupted, skipping remaining chunks
+🎙️ [2] Interim: "maar even"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Interim: "maar even die"
+🎙️ [2] Final segment: "Maar even die."
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Maar even die."
+📝 [2] Jac: "Maar even die." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Ja, zeg het maar!..."
+🔊 [2] TTS starting bundled 2: "Wat wou je vragen?..."
+🦋 [2] Dolores (5995ms): "Ja, zeg het maar! Wat wou je vragen?..."
+🔊 [2] Sent audio chunk 1 (30528 bytes)
+🔊 [2] Sent audio chunk 2 (27072 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "kun"
+🎙️ [2] Interim: "kun je"
+🎙️ [2] Interim: "kun je nog"
+🎙️ [2] Interim: "kun je nog een verhaal"
+🎙️ [2] Interim: "kun je nog een verhaaltje"
+🎙️ [2] Interim: "kun je nog een verhaaltje van"
+🎙️ [2] Interim: "kun je nog een verhaaltje van hon"
+🎙️ [2] Interim: "kun je nog een verhaaltje van 100 woorden"
+🎙️ [2] Interim: "kun je nog een verhaaltje van 100 woorden ver"
+🎙️ [2] Interim: "kun je nog een verhaaltje van 100 woorden vertellen"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Kun je nog een verhaaltje van 100 woorden vertellen?"
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Kun je nog een verhaaltje van 100 woorden vertellen?"
+📝 [2] Jac: "Kun je nog een verhaaltje van 100 woorden vertellen?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "In een klein dorp stond een klok die altijd vijf m..."
+🔊 [2] Sent audio chunk 1 (57024 bytes)
+🔊 [2] TTS starting bundled 2: "De klokkenmaker had het allang kunnen fixen, maar ..."
+🔊 [2] Sent audio chunk 2 (55872 bytes)
+🔊 [2] TTS starting bundled 3: ""Mensen komen liever te vroeg dan te laat," zei hi..."
+🔊 [2] Sent audio chunk 3 (48960 bytes)
+🔊 [2] TTS starting bundled 4: "Het dorp paste zich aan...."
+🔊 [2] Sent audio chunk 4 (31104 bytes)
+🔊 [2] TTS starting bundled 5: "Vergaderingen begonnen soepeler...."
+🔊 [2] Sent audio chunk 5 (36288 bytes)
+🔊 [2] TTS starting bundled 6: "Treinen werden gehaald...."
+🔊 [2] Sent audio chunk 6 (29376 bytes)
+🔊 [2] TTS starting bundled 7: "Verjaardagen werden nooit gemist...."
+🔊 [2] Sent audio chunk 7 (38592 bytes)
+🔊 [2] TTS starting bundled 8: "Toen stuurde de gemeente een inspecteur...."
+🔊 [2] Sent audio chunk 8 (40320 bytes)
+🔊 [2] TTS starting bundled 9: "Die stelde de klok gelijk...."
+🔊 [2] Sent audio chunk 9 (32256 bytes)
+🔊 [2] TTS starting bundled 10: "Precies op tijd...."
+🔊 [2] Sent audio chunk 10 (27072 bytes)
+🔊 [2] TTS starting bundled 11: "Het dorp was woedend...."
+🔊 [2] Sent audio chunk 11 (28800 bytes)
+🔊 [2] TTS starting bundled 12: "Ineens was iedereen weer te laat...."
+🔊 [2] TTS starting bundled 13: "Afspraken werden gemist...."
+🔊 [2] Sent audio chunk 12 (36288 bytes)
+🔊 [2] Sent audio chunk 13 (31680 bytes)
+🔊 [2] TTS starting bundled 14: "De bakker brandde zijn brood aan...."
+⏸️ [2] Interrupted by user
+🎙️ [2] Starting STT streaming session...
+⏸️ [2] Text streaming interrupted by barge-in
+🦋 [2] Dolores (6852ms): "In een klein dorp stond een klok die altijd vijf minuten voorliep. De klokkenmaker had het allang ku..."
+🎙️ [2] STT streaming started
+⏸️ [2] Audio sending interrupted, skipping remaining chunks
+⏸️ [2] Audio sending interrupted, skipping remaining chunks
+🎙️ [2] Interim: "m"
+🎙️ [2] Interim: "mokkenma"
+🎙️ [2] Interim: "mokkenmaker had het"
+🎙️ [2] Interim: "mokkenmaker had het al lang kunnen"
+🎙️ [2] Interim: "mokkenmaker had het al lang kunnen fixen"
