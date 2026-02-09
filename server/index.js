@@ -596,7 +596,27 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
     
     // Function to send audio chunks in order as they become ready
     const trySendAudioChunks = () => {
+      // Check if interrupted
+      if (ws.interrupted) {
+        console.log(`⏸️ [${connectionId}] Audio sending interrupted, skipping remaining chunks`);
+        // Skip to end
+        nextAudioToSend = audioResults.length;
+        if (audioSent) {
+          sendMessage(ws, { type: 'audio_done' });
+        }
+        return;
+      }
+      
       while (audioResults[nextAudioToSend] !== undefined) {
+        // Double-check interrupt status
+        if (ws.interrupted) {
+          console.log(`⏸️ [${connectionId}] Audio sending interrupted mid-stream`);
+          if (audioSent) {
+            sendMessage(ws, { type: 'audio_done' });
+          }
+          return;
+        }
+        
         const audioData = audioResults[nextAudioToSend];
         if (audioData) {
           if (!audioSent) {
@@ -698,8 +718,8 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
       textToSpeech(sentenceBuffer.trim()).then(audioData => {
         audioResults[myIndex] = audioData;
         trySendAudioChunks();
-        // After final chunk, send audio_done
-        if (nextAudioToSend >= sentenceCount) {
+        // After final chunk, send audio_done (unless interrupted)
+        if (nextAudioToSend >= sentenceCount && !ws.interrupted && audioSent) {
           sendMessage(ws, { type: 'audio_done' });
           console.log(`🔊 [${connectionId}] Audio streaming complete`);
         }
@@ -711,10 +731,12 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
       // Wait for pending audio to finish, then send audio_done
       const checkComplete = setInterval(() => {
         trySendAudioChunks();
-        if (nextAudioToSend >= sentenceCount) {
+        if (nextAudioToSend >= sentenceCount || ws.interrupted) {
           clearInterval(checkComplete);
-          sendMessage(ws, { type: 'audio_done' });
-          console.log(`🔊 [${connectionId}] Audio streaming complete`);
+          if (!ws.interrupted && audioSent) {
+            sendMessage(ws, { type: 'audio_done' });
+            console.log(`🔊 [${connectionId}] Audio streaming complete`);
+          }
         }
       }, 100);
     }
@@ -975,7 +997,14 @@ function startServer() {
         const message = JSON.parse(data.toString());
         const useStreaming = message.streaming !== false && ENABLE_STREAMING;
         
-        if (message.type === 'text') {
+        if (message.type === 'interrupt') {
+          // Client interrupted playback (barge-in)
+          console.log(`⏸️ [${connectionId}] Interrupted by user`);
+          ws.interrupted = true;
+          sendMessage(ws, { type: 'interrupted' });
+        } else if (message.type === 'text') {
+          // Reset interrupt flag on new message
+          ws.interrupted = false;
           const wantsAudio = message.wantsAudio !== false;
           if (useStreaming) {
             await handleTextMessageStreaming(ws, message.text, connectionId, wantsAudio);
@@ -983,6 +1012,8 @@ function startServer() {
             await handleTextMessage(ws, message.text, connectionId, wantsAudio);
           }
         } else if (message.type === 'audio') {
+          // Reset interrupt flag on new audio
+          ws.interrupted = false;
           await handleAudioMessage(ws, message.data, connectionId, useStreaming);
         } else if (message.type === 'audio_stream_start') {
           // Start real-time STT streaming session
@@ -991,6 +1022,8 @@ function startServer() {
           // Receive audio chunk for STT streaming
           handleAudioStreamChunk(ws, message.data, connectionId);
         } else if (message.type === 'audio_stream_end') {
+          // Reset interrupt flag on new audio stream end
+          ws.interrupted = false;
           // End STT streaming and process final transcript
           await handleAudioStreamEnd(ws, connectionId, useStreaming);
         } else if (message.type === 'ping') {

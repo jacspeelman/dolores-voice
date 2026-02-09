@@ -238,6 +238,11 @@ class VoiceManager: ObservableObject {
     private var pcmBuffer: Data = Data()
     private let audioChunkIntervalMs: Double = 150  // Send chunks every 150ms
     
+    // Barge-in support
+    private var bargeInDetectionStartTime: Date?
+    private let bargeInThreshold: Float = 0.04  // Slightly above ambient to avoid speaker bleed
+    private let bargeInDurationMs: Double = 150  // 150ms to avoid false positives from speaker
+    
     // MARK: - Initialization
     
     init() {
@@ -434,14 +439,10 @@ class VoiceManager: ObservableObject {
             streamingAudioPlayer = StreamingAudioPlayer()
             streamingAudioPlayer?.prepare()
             
-            // Setup audio session for playback
-            do {
-                let session = AVAudioSession.sharedInstance()
-                try session.setCategory(.playback)
-                try session.setActive(true)
-            } catch {
-                print("⚠️ Audio session setup failed: \(error)")
-            }
+            // Audio session already in playAndRecord mode
+            
+            // Start barge-in monitoring
+            startBargeInMonitoring()
             
         case "audio_chunk":
             // Streaming audio chunk
@@ -464,6 +465,10 @@ class VoiceManager: ObservableObject {
         case "audio":
             // Non-streaming audio (backwards compatibility)
             state = .speaking
+            
+            // Start barge-in monitoring
+            startBargeInMonitoring()
+            
             if let base64 = json["data"] as? String,
                let audioData = Data(base64Encoded: base64) {
                 playAudio(audioData)
@@ -567,6 +572,16 @@ class VoiceManager: ObservableObject {
     
     func startConversation() {
         guard isConnected else { return }
+        
+        // Setup audio session for playAndRecord once
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
+            try audioSession.setActive(true)
+        } catch {
+            print("⚠️ Audio session setup failed: \(error)")
+        }
+        
         isConversationActive = true
         startRecording()
     }
@@ -578,6 +593,10 @@ class VoiceManager: ObservableObject {
         streamingAudioPlayer?.stop()
         streamingAudioPlayer = nil
         interimTranscript = ""
+        
+        // Deactivate audio session
+        try? AVAudioSession.sharedInstance().setActive(false)
+        
         state = isConnected ? .idle : .disconnected
     }
     
@@ -617,9 +636,7 @@ class VoiceManager: ObservableObject {
         stopRecording(send: false)
         
         do {
-            let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            // Audio session already configured in playAndRecord mode
             
             let settings: [String: Any] = [
                 AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -654,9 +671,7 @@ class VoiceManager: ObservableObject {
         sendJSON(["type": "audio_stream_start"])
         
         do {
-            let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            // Audio session already configured in playAndRecord mode
             
             audioEngine = AVAudioEngine()
             guard let engine = audioEngine else { return }
@@ -830,7 +845,7 @@ class VoiceManager: ObservableObject {
         audioRecorder?.stop()
         audioRecorder = nil
         
-        try? AVAudioSession.sharedInstance().setActive(false)
+        // Keep audio session active for playAndRecord throughout conversation
         
         if send && !isSTTStreamingActive {
             sendRecording()
@@ -911,9 +926,7 @@ class VoiceManager: ObservableObject {
     
     private func playAudio(_ data: Data) {
         do {
-            let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback)
-            try session.setActive(true)
+            // Audio session already configured in playAndRecord mode
             
             audioPlayer = try AVAudioPlayer(data: data)
             audioPlayerDelegate = AudioPlayerDelegate { [weak self] in
@@ -943,15 +956,103 @@ class VoiceManager: ObservableObject {
     
     private func onAudioFinished() {
         streamingAudioPlayer = nil
+        stopBargeInMonitoring()
         
         if isConversationActive {
             Task {
-                try? await Task.sleep(for: .milliseconds(300))
+                try? await Task.sleep(for: .milliseconds(50))  // Reduced from 300ms
                 startRecording()
             }
         } else {
             state = isConnected ? .idle : .disconnected
         }
+    }
+    
+    // MARK: - Barge-in Support (using AVAudioRecorder for level monitoring)
+    
+    private var bargeInRecorder: AVAudioRecorder?
+    private var bargeInTimer: Timer?
+    
+    private func startBargeInMonitoring() {
+        stopBargeInMonitoring()
+        bargeInDetectionStartTime = nil
+        
+        do {
+            // Use a dummy AVAudioRecorder purely for metering — works alongside playback in .playAndRecord mode
+            let tempDir = FileManager.default.temporaryDirectory
+            let bargeInURL = tempDir.appendingPathComponent("bargein_monitor.m4a")
+            
+            let settings: [String: Any] = [
+                AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                AVSampleRateKey: 16000,
+                AVNumberOfChannelsKey: 1,
+                AVEncoderAudioQualityKey: AVAudioQuality.low.rawValue
+            ]
+            
+            bargeInRecorder = try AVAudioRecorder(url: bargeInURL, settings: settings)
+            bargeInRecorder?.isMeteringEnabled = true
+            bargeInRecorder?.record()
+            
+            // Poll levels at ~20Hz
+            bargeInTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
+                Task { @MainActor in
+                    guard let self = self, self.state == .speaking else { return }
+                    self.bargeInRecorder?.updateMeters()
+                    let power = self.bargeInRecorder?.averagePower(forChannel: 0) ?? -160
+                    // Convert dB to linear (same scale as silenceThreshold)
+                    let linear = pow(10, power / 20)
+                    self.checkBargeIn(level: linear)
+                }
+            }
+            
+            print("🎙️ Barge-in monitoring started (AVAudioRecorder)")
+        } catch {
+            print("⚠️ Barge-in monitoring failed: \(error)")
+        }
+    }
+    
+    private func stopBargeInMonitoring() {
+        bargeInTimer?.invalidate()
+        bargeInTimer = nil
+        bargeInRecorder?.stop()
+        bargeInRecorder = nil
+        bargeInDetectionStartTime = nil
+    }
+    
+    private func checkBargeIn(level: Float) {
+        guard state == .speaking else { return }
+        
+        if level > bargeInThreshold {
+            if bargeInDetectionStartTime == nil {
+                bargeInDetectionStartTime = Date()
+            } else if let startTime = bargeInDetectionStartTime {
+                let duration = Date().timeIntervalSince(startTime) * 1000  // ms
+                if duration >= bargeInDurationMs {
+                    // Speech detected for long enough - trigger barge-in!
+                    print("🎤 Barge-in detected!")
+                    performBargeIn()
+                }
+            }
+        } else {
+            bargeInDetectionStartTime = nil
+        }
+    }
+    
+    private func performBargeIn() {
+        // Stop monitoring
+        stopBargeInMonitoring()
+        
+        // Stop all audio playback immediately
+        audioPlayer?.stop()
+        streamingAudioPlayer?.stop()
+        streamingAudioPlayer = nil
+        
+        // Send interrupt to server
+        sendJSON(["type": "interrupt"])
+        
+        // Start listening immediately
+        state = .listening
+        startRecording()
     }
 }
 
