@@ -105,6 +105,8 @@ class StreamingAudioPlayer {
         }
     }
     
+    private var nextPlayer: AVAudioPlayer?
+    
     private func playNextChunk() {
         guard currentChunkIndex < audioChunks.count else {
             isPlaying = false
@@ -120,18 +122,30 @@ class StreamingAudioPlayer {
         let chunkData = audioChunks[currentChunkIndex]
         currentChunkIndex += 1
         
-        // Decode and play MP3 chunk
-        // For simplicity, we'll use AVAudioPlayer for each chunk
-        // A more advanced implementation would decode to PCM and schedule buffers
         DispatchQueue.global(qos: .userInteractive).async { [weak self] in
             do {
-                let player = try AVAudioPlayer(data: chunkData)
-                player.prepareToPlay()
+                // Use pre-buffered player if available, otherwise create new one
+                let player: AVAudioPlayer
+                if let preBuffered = self?.nextPlayer {
+                    player = preBuffered
+                    self?.nextPlayer = nil
+                } else {
+                    player = try AVAudioPlayer(data: chunkData)
+                    player.prepareToPlay()
+                }
+                
+                // Pre-buffer the NEXT chunk while current one plays
+                if let self = self, self.currentChunkIndex < self.audioChunks.count {
+                    let nextData = self.audioChunks[self.currentChunkIndex]
+                    self.nextPlayer = try? AVAudioPlayer(data: nextData)
+                    self.nextPlayer?.prepareToPlay()
+                }
+                
                 player.play()
                 
                 // Wait for playback to complete
                 while player.isPlaying {
-                    Thread.sleep(forTimeInterval: 0.05)
+                    Thread.sleep(forTimeInterval: 0.02)
                 }
                 
                 DispatchQueue.main.async {

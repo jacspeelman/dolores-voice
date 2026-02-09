@@ -301,7 +301,7 @@ async function* callOpenClawStreaming(userMessage) {
       'x-openclaw-agent-id': 'main'
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'openclaw',
       messages: [{ role: 'user', content: voiceMessage }],
       user: 'voice-jac',
       stream: true
@@ -367,7 +367,7 @@ async function callOpenClaw(userMessage) {
       'x-openclaw-agent-id': 'main'
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'openclaw',
       messages: [{ role: 'user', content: voiceMessage }],
       user: 'voice-jac'
     })

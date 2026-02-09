@@ -152,3 +152,90 @@
 🔴 STT Streaming: enabled
 ✅ Ready on ws://0.0.0.0:8765
 🔌 [1] Connected from 192.168.1.135
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.135
+🔌 [1] Disconnected (code: 1006, reason: )
+🔌 [2] Connected from 192.168.1.135
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "hallo"
+🎙️ [2] Interim: "hallo dara"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Interim: "hallo dara hoe gaat het"
+🎙️ [2] Final segment: "Hallo dara, hoe gaat het?"
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Hallo dara, hoe gaat het?"
+📝 [2] Jac: "Hallo dara, hoe gaat het?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Hé Jak!..."
+🔊 [2] TTS starting sentence 2: "Prima hier...."
+🔊 [2] TTS starting sentence 3: "Wat kan ik voor je doen?..."
+🔊 [2] Sent audio chunk 1 (21888 bytes)
+🔊 [2] Sent audio chunk 2 (21888 bytes)
+🦋 [2] Dolores (2720ms): "Hé Jak! Prima hier. Wat kan ik voor je doen?..."
+🔊 [2] Sent audio chunk 3 (27648 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "kun"
+🎙️ [2] Interim: "kun je"
+🎙️ [2] Interim: "kun je een ver"
+🎙️ [2] Interim: "kun je een verhaaltje"
+🎙️ [2] Interim: "kun je een verhaaltje vertel"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen van"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen van hon"
+🎙️ [2] Interim: "kun je een verhaaltje vertellen van 100 woorden"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Final segment: "Kun je een verhaaltje vertellen van 100 woorden?"
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Kun je een verhaaltje vertellen van 100 woorden?"
+📝 [2] Jac: "Kun je een verhaaltje vertellen van 100 woorden?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Oké, luister...."
+🔊 [2] Sent audio chunk 1 (29952 bytes)
+🔊 [2] TTS starting sentence 2: "Er was eens een oude vuurtoren aan de Noordzeekust..."
+🔊 [2] Sent audio chunk 2 (76608 bytes)
+🔊 [2] TTS starting sentence 3: "Maar er voeren al jaren geen schepen meer...."
+🔊 [2] Sent audio chunk 3 (42048 bytes)
+🔊 [2] TTS starting sentence 4: "De havenmester wilde hem sluiten...."
+🔊 [2] Sent audio chunk 4 (39744 bytes)
+🔊 [2] TTS starting sentence 5: ""Verspilling," zei hij...."
+🔊 [2] Sent audio chunk 5 (32832 bytes)
+🔊 [2] TTS starting sentence 6: "De vuurtorenwachter, een stille man genaamd Hendri..."
+🔊 [2] Sent audio chunk 6 (70848 bytes)
+🔊 [2] TTS starting sentence 7: "Elke avond stak hij het licht aan...."
+🔊 [2] Sent audio chunk 7 (37440 bytes)
+🔊 [2] TTS starting sentence 8: "Elke ochtend poetste hij de lens...."
+🔊 [2] Sent audio chunk 8 (36864 bytes)
+🔊 [2] TTS starting sentence 9: "Op een stormnacht in december verdwaalde een klein..."
+🔊 [2] Sent audio chunk 9 (64512 bytes)
+🔊 [2] TTS starting sentence 10: "De motor was uitgevallen...."
+🔊 [2] TTS starting sentence 11: "De golven werden groter...."
+🔊 [2] Sent audio chunk 10 (32832 bytes)
+🔊 [2] Sent audio chunk 11 (32256 bytes)
+🔊 [2] TTS starting sentence 12: "Toen zagen ze het licht...."
+🔊 [2] Sent audio chunk 12 (29952 bytes)
+🔊 [2] TTS starting sentence 13: "Zwak, maar genoeg...."
+🔊 [2] Sent audio chunk 13 (31104 bytes)
+🔊 [2] TTS starting sentence 14: "Ze volgden het naar de haven...."
+🔊 [2] Sent audio chunk 14 (33408 bytes)
+🔊 [2] TTS starting sentence 15: "Drie mannen kwamen levend thuis...."
+🔊 [2] Sent audio chunk 15 (36864 bytes)
+🔊 [2] TTS starting sentence 16: "De havenmester heeft nooit meer over sluiten gespr..."
+🔊 [2] TTS starting sentence 17: "En Hendrik?..."
+🔊 [2] Sent audio chunk 16 (52992 bytes)
+🔊 [2] Sent audio chunk 17 (23040 bytes)
+🔊 [2] TTS starting sentence 18: "Die glimlachte alleen maar en poetste de volgende ..."
+🔊 [2] Sent audio chunk 18 (63936 bytes)
+🦋 [2] Dolores (10219ms): "Oké, luister. Er was eens een oude vuurtoren aan de Noordzeekust die elke nacht trouw zijn licht lie..."
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
