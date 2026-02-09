@@ -240,8 +240,8 @@ class VoiceManager: ObservableObject {
     
     // Barge-in support
     private var bargeInDetectionStartTime: Date?
-    private let bargeInThreshold: Float = 0.02  // Lower threshold now that echo cancellation is active
-    private let bargeInDurationMs: Double = 80   // Faster detection — echo cancellation prevents false positives
+    private let bargeInThreshold: Float = 0.08  // High enough to ignore speaker bleed, low enough for close-mic speech
+    private let bargeInDurationMs: Double = 120  // Slightly longer to avoid false triggers from speaker peaks
     
     // MARK: - Initialization
     

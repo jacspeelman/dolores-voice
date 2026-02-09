@@ -1401,3 +1401,58 @@ Stilte...."
 🎙️ [2] Interim: "ja klopt het leek alsof de spraakherkenning een stuk van mijn verhaaltje op"
 🎙️ [2] Interim: "ja klopt het leek alsof de spraakherkenning een stuk van mijn verhaaltje oppakte"
 🎙️ [2] Final segment: "Ja klopt. Het leek alsof de spraakherkenning een stuk van mijn verhaaltje oppakte."
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Ja klopt. Het leek alsof de spraakherkenning een stuk van mijn verhaaltje oppakte."
+📝 [2] Jac: "Ja klopt. Het leek alsof de spraakherkenning een stuk van mijn verhaaltje oppakte." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔌 [2] Disconnected (code: 1006, reason: )
+🔊 [2] TTS starting sentence 1: "Ha, nu herhaalt de spraakherkenning mijn woorden w..."
+🔊 [2] Sent audio chunk 1 (51264 bytes)
+🔊 [2] TTS starting bundled 2: "Het lijkt erop dat mijn audio terugkomt in jouw mi..."
+🔊 [2] Sent audio chunk 2 (54144 bytes)
+🔊 [2] TTS starting bundled 3: "Misschien het volume wat lager zetten of oortjes g..."
+🦋 [2] Dolores (3733ms): "Ha, nu herhaalt de spraakherkenning mijn woorden weer! Het lijkt erop dat mijn audio terugkomt in jo..."
+🔊 [2] Sent audio chunk 3 (51264 bytes)
+🔊 [2] Audio streaming complete
+🔌 [3] Connected from 192.168.1.66
+🎙️ [3] Starting STT streaming session...
+🎙️ [3] STT streaming started
+🎙️ [3] Interim: "laten we"
+🎙️ [3] Interim: "laten we nog eens een keer"
+🎙️ [3] Interim: "laten we nog eens een keer te"
+🎙️ [3] Interim: "laten we nog eens een keer testen"
+🎙️ [3] Interim: "laten we nog eens een keer testen kun je"
+🎙️ [3] Interim: "laten we nog eens een keer testen kun je 100"
+🎙️ [3] Interim: "laten we nog eens een keer testen kun je 100 woorden"
+🎙️ [3] Ending STT streaming session...
+🎙️ [3] Final segment: "Laten we nog eens een keer testen. Kun je 100 woorden."
+🎙️ [3] Session stopped
+🎙️ [3] STT streaming stopped, final: "Laten we nog eens een keer testen. Kun je 100 woorden."
+📝 [3] Jac: "Laten we nog eens een keer testen. Kun je 100 woorden." (audio: true, streaming: true)
+🦋 [3] Asking OpenClaw (streaming)...
+🔊 [3] TTS starting sentence 1: "In een flatgebouw in Den Haag woonde op elke verdi..."
+🔊 [3] Sent audio chunk 1 (69120 bytes)
+🔊 [3] TTS starting bundled 2: "De eerste telde schapen...."
+🔊 [3] Sent audio chunk 2 (33408 bytes)
+🔊 [3] TTS starting bundled 3: "De tweede las boeken...."
+🔊 [3] Sent audio chunk 3 (29376 bytes)
+🔊 [3] TTS starting bundled 4: "De derde staarde naar het plafond...."
+🔊 [3] Sent audio chunk 4 (35136 bytes)
+🔊 [3] TTS starting bundled 5: "Op een nacht hoorden ze allemaal hetzelfde geluid...."
+🔊 [3] TTS starting bundled 6: "Piano...."
+🔊 [3] Sent audio chunk 5 (44352 bytes)
+🔊 [3] Sent audio chunk 6 (20736 bytes)
+🔊 [3] TTS starting bundled 7: "Zacht, vanuit de kelder...."
+🔊 [3] Sent audio chunk 7 (33984 bytes)
+🔊 [3] TTS starting bundled 8: "Eén voor één liepen ze de trap af in hun pyjama...."
+🔊 [3] Sent audio chunk 8 (46080 bytes)
+🔊 [3] TTS starting bundled 9: "In de kelder zat een meisje van tien...."
+🔊 [3] Sent audio chunk 9 (38016 bytes)
+⏸️ [3] Interrupted by user
+⏸️ [3] Text streaming interrupted by barge-in
+⏸️ [3] Skipping text_done/response — interrupted
+🎙️ [3] Starting STT streaming session...
+🎙️ [3] STT streaming started
+🎙️ [3] Interim: "ik kon slapen"
+🎙️ [3] Final segment: "Ik kon slapen."
