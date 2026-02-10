@@ -3229,3 +3229,330 @@ De journalist schreef haar artikel nooit...."
 🔊 [2] Sent audio chunk 1 (105984 bytes)
 🔊 [2] TTS starting bundled 2: "Ik push het naar GitHub, dan kun je straks gewoon ..."
 🔊 [2] Sent audio chunk 2 (68544 bytes)
+🔊 [2] TTS starting bundled 3: "Staat op GitHub!..."
+🔊 [2] Sent audio chunk 3 (28224 bytes)
+🔊 [2] TTS starting bundled 4: "Straks even pullen in Xcode, builden, en testen...."
+🔊 [2] Sent audio chunk 4 (60480 bytes)
+🔊 [2] TTS starting bundled 5: "Zou een stuk beter moeten gaan in de auto...."
+🔊 [2] Sent audio chunk 5 (43200 bytes)
+🦋 [2] Dolores (12213ms): "Ja precies, je moet de Xcode-code opnieuw builden en op je telefoon installeren, want het is een iOS..."
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "als ik"
+🎙️ [2] Interim: "als ik op mijn werk"
+🎙️ [2] Interim: "als ik op mijn werk ben"
+🎙️ [2] Interim: "als ik op mijn werk ben ga ik dat even doen"
+🎙️ [2] Final segment: "Als ik op mijn werk ben, ga ik dat even doen."
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Als ik op mijn werk ben, ga ik dat even doen."
+📝 [2] Jac: "Als ik op mijn werk ben, ga ik dat even doen." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Top, succes op je werk en laat maar weten hoe het ..."
+🦋 [2] Dolores (2998ms): "Top, succes op je werk en laat maar weten hoe het gaat na het testen!..."
+🔊 [2] Sent audio chunk 1 (61632 bytes)
+🔊 [2] Audio streaming complete
+⏸️ [2] Interrupted by user
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming started
+🔌 [2] Disconnected (code: 1006, reason: )
+🎙️ [2] Session stopped
+🔌 [1] Disconnected (code: 1006, reason: )
+🔌 [3] Connected from 192.168.1.135
+🔌 [4] Connected from 192.168.1.135
+📝 [4] Jac: "hoi daar ben ik weer. Enter" (audio: false, streaming: true)
+🦋 [4] Asking OpenClaw (streaming)...
+🦋 [4] Dolores (3466ms): "Hoi! Welkom terug. Heb je al kunnen builden en testen?..."
+🎙️ [4] Starting STT streaming session...
+🎙️ [4] STT streaming started
+🎙️ [4] Interim: "dat ga ik nu"
+🎙️ [4] Interim: "dat ga ik nu doen"
+🎙️ [4] Final segment: "Dat ga ik nu doen."
+🎙️ [4] Ending STT streaming session...
+🎙️ [4] Session stopped
+🎙️ [4] STT streaming stopped, final: "Dat ga ik nu doen."
+📝 [4] Jac: "Dat ga ik nu doen." (audio: true, streaming: true)
+🦋 [4] Asking OpenClaw (streaming)...
+🔊 [4] TTS starting sentence 1: "Oké, succes!..."
+🔊 [4] Sent audio chunk 1 (32832 bytes)
+🔊 [4] TTS starting bundled 2: "Laat weten of de barge-in fix werkt...."
+🦋 [4] Dolores (2697ms): "Oké, succes! Laat weten of de barge-in fix werkt...."
+🔊 [4] Sent audio chunk 2 (43200 bytes)
+🔊 [4] Audio streaming complete
+🎙️ [4] Starting STT streaming session...
+🎙️ [4] STT streaming started
+🎙️ [4] Ending STT streaming session...
+🎙️ [4] Session stopped
+🎙️ [4] STT streaming stopped, final: ""
+⚠️ [4] Empty transcript from streaming
+🎙️ [4] Starting STT streaming session...
+🎙️ [4] STT streaming started
+🎙️ [4] Ending STT streaming session...
+🎙️ [4] Session stopped
+🎙️ [4] STT streaming stopped, final: ""
+⚠️ [4] Empty transcript from streaming
+🎙️ [4] Starting STT streaming session...
+🎙️ [4] STT streaming started
+🎙️ [4] Ending STT streaming session...
+🎙️ [4] Session stopped
+🎙️ [4] STT streaming stopped, final: ""
+⚠️ [4] Empty transcript from streaming
+🎙️ [4] Starting STT streaming session...
+🎙️ [4] STT streaming started
+🔌 [4] Disconnected (code: 1006, reason: )
+🔌 [3] Disconnected (code: 1006, reason: )
+🎙️ [4] Session stopped
+🔌 [5] Connected from 192.168.1.135
+🔌 [5] Disconnected (code: 1006, reason: )
+🔌 [6] Connected from 192.168.1.135
+🎙️ [6] Starting STT streaming session...
+🎙️ [6] STT streaming started
+🎙️ [6] Interim: "ja"
+🎙️ [6] Interim: "ja daar ben ik"
+🎙️ [6] Interim: "ja daar ben ik weer"
+🎙️ [6] Interim: "ja daar ben ik weer zou"
+🎙️ [6] Interim: "ja daar ben ik weer zou jij"
+🎙️ [6] Interim: "ja daar ben ik weer zou jij een verhaaltje"
+🎙️ [6] Interim: "ja daar ben ik weer zou jij een verhaaltje kunnen"
+🎙️ [6] Interim: "ja daar ben ik weer zou jij een verhaaltje kunnen vertellen"
+🎙️ [6] Interim: "ja daar ben ik weer zou jij een verhaaltje kunnen vertellen van"
+🎙️ [6] Interim: "ja daar ben ik weer zou jij een verhaaltje kunnen vertellen van 50"
+🎙️ [6] Interim: "ja daar ben ik weer zou jij een verhaaltje kunnen vertellen van 50 woorden"
+🎙️ [6] Final segment: "Ja, daar ben ik weer. Zou jij een verhaaltje kunnen vertellen van 50 woorden?"
+🎙️ [6] Ending STT streaming session...
+🎙️ [6] Session stopped
+🎙️ [6] STT streaming stopped, final: "Ja, daar ben ik weer. Zou jij een verhaaltje kunnen vertellen van 50 woorden?"
+📝 [6] Jac: "Ja, daar ben ik weer. Zou jij een verhaaltje kunnen vertellen van 50 woorden?" (audio: true, streaming: true)
+🦋 [6] Asking OpenClaw (streaming)...
+🔊 [6] TTS starting sentence 1: "Op een nacht vond een meisje een deur in haar keld..."
+🔊 [6] Sent audio chunk 1 (61056 bytes)
+🔊 [6] TTS starting bundled 2: "Ze deed hem open en zag een tuin vol lichtgevende ..."
+🔊 [6] Sent audio chunk 2 (57024 bytes)
+🔊 [6] TTS starting bundled 3: "In het midden zat een vos die zei: je mag hier kom..."
+🔊 [6] Sent audio chunk 3 (82368 bytes)
+🔊 [6] TTS starting bundled 4: "Ze kwam elke nacht terug...."
+🦋 [6] Dolores (5261ms): "Op een nacht vond een meisje een deur in haar kelder die er eerder niet was. Ze deed hem open en zag..."
+🔊 [6] Sent audio chunk 4 (33984 bytes)
+🔊 [6] Audio streaming complete
+🎙️ [6] Starting STT streaming session...
+🎙️ [6] STT streaming started
+🎙️ [6] Starting STT streaming session...
+🎙️ [6] Session stopped
+🎙️ [6] STT streaming started
+🎙️ [6] Interim: "ja"
+🎙️ [6] Interim: "ja het"
+🎙️ [6] Interim: "ja het wer"
+🎙️ [6] Interim: "ja het werkt"
+🎙️ [6] Interim: "ja het werkt nu"
+🎙️ [6] Interim: "ja het werkt nu goed"
+🎙️ [6] Interim: "ja het werkt nu goed ja"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit n"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goe"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op max"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op maximaal staan"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op maximaal staan op mijn telef"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op maximaal staan op mijn telefoon"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op maximaal staan op mijn telefoon maar het klinkt"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op maximaal staan op mijn telefoon maar het klinkt toch"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op maximaal staan op mijn telefoon maar het klinkt toch nog"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op maximaal staan op mijn telefoon maar het klinkt toch nog redelijk zacht"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op maximaal staan op mijn telefoon maar het klinkt toch nog redelijk zacht kan"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op maximaal staan op mijn telefoon maar het klinkt toch nog redelijk zacht kan het"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op maximaal staan op mijn telefoon maar het klinkt toch nog redelijk zacht kan het nog aan"
+🎙️ [6] Interim: "ja het werkt nu goed ja ik zit niet in de auto dus wellicht dat dat nog uitmaakt maar ja de hele 50 woorden worden goed door je uitgesproken ik vind wel dat het wat zacht is en ik heb mijn volume op maximaal staan op mijn telefoon maar het klinkt toch nog redelijk zacht kan het nog aangepast worden"
+🎙️ [6] Final segment: "Ja, het werkt nu goed. Ja, ik zit niet In de auto, dus wellicht dat dat nog uitmaakt. Maar ja, de hele 50 woorden worden goed door je uitgesproken. Ik vind wel dat het wat zacht is en Ik heb mijn volume op maximaal staan op mijn telefoon, Maar het klinkt toch nog redelijk zacht, kan het nog aangepast worden."
+🎙️ [6] Ending STT streaming session...
+🎙️ [6] Session stopped
+🎙️ [6] STT streaming stopped, final: "Ja, het werkt nu goed. Ja, ik zit niet In de auto, dus wellicht dat dat nog uitmaakt. Maar ja, de hele 50 woorden worden goed door je uitgesproken. Ik vind wel dat het wat zacht is en Ik heb mijn volume op maximaal staan op mijn telefoon, Maar het klinkt toch nog redelijk zacht, kan het nog aangepast worden."
+📝 [6] Jac: "Ja, het werkt nu goed. Ja, ik zit niet In de auto, dus wellicht dat dat nog uitmaakt. Maar ja, de hele 50 woorden worden goed door je uitgesproken. Ik vind wel dat het wat zacht is en Ik heb mijn volume op maximaal staan op mijn telefoon, Maar het klinkt toch nog redelijk zacht, kan het nog aangepast worden." (audio: true, streaming: true)
+🦋 [6] Asking OpenClaw (streaming)...
+🔊 [6] TTS starting sentence 1: "Mooi dat het werkt!..."
+🔊 [6] Sent audio chunk 1 (28224 bytes)
+🔊 [6] TTS starting bundled 2: "Het volume kan ik opschroeven via de Azure TTS ins..."
+🔊 [6] TTS starting bundled 3: "Even aanpassen...."
+🔊 [6] Sent audio chunk 2 (60480 bytes)
+🔊 [6] Sent audio chunk 3 (27648 bytes)
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.135
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Interim: "heb je"
+🎙️ [1] Interim: "heb je het aan"
+🎙️ [1] Interim: "heb je het aangepast"
+🎙️ [1] Final segment: "Heb je het aangepast?"
+🎙️ [1] Ending STT streaming session...
+🎙️ [1] Session stopped
+🎙️ [1] STT streaming stopped, final: "Heb je het aangepast?"
+📝 [1] Jac: "Heb je het aangepast?" (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS starting sentence 1: "Ja, het staat live!..."
+🔊 [1] TTS starting bundled 2: "Het volume is nu op plus vijftig procent gezet...."
+🔊 [1] Sent audio chunk 1 (35136 bytes)
+🔊 [1] Sent audio chunk 2 (52992 bytes)
+🔊 [1] TTS starting bundled 3: "Je hoeft niks opnieuw te builden, dit is een serve..."
+🔊 [1] Sent audio chunk 3 (64512 bytes)
+🔊 [1] TTS starting bundled 4: "Hoor je verschil?..."
+🦋 [1] Dolores (3434ms): "Ja, het staat live! Het volume is nu op plus vijftig procent gezet. Je hoeft niks opnieuw te builden..."
+🔊 [1] Sent audio chunk 4 (25344 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Interim: "ja"
+🎙️ [1] Interim: "ja maar het mag"
+🎙️ [1] Interim: "ja maar het mag nog"
+🎙️ [1] Interim: "ja maar het mag nog iets iets"
+🎙️ [1] Interim: "ja maar het mag nog iets iets harder"
+🎙️ [1] Final segment: "Ja, Maar het mag nog iets iets harder."
+🎙️ [1] Ending STT streaming session...
+🎙️ [1] Session stopped
+🎙️ [1] STT streaming stopped, final: "Ja, Maar het mag nog iets iets harder."
+📝 [1] Jac: "Ja, Maar het mag nog iets iets harder." (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.135
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Interim: "spr"
+🎙️ [1] Interim: "spreek nog eens"
+🎙️ [1] Interim: "spreek nog eens wat"
+🎙️ [1] Final segment: "Spreek nog eens wat?"
+🎙️ [1] Ending STT streaming session...
+🎙️ [1] Session stopped
+🎙️ [1] STT streaming stopped, final: "Spreek nog eens wat?"
+📝 [1] Jac: "Spreek nog eens wat?" (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS starting sentence 1: "Hallo Jak!..."
+🔊 [1] Sent audio chunk 1 (23616 bytes)
+🔊 [1] TTS starting bundled 2: "Dit is een test om te kijken of het volume nu lekk..."
+🔊 [1] Sent audio chunk 2 (52416 bytes)
+🔊 [1] TTS starting bundled 3: "Kun je me goed verstaan zo?..."
+🔊 [1] Sent audio chunk 3 (33408 bytes)
+🦋 [1] Dolores (3636ms): "Hallo Jak! Dit is een test om te kijken of het volume nu lekker klinkt. Kun je me goed verstaan zo?..."
+🔊 [1] Audio streaming complete
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Interim: "ja"
+🎙️ [1] Interim: "jazeker"
+🎙️ [1] Interim: "jazeker ik kan je"
+🎙️ [1] Interim: "jazeker ik kan je goed ver"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar je mag"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar je mag het nog"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar je mag het nog luider"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar je mag het nog luider doen"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar je mag het nog luider doen echt"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar je mag het nog luider doen echt zo"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar je mag het nog luider doen echt zo luid mogelijk"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar je mag het nog luider doen echt zo luid mogelijk ik"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar je mag het nog luider doen echt zo luid mogelijk ik kan op"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar je mag het nog luider doen echt zo luid mogelijk ik kan op mijn"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar je mag het nog luider doen echt zo luid mogelijk ik kan op mijn iphone z"
+🎙️ [1] Interim: "jazeker ik kan je goed verstaan maar je mag het nog luider doen echt zo luid mogelijk ik kan op mijn iphone zelf namelijk"
+🎙️ [1] Final segment: "Jazeker, Ik kan je goed verstaan, maar je mag het nog luider doen. Echt zo luid mogelijk. Ik kan op mijn iPhone zelf namelijk."
+🎙️ [1] Interim: "het"
+🎙️ [1] Interim: "het vol"
+🎙️ [1] Interim: "het volume"
+🎙️ [1] Interim: "het volume weer"
+🎙️ [1] Interim: "het volume weer weer minder"
+🎙️ [1] Interim: "het volume weer weer minder maken"
+🎙️ [1] Interim: "het volume weer weer minder maken snap je"
+🎙️ [1] Final segment: "Het volume weer weer minder maken, snap je?"
+🎙️ [1] Ending STT streaming session...
+🎙️ [1] Session stopped
+🎙️ [1] STT streaming stopped, final: "Jazeker, Ik kan je goed verstaan, maar je mag het nog luider doen. Echt zo luid mogelijk. Ik kan op mijn iPhone zelf namelijk. Het volume weer weer minder maken, snap je?"
+📝 [1] Jac: "Jazeker, Ik kan je goed verstaan, maar je mag het nog luider doen. Echt zo luid mogelijk. Ik kan op mijn iPhone zelf namelijk. Het volume weer weer minder maken, snap je?" (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🚀 Dolores Voice Server v3 starting...
+🔗 OpenClaw: http://127.0.0.1:18789
+🔑 Auth: ✓
+🎤 TTS: Azure Fenna 🇳🇱
+🎙️ STT: Azure Speech (realtime)
+📡 Streaming: enabled
+🔴 STT Streaming: enabled
+✅ Ready on ws://0.0.0.0:8765
+🔌 [1] Connected from 192.168.1.135
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Interim: "heb je het"
+🎙️ [1] Interim: "heb je het aangepast"
+🎙️ [1] Final segment: "Heb je het aangepast?"
+🎙️ [1] Ending STT streaming session...
+🎙️ [1] Session stopped
+🎙️ [1] STT streaming stopped, final: "Heb je het aangepast?"
+📝 [1] Jac: "Heb je het aangepast?" (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS starting sentence 1: "Ja, staat op het maximum nu!..."
+🔊 [1] TTS starting bundled 2: "Plus honderd procent, harder kan Azure niet...."
+🔊 [1] Sent audio chunk 1 (40896 bytes)
+🔊 [1] TTS starting bundled 3: "Hoor je verschil?..."
+🦋 [1] Dolores (2761ms): "Ja, staat op het maximum nu! Plus honderd procent, harder kan Azure niet. Hoor je verschil?..."
+🔊 [1] Sent audio chunk 2 (50688 bytes)
+🔊 [1] Sent audio chunk 3 (25344 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] Session stopped
+🎙️ [1] STT streaming started
+🎙️ [1] Interim: "ja volgens"
+🎙️ [1] Interim: "ja volgens mij"
+🎙️ [1] Interim: "ja volgens mij is"
+🎙️ [1] Interim: "ja volgens mij is het beter"
+🎙️ [1] Interim: "ja volgens mij is het beter zo"
+🎙️ [1] Final segment: "Ja, volgens mij is het beter zo."
+🎙️ [1] Ending STT streaming session...
+🎙️ [1] Session stopped
+🎙️ [1] STT streaming stopped, final: "Ja, volgens mij is het beter zo."
+📝 [1] Jac: "Ja, volgens mij is het beter zo." (audio: true, streaming: true)
+🦋 [1] Asking OpenClaw (streaming)...
+🔊 [1] TTS starting sentence 1: "Top!..."
+🔊 [1] Sent audio chunk 1 (18432 bytes)
+🔊 [1] TTS starting bundled 2: "Dan laat ik het zo staan...."
+🔊 [1] Sent audio chunk 2 (31104 bytes)
+🔊 [1] TTS starting bundled 3: "Even committen en pushen naar GitHub...."
+🔊 [1] Sent audio chunk 3 (40896 bytes)

@@ -22,6 +22,7 @@ const AZURE_SPEECH_REGION = process.env.AZURE_SPEECH_REGION || 'westeurope';
 const AZURE_VOICE = process.env.AZURE_VOICE || 'nl-NL-FennaNeural';
 const AZURE_RATE = process.env.AZURE_RATE || '+5%';
 const AZURE_PITCH = process.env.AZURE_PITCH || '+0%';
+const AZURE_VOLUME = process.env.AZURE_VOLUME || '+100%';
 const AZURE_STYLE = process.env.AZURE_STYLE || '';
 
 // Fallback to ElevenLabs if Azure not configured
@@ -431,7 +432,7 @@ async function azureTTS(text) {
            xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='nl-NL'>
       <voice name='${AZURE_VOICE}'>
         ${styleTag}
-        <prosody rate='${AZURE_RATE}' pitch='${AZURE_PITCH}'>${escapeXml(text)}</prosody>
+        <prosody rate='${AZURE_RATE}' pitch='${AZURE_PITCH}' volume='${AZURE_VOLUME}'>${escapeXml(text)}</prosody>
         ${styleClose}
       </voice>
     </speak>
@@ -475,7 +476,7 @@ async function* azureTTSStreaming(text) {
            xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='nl-NL'>
       <voice name='${AZURE_VOICE}'>
         ${styleTag}
-        <prosody rate='${AZURE_RATE}' pitch='${AZURE_PITCH}'>${escapeXml(text)}</prosody>
+        <prosody rate='${AZURE_RATE}' pitch='${AZURE_PITCH}' volume='${AZURE_VOLUME}'>${escapeXml(text)}</prosody>
         ${styleClose}
       </voice>
     </speak>
