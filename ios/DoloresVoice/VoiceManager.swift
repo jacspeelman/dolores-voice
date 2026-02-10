@@ -161,7 +161,9 @@ class VoiceManager: ObservableObject {
     }
     
     deinit {
-        disconnect()
+        webSocketTask?.cancel(with: .goingAway, reason: nil)
+        audioEngine?.stop()
+        audioEngine?.inputNode.removeTap(onBus: 0)
     }
     
     // MARK: - Audio Session Setup
