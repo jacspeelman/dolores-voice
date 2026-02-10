@@ -79,7 +79,6 @@ function fetchWithTimeout(url, options, timeoutMs = 60000) {
  */
 async function verifySpeaker(audioBuffer) {
   if (!AZURE_SPEAKER_KEY || !AZURE_SPEAKER_PROFILE_ID) {
-    console.log('⚠️ Azure Speaker Verification not configured, skipping');
     return true;
   }
 
@@ -360,11 +359,12 @@ function sendMessage(ws, message) {
 }
 
 // === Main Voice Pipeline ===
-async function handleVoiceInteraction(ws, connectionId) {
+function handleVoiceInteraction(ws, connectionId) {
   let currentState = 'listening';
   let ttsQueue = [];
   let nextTtsIndex = 0;
   let audioSent = false;
+  let allChunksQueued = false;
 
   const setState = (newState) => {
     currentState = newState;
@@ -410,10 +410,17 @@ async function handleVoiceInteraction(ws, connectionId) {
       }
       nextTtsIndex++;
     }
+    
+    // If all TTS calls are dispatched and all chunks sent, end audio
+    if (allChunksQueued && nextTtsIndex >= ttsQueue.length && ttsQueue.length > 0) {
+      allChunksQueued = false; // Prevent duplicate endAudio
+      endAudio();
+    }
   };
 
   return {
     setState,
+    getState() { return currentState; },
     async processTranscript(transcript) {
       if (!transcript || transcript.trim().length === 0) {
         console.log(`⚠️ [${connectionId}] Empty transcript, ignoring`);
@@ -432,6 +439,7 @@ async function handleVoiceInteraction(ws, connectionId) {
         ttsQueue = [];
         nextTtsIndex = 0;
         audioSent = false;
+        allChunksQueued = false;
 
         // Stream response from OpenClaw
         for await (const chunk of callOpenClaw(transcript)) {
@@ -480,34 +488,20 @@ async function handleVoiceInteraction(ws, connectionId) {
           
           console.log(`🔊 [${connectionId}] TTS starting for final: "${sentenceBuffer.substring(0, 50)}..."`);
           
-          await generateSpeech(sentenceBuffer.trim())
+          allChunksQueued = true;
+          generateSpeech(sentenceBuffer.trim())
             .then(audioBuffer => {
               ttsQueue[ttsIndex] = audioBuffer;
-              trySendQueuedAudio();
-              // Wait a moment for any in-flight TTS, then end
-              setTimeout(() => {
-                if (nextTtsIndex >= ttsQueue.length) {
-                  endAudio();
-                }
-              }, 500);
+              trySendQueuedAudio(); // Will call endAudio when all sent
             })
             .catch(error => {
               console.error(`⚠️ [${connectionId}] TTS error:`, error.message);
               ttsQueue[ttsIndex] = Buffer.alloc(0);
               trySendQueuedAudio();
-              setTimeout(() => {
-                if (nextTtsIndex >= ttsQueue.length) {
-                  endAudio();
-                }
-              }, 500);
             });
         } else if (!ws.interrupted && ttsQueue.length > 0) {
-          // Wait for all TTS to complete
-          setTimeout(() => {
-            if (nextTtsIndex >= ttsQueue.length) {
-              endAudio();
-            }
-          }, 500);
+          allChunksQueued = true;
+          trySendQueuedAudio();
         } else if (!ws.interrupted) {
           // No audio generated
           setState('listening');
@@ -594,7 +588,11 @@ function startServer() {
         const message = JSON.parse(data.toString());
 
         if (message.type === 'audio') {
-          // Raw audio chunk from iOS
+          // Raw audio chunk from iOS — ignore during speaking/processing to prevent echo
+          if (pipeline.getState() === 'speaking' || pipeline.getState() === 'processing') {
+            return;
+          }
+          
           const audioBuffer = Buffer.from(message.data, 'base64');
           
           // Speaker verification (optional)
