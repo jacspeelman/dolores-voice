@@ -593,13 +593,13 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
     // Queue for ordered audio sending (TTS may complete out of order)
     const audioResults = [];
     let nextAudioToSend = 0;
+    let allChunksQueued = false; // Set true when we know total sentenceCount is final
     
     // Function to send audio chunks in order as they become ready
     const trySendAudioChunks = () => {
       // Check if interrupted
       if (ws.interrupted) {
         console.log(`⏸️ [${connectionId}] Audio sending interrupted, skipping remaining chunks`);
-        // Skip to end
         nextAudioToSend = audioResults.length;
         if (audioSent) {
           sendMessage(ws, { type: 'audio_done' });
@@ -608,7 +608,6 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
       }
       
       while (audioResults[nextAudioToSend] !== undefined) {
-        // Double-check interrupt status
         if (ws.interrupted) {
           console.log(`⏸️ [${connectionId}] Audio sending interrupted mid-stream`);
           if (audioSent) {
@@ -631,6 +630,13 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
           console.log(`🔊 [${connectionId}] Sent audio chunk ${nextAudioToSend + 1} (${audioData.length} bytes)`);
         }
         nextAudioToSend++;
+      }
+      
+      // Check if all chunks have been sent and we're done
+      if (allChunksQueued && nextAudioToSend >= sentenceCount && audioSent && !ws.interrupted) {
+        sendMessage(ws, { type: 'audio_done' });
+        console.log(`🔊 [${connectionId}] Audio streaming complete`);
+        allChunksQueued = false; // Prevent duplicate audio_done
       }
     };
     
@@ -727,30 +733,18 @@ async function handleTextMessageStreaming(ws, text, connectionId, wantsAudio = t
       sentenceCount++;
       console.log(`🔊 [${connectionId}] TTS starting final: "${sentenceBuffer.substring(0, 50)}..."`);
       
+      allChunksQueued = true; // All TTS calls are now dispatched
       textToSpeech(sentenceBuffer.trim()).then(audioData => {
         audioResults[myIndex] = audioData;
-        trySendAudioChunks();
-        // After final chunk, send audio_done (unless interrupted)
-        if (nextAudioToSend >= sentenceCount && !ws.interrupted && audioSent) {
-          sendMessage(ws, { type: 'audio_done' });
-          console.log(`🔊 [${connectionId}] Audio streaming complete`);
-        }
+        trySendAudioChunks(); // Will send audio_done if all chunks delivered
       }).catch(err => {
         audioResults[myIndex] = null;
         trySendAudioChunks();
       });
     } else if (wantsAudio && sentenceCount > 0) {
-      // Wait for pending audio to finish, then send audio_done
-      const checkComplete = setInterval(() => {
-        trySendAudioChunks();
-        if (nextAudioToSend >= sentenceCount || ws.interrupted) {
-          clearInterval(checkComplete);
-          if (!ws.interrupted && audioSent) {
-            sendMessage(ws, { type: 'audio_done' });
-            console.log(`🔊 [${connectionId}] Audio streaming complete`);
-          }
-        }
-      }, 100);
+      // No remaining text, mark all chunks queued and let trySendAudioChunks handle it
+      allChunksQueued = true;
+      trySendAudioChunks();
     }
 
   } catch (error) {

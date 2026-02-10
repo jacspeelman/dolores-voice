@@ -240,8 +240,8 @@ class VoiceManager: ObservableObject {
     
     // Barge-in support
     private var bargeInDetectionStartTime: Date?
-    private let bargeInThreshold: Float = 0.04  // Tuned for real iPhone with echo cancellation
-    private let bargeInDurationMs: Double = 100  // 100ms to confirm speech
+    private let bargeInThreshold: Float = 0.08  // Raised to avoid speaker feedback triggering barge-in
+    private let bargeInDurationMs: Double = 300  // 300ms to confirm real speech (not echo)
     
     // MARK: - Initialization
     
