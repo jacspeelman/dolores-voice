@@ -3556,3 +3556,77 @@ De journalist schreef haar artikel nooit...."
 🔊 [1] Sent audio chunk 2 (31104 bytes)
 🔊 [1] TTS starting bundled 3: "Even committen en pushen naar GitHub...."
 🔊 [1] Sent audio chunk 3 (40896 bytes)
+🔊 [1] TTS starting bundled 4: "Staat op GitHub...."
+🔊 [1] Sent audio chunk 4 (27648 bytes)
+🔊 [1] TTS starting bundled 5: "Lekker gefixt vandaag, barge-in én volume!..."
+🦋 [1] Dolores (8454ms): "Top! Dan laat ik het zo staan. Even committen en pushen naar GitHub.Staat op GitHub. Lekker gefixt v..."
+🔊 [1] Sent audio chunk 5 (51264 bytes)
+🔊 [1] Audio streaming complete
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🎙️ [1] Ending STT streaming session...
+🎙️ [1] Session stopped
+🎙️ [1] STT streaming stopped, final: ""
+⚠️ [1] Empty transcript from streaming
+🎙️ [1] Starting STT streaming session...
+🎙️ [1] STT streaming started
+🔌 [1] Disconnected (code: 1006, reason: )
+🎙️ [1] Session stopped
+🔌 [2] Connected from 192.168.1.135
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "zo"
+🎙️ [2] Interim: "zo daar ben ik"
+🎙️ [2] Interim: "zo daar ben ik we"
+🎙️ [2] Interim: "zo daar ben ik weer"
+🎙️ [2] Interim: "zo daar ben ik weer kun je"
+🎙️ [2] Interim: "zo daar ben ik weer kun je nog even"
+🎙️ [2] Interim: "zo daar ben ik weer kun je nog even een verhaal"
+🎙️ [2] Interim: "zo daar ben ik weer kun je nog even een verhaaltje ver"
+🎙️ [2] Interim: "zo daar ben ik weer kun je nog even een verhaaltje vertellen"
+🎙️ [2] Interim: "zo daar ben ik weer kun je nog even een verhaaltje vertellen van"
+🎙️ [2] Interim: "zo daar ben ik weer kun je nog even een verhaaltje vertellen van 50 woorden"
+🎙️ [2] Final segment: "Zo, daar ben ik weer. Kun je nog even een verhaaltje vertellen van 50 woorden?"
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Zo, daar ben ik weer. Kun je nog even een verhaaltje vertellen van 50 woorden?"
+📝 [2] Jac: "Zo, daar ben ik weer. Kun je nog even een verhaaltje vertellen van 50 woorden?" (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Een jongen vond een oude radio op zolder die geen ..."
+🔊 [2] Sent audio chunk 1 (61632 bytes)
+🔊 [2] TTS starting bundled 2: "Elke nacht speelde hij één liedje dat niemand ande..."
+🔊 [2] Sent audio chunk 2 (59904 bytes)
+🔊 [2] TTS starting bundled 3: "Op een dag stopte de muziek...."
+🔊 [2] Sent audio chunk 3 (33408 bytes)
+🔊 [2] TTS starting bundled 4: "De jongen huilde...."
+🔊 [2] Sent audio chunk 4 (25920 bytes)
+🔊 [2] TTS starting bundled 5: "Toen fluisterde de radio: je kent het liedje nu va..."
+🔊 [2] Sent audio chunk 5 (57024 bytes)
+🔊 [2] TTS starting bundled 6: "Je hebt mij niet meer nodig...."
+🦋 [2] Dolores (4607ms): "Een jongen vond een oude radio op zolder die geen stroom nodig had. Elke nacht speelde hij één liedj..."
+🔊 [2] Sent audio chunk 6 (31680 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🎙️ [2] Interim: "oké"
+🎙️ [2] Interim: "oké prima"
+🎙️ [2] Interim: "oké prima het werkt goed"
+🎙️ [2] Interim: "oké prima het werkt goed zo"
+🎙️ [2] Final segment: "Oké prima het werkt goed zo."
+🎙️ [2] Ending STT streaming session...
+🎙️ [2] Session stopped
+🎙️ [2] STT streaming stopped, final: "Oké prima het werkt goed zo."
+📝 [2] Jac: "Oké prima het werkt goed zo." (audio: true, streaming: true)
+🦋 [2] Asking OpenClaw (streaming)...
+🔊 [2] TTS starting sentence 1: "Mooi!..."
+🔊 [2] Sent audio chunk 1 (19584 bytes)
+🔊 [2] TTS starting bundled 2: "Fijn dat alles nu lekker werkt...."
+🔊 [2] Sent audio chunk 2 (36288 bytes)
+🔊 [2] TTS starting bundled 3: "Als je verder nog iets nodig hebt, je weet me te v..."
+🦋 [2] Dolores (3048ms): "Mooi! Fijn dat alles nu lekker werkt. Als je verder nog iets nodig hebt, je weet me te vinden!..."
+🔊 [2] Sent audio chunk 3 (52992 bytes)
+🔊 [2] Audio streaming complete
+🎙️ [2] Starting STT streaming session...
+🎙️ [2] STT streaming started
+🔌 [2] Disconnected (code: 1006, reason: )
+🎙️ [2] Session stopped
