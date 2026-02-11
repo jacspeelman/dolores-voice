@@ -458,6 +458,8 @@ class VoiceManager: ObservableObject {
             streamingAudioPlayer?.finalize { [weak self] in
                 Task { @MainActor in
                     self?.onSpeakingFinished()
+                    // Tell server playback is actually finished, so it can safely resume STT
+                    self?.sendJSON(["type": "playback_done"])
                 }
             }
             
