@@ -41,66 +41,159 @@ enum VoiceState: String {
     }
 }
 
-/// Streaming audio player for server TTS chunks
-class StreamingAudioPlayer: NSObject, AVAudioPlayerDelegate {
+/// Streaming PCM audio player for server TTS chunks.
+///
+/// Accepts raw PCM S16LE, 16kHz, mono chunks and plays them via AVAudioEngine + AVAudioPlayerNode.
+/// This is resilient to chunk boundaries and supports low-latency start with a small jitter buffer.
+final class PCMStreamingAudioPlayer {
+    private let queue = DispatchQueue(label: "pcm.streaming.player")
+
+    private let engine = AVAudioEngine()
+    private let playerNode = AVAudioPlayerNode()
+
+    private let sampleRate: Double = 16_000
+    private let channels: AVAudioChannelCount = 1
+
+    private lazy var format: AVAudioFormat = {
+        // Non-interleaved is the most common representation for AVAudioPCMBuffer.
+        AVAudioFormat(commonFormat: .pcmFormatInt16,
+                      sampleRate: sampleRate,
+                      channels: channels,
+                      interleaved: false)!
+    }()
+
     private var audioQueue: [Data] = []
-    private var currentPlayer: AVAudioPlayer?
+    private var isEngineRunning = false
     private var isPlaying = false
+
+    private var scheduledBuffers = 0
     private var onComplete: (() -> Void)?
-    
+    private var finalizing = false
+
+    // Jitter buffer: wait until we have ~250ms before starting playback.
+    private let startBufferSeconds: Double = 0.25
+
+    init() {
+        engine.attach(playerNode)
+        engine.connect(playerNode, to: engine.mainMixerNode, format: format)
+    }
+
     func addChunk(_ data: Data) {
-        audioQueue.append(data)
-        if !isPlaying {
-            playNext()
+        guard !data.isEmpty else { return }
+        queue.async { [weak self] in
+            guard let self else { return }
+            self.audioQueue.append(data)
+            self.finalizing = false
+            self.onComplete = nil
+            self.ensureStartedIfReady()
+            self.scheduleMoreIfNeeded()
         }
     }
-    
+
     func finalize(onComplete: @escaping () -> Void) {
-        self.onComplete = onComplete
-        if !isPlaying && audioQueue.isEmpty {
-            complete()
+        queue.async { [weak self] in
+            guard let self else { return }
+            self.finalizing = true
+            self.onComplete = onComplete
+            self.maybeComplete()
         }
     }
-    
-    private func playNext() {
-        guard !audioQueue.isEmpty else {
+
+    func stop() {
+        queue.sync {
+            audioQueue.removeAll()
+            finalizing = false
+            onComplete = nil
+            scheduledBuffers = 0
             isPlaying = false
-            if onComplete != nil {
-                complete()
-            }
+
+            playerNode.stop()
+            engine.stop()
+            isEngineRunning = false
+        }
+    }
+
+    // MARK: - Internals
+
+    private func totalQueuedSeconds() -> Double {
+        let bytes = audioQueue.reduce(0) { $0 + $1.count }
+        let frames = Double(bytes / 2) // 2 bytes per Int16 sample (mono)
+        return frames / sampleRate
+    }
+
+    private func ensureEngineRunning() throws {
+        guard !isEngineRunning else { return }
+        try engine.start()
+        isEngineRunning = true
+    }
+
+    private func ensureStartedIfReady() {
+        do {
+            try ensureEngineRunning()
+        } catch {
+            print("⚠️ PCM engine start failed: \(error)")
             return
         }
-        
+
+        guard !isPlaying else { return }
+        guard totalQueuedSeconds() >= startBufferSeconds else { return }
+
+        playerNode.play()
         isPlaying = true
-        let chunk = audioQueue.removeFirst()
-        
-        do {
-            currentPlayer = try AVAudioPlayer(data: chunk)
-            currentPlayer?.delegate = self
-            currentPlayer?.prepareToPlay()
-            currentPlayer?.play()
-        } catch {
-            print("⚠️ Audio chunk playback failed: \(error)")
-            playNext()
+    }
+
+    private func scheduleMoreIfNeeded() {
+        // Keep a small number of buffers scheduled ahead to avoid runaway scheduling.
+        let maxScheduledAhead = 8
+        while scheduledBuffers < maxScheduledAhead, !audioQueue.isEmpty {
+            let chunk = audioQueue.removeFirst()
+            guard let pcmBuffer = makePCMBuffer(from: chunk) else { continue }
+
+            scheduledBuffers += 1
+            playerNode.scheduleBuffer(pcmBuffer, completionCallbackType: .dataConsumed) { [weak self] _ in
+                guard let self else { return }
+                self.queue.async {
+                    self.scheduledBuffers = max(0, self.scheduledBuffers - 1)
+                    self.ensureStartedIfReady()
+                    self.scheduleMoreIfNeeded()
+                    self.maybeComplete()
+                }
+            }
         }
     }
-    
-    private func complete() {
-        onComplete?()
+
+    private func makePCMBuffer(from data: Data) -> AVAudioPCMBuffer? {
+        // Data is PCM S16LE mono.
+        let alignedCount = data.count - (data.count % 2)
+        guard alignedCount > 0 else { return nil }
+
+        let frameCount = AVAudioFrameCount(alignedCount / 2)
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount) else { return nil }
+        buffer.frameLength = frameCount
+
+        data.withUnsafeBytes { raw in
+            guard let src = raw.baseAddress else { return }
+            if let dst = buffer.int16ChannelData {
+                memcpy(dst[0], src, alignedCount)
+            }
+        }
+
+        return buffer
+    }
+
+    private func maybeComplete() {
+        guard finalizing else { return }
+        guard audioQueue.isEmpty, scheduledBuffers == 0 else { return }
+
+        let cb = onComplete
         onComplete = nil
-    }
-    
-    func stop() {
-        currentPlayer?.stop()
-        currentPlayer = nil
-        audioQueue.removeAll()
-        isPlaying = false
-    }
-    
-    // MARK: - AVAudioPlayerDelegate
-    
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        playNext()
+        finalizing = false
+
+        if cb != nil {
+            DispatchQueue.main.async {
+                cb?()
+            }
+        }
     }
 }
 
@@ -143,7 +236,7 @@ class VoiceManager: ObservableObject {
     private var isRecording = false
     
     // Audio playback
-    private var streamingAudioPlayer: StreamingAudioPlayer?
+    private var streamingAudioPlayer: PCMStreamingAudioPlayer?
     
     // Barge-in monitoring
     private var bargeInMonitor: AVAudioRecorder?
@@ -328,6 +421,16 @@ class VoiceManager: ObservableObject {
             
         case "audio":
             // Single audio chunk (TTS)
+            // Expected protocol: {type:'audio', format:'pcm_s16le', sampleRate:16000, channels:1, data:base64}
+            let format = (json["format"] as? String) ?? ""
+            let sr = (json["sampleRate"] as? Double) ?? Double(json["sampleRate"] as? Int ?? 0)
+            let ch = (json["channels"] as? Int) ?? 0
+
+            guard format == "pcm_s16le", Int(sr) == 16000, ch == 1 else {
+                // Ignore unknown/legacy formats (e.g., mp3 chunks)
+                return
+            }
+
             if let base64 = json["data"] as? String,
                let audioData = Data(base64Encoded: base64) {
                 playAudioChunk(audioData)
@@ -482,7 +585,7 @@ class VoiceManager: ObservableObject {
     
     private func playAudioChunk(_ data: Data) {
         if streamingAudioPlayer == nil {
-            streamingAudioPlayer = StreamingAudioPlayer()
+            streamingAudioPlayer = PCMStreamingAudioPlayer()
         }
         streamingAudioPlayer?.addChunk(data)
     }

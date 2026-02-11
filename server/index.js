@@ -15,7 +15,7 @@
  * 
  * Server → Client:
  *   {type: "state", state: "listening|processing|speaking"}
- *   {type: "audio", data: <base64 mp3/pcm>}
+ *   {type: "audio", format: "pcm_s16le", sampleRate: 16000, channels: 1, data: <base64 PCM>}
  *   {type: "audio_end"}
  *   {type: "transcript", text: "..."}
  */
@@ -285,19 +285,22 @@ async function* callOpenClaw(userMessage) {
 // === ElevenLabs TTS ===
 /**
  * Generate speech with ElevenLabs
- * Returns audio buffer (MP3)
+ * Returns raw PCM S16LE 16kHz mono (Buffer)
  */
 async function generateSpeech(text) {
   if (!text || text.trim().length === 0) {
     throw new Error('Empty text for TTS');
   }
 
+  // Request stream endpoint but ask ElevenLabs to return raw PCM.
+  // Per ElevenLabs docs, `output_format=pcm_16000` => PCM (S16LE) 16kHz.
   const response = await fetchWithTimeout(
-    `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}/stream`,
+    `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}/stream?output_format=pcm_16000`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'audio/pcm',
         'xi-api-key': ELEVENLABS_API_KEY
       },
       body: JSON.stringify({
@@ -397,6 +400,9 @@ function handleVoiceInteraction(ws, connectionId) {
     }
     sendMessage(ws, {
       type: 'audio',
+      format: 'pcm_s16le',
+      sampleRate: 16000,
+      channels: 1,
       data: audioBuffer.toString('base64'),
       index
     });
