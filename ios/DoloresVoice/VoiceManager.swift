@@ -407,15 +407,30 @@ class VoiceManager: ObservableObject {
                     state = .listening
                     stopProcessingAnimation()
                     stopSpeakingAnimation()
+                    // Prevent echo-loop: only record when server is listening.
+                    // Add a short tail so we don't immediately re-capture our own TTS.
+                    stopRecording()
+                    stopBargeInMonitoring()
+                    Task { [weak self] in
+                        try? await Task.sleep(for: .milliseconds(350))
+                        await MainActor.run {
+                            self?.startRecording()
+                        }
+                    }
                 case "processing":
                     state = .processing
                     startProcessingAnimation()
                     stopSpeakingAnimation()
+                    // Don't record while server is processing.
+                    stopRecording()
+                    stopBargeInMonitoring()
                 case "speaking":
                     state = .speaking
                     stopProcessingAnimation()
                     startSpeakingAnimation()
-                    startBargeInMonitoring()
+                    // Don't record while speaking (avoids self-transcription loops).
+                    stopRecording()
+                    stopBargeInMonitoring()
                 default:
                     break
                 }
