@@ -201,7 +201,7 @@ final class PCMStreamingAudioPlayer {
 class VoiceManager: ObservableObject {
     // MARK: - Configuration
     
-    private let serverURL = URL(string: "ws://192.168.1.66:8765")!
+    private let serverURL = URL(string: "ws://192.168.1.214:8765")!
     private let maxReconnectAttempts = 5
     
     // Audio settings (match server expectations)
