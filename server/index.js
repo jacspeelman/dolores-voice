@@ -444,7 +444,7 @@ function handleVoiceInteraction(ws, connectionId) {
         try {
           // Only resume if we're still not in listening
           if (pipeline.getState() !== 'listening') {
-            ws.muteUntilMs = Date.now() + 250;
+            ws.muteUntilMs = Date.now() + 1200;
             pipeline.setState('listening');
             console.log(`🔊 [${connectionId}] playback_done timeout → resume listening`);
           }
@@ -739,10 +739,17 @@ function startServer() {
           entry.session.pushAudio(audioBuffer);
 
         } else if (message.type === 'playback_done') {
-          // Client confirms audio has finished playing; safe to resume listening.
-          ws.muteUntilMs = Date.now() + 250; // short tail
-          pipeline.setState('listening');
-          console.log(`🔊 [${connectionId}] playback_done received → resume listening`);
+          // Client confirms playback finished. Still add a safety tail before resuming STT,
+          // otherwise we can transcribe our own last audio (speaker leakage).
+          ws.muteUntilMs = Date.now() + 1200;
+          console.log(`🔊 [${connectionId}] playback_done received → resume listening after tail`);
+
+          setTimeout(() => {
+            try {
+              pipeline.setState('listening');
+              console.log(`🔊 [${connectionId}] resume listening (post-playback tail)`);
+            } catch {}
+          }, 1200).unref();
 
         } else if (message.type === 'interrupt') {
           // User interrupted (barge-in)
