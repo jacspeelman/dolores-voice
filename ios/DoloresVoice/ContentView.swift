@@ -21,15 +21,15 @@ struct ContentView: View {
                 
                 // Pulsing circle in center
                 ZStack {
-                    // Outer pulse animation
-                    if voiceManager.state == .listening {
-                        Circle()
-                            .stroke(voiceManager.state.color.opacity(0.3), lineWidth: 3)
-                            .frame(
-                                width: 200 + CGFloat(voiceManager.audioLevel * 80),
-                                height: 200 + CGFloat(voiceManager.audioLevel * 80)
-                            )
-                            .animation(.easeOut(duration: 0.1), value: voiceManager.audioLevel)
+                    // Listening: pulsing rings identical to speaking rings
+                    if voiceManager.state == .listening && voiceManager.audioLevel > 0.05 {
+                        ForEach(0..<3, id: \.self) { index in
+                            Circle()
+                                .stroke(voiceManager.state.color.opacity(0.5), lineWidth: 2)
+                                .frame(width: 200 + CGFloat(index * 30), height: 200 + CGFloat(index * 30))
+                                .scaleEffect(voiceManager.listeningWaveformScale)
+                                .opacity(1.0 - Double(index) * 0.3)
+                        }
                     }
                     
                     // Processing spinner

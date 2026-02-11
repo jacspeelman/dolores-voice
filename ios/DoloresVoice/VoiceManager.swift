@@ -201,7 +201,7 @@ final class PCMStreamingAudioPlayer {
 class VoiceManager: ObservableObject {
     // MARK: - Configuration
     
-    private let serverURL = URL(string: "ws://192.168.1.214:8765")!
+    private let serverURL = URL(string: "ws://192.168.1.66:8765")!
     private let maxReconnectAttempts = 5
     
     // Audio settings (match server expectations)
@@ -224,6 +224,7 @@ class VoiceManager: ObservableObject {
     // UI animation properties
     @Published var spinnerRotation: Double = 0.0
     @Published var waveformScale: CGFloat = 1.0
+    @Published var listeningWaveformScale: CGFloat = 1.0
     
     // MARK: - Private Properties
     
@@ -248,6 +249,7 @@ class VoiceManager: ObservableObject {
     // Animation timers
     private var spinnerTimer: Timer?
     private var waveformTimer: Timer?
+    private var listeningWaveformTimer: Timer?
     
     // MARK: - Initialization
     
@@ -407,26 +409,29 @@ class VoiceManager: ObservableObject {
                     state = .listening
                     stopProcessingAnimation()
                     stopSpeakingAnimation()
-                    // Prevent echo-loop: only record when server is listening.
-                    // Add a short tail so we don't immediately re-capture our own TTS.
-                    stopRecording()
+                    // Echo protection is handled server-side (Deepgram session killed + mute window).
+                    // Start recording quickly so user can speak immediately after Dolores finishes.
                     stopBargeInMonitoring()
-                    Task { [weak self] in
-                        try? await Task.sleep(for: .milliseconds(350))
-                        await MainActor.run {
-                            self?.startRecording()
+                    if !isRecording {
+                        Task { [weak self] in
+                            try? await Task.sleep(for: .milliseconds(200))
+                            await MainActor.run {
+                                self?.startRecording()
+                            }
                         }
                     }
                 case "processing":
                     state = .processing
                     startProcessingAnimation()
                     stopSpeakingAnimation()
+                    stopListeningAnimation()
                     // Don't record while server is processing.
                     stopRecording()
                     stopBargeInMonitoring()
                 case "speaking":
                     state = .speaking
                     stopProcessingAnimation()
+                    stopListeningAnimation()
                     startSpeakingAnimation()
                     // Don't record while speaking (avoids self-transcription loops).
                     stopRecording()
@@ -454,13 +459,12 @@ class VoiceManager: ObservableObject {
             }
             
         case "audio_end":
-            // Server finished speaking.
-            // Send playback_done immediately (best-effort) so server can resume STT.
-            // We still finalize the local player and update UI when audio really drains.
-            sendJSON(["type": "playback_done"])
-
+            // Server finished sending audio chunks.
+            // Wait until the player has actually finished playing before sending playback_done,
+            // otherwise the mic will pick up the tail of our own TTS output (echo loop).
             streamingAudioPlayer?.finalize { [weak self] in
                 Task { @MainActor in
+                    self?.sendJSON(["type": "playback_done"])
                     self?.onSpeakingFinished()
                 }
             }
@@ -542,7 +546,7 @@ class VoiceManager: ObservableObject {
                     
                     DispatchQueue.main.async {
                         self.pcmBuffer.append(data)
-                        
+
                         // Calculate audio level for UI
                         var sum: Float = 0
                         for i in 0..<Int(convertedBuffer.frameLength) {
@@ -551,6 +555,13 @@ class VoiceManager: ObservableObject {
                         }
                         let rms = sqrt(sum / Float(convertedBuffer.frameLength))
                         self.audioLevel = min(rms * 5, 1.0)
+
+                        // Start/stop listening waveform animation based on voice
+                        if self.state == .listening && self.audioLevel > 0.05 {
+                            self.startListeningAnimation()
+                        } else if self.audioLevel <= 0.05 {
+                            self.stopListeningAnimation()
+                        }
                     }
                 }
             }
@@ -754,5 +765,28 @@ class VoiceManager: ObservableObject {
         waveformTimer?.invalidate()
         waveformTimer = nil
         waveformScale = 1.0
+    }
+
+    private func startListeningAnimation() {
+        guard listeningWaveformTimer == nil else { return }
+        listeningWaveformScale = 1.0
+        var direction: CGFloat = 1.0
+        listeningWaveformTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                guard let self = self else { return }
+                self.listeningWaveformScale += 0.05 * direction
+                if self.listeningWaveformScale >= 1.2 {
+                    direction = -1.0
+                } else if self.listeningWaveformScale <= 0.8 {
+                    direction = 1.0
+                }
+            }
+        }
+    }
+
+    private func stopListeningAnimation() {
+        listeningWaveformTimer?.invalidate()
+        listeningWaveformTimer = nil
+        listeningWaveformScale = 1.0
     }
 }

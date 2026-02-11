@@ -42,9 +42,9 @@ const AZURE_SPEAKER_KEY = process.env.AZURE_SPEAKER_KEY;
 const AZURE_SPEAKER_REGION = process.env.AZURE_SPEAKER_REGION || 'westeurope';
 const AZURE_SPEAKER_PROFILE_ID = process.env.AZURE_SPEAKER_PROFILE_ID; // Jac's voice profile
 
-// OpenClaw Gateway
-const OPENCLAW_URL = process.env.OPENCLAW_URL || 'http://127.0.0.1:18789';
-const OPENCLAW_TOKEN = process.env.OPENCLAW_TOKEN || '3045cdeb9a19f9d7198690cdadade2dff487a9556e0330d5';
+// OpenAI API (direct, replaces OpenClaw for local testing)
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o';
 
 // === Validation ===
 if (!DEEPGRAM_API_KEY) {
@@ -57,8 +57,8 @@ if (!ELEVENLABS_API_KEY) {
   process.exit(1);
 }
 
-if (!OPENCLAW_TOKEN) {
-  console.error('❌ OPENCLAW_TOKEN not set');
+if (!OPENAI_API_KEY) {
+  console.error('❌ OPENAI_API_KEY not set');
   process.exit(1);
 }
 
@@ -100,9 +100,9 @@ async function verifySpeaker(audioBuffer) {
  * Real-time Speech-to-Text using Deepgram Nova-3
  */
 class DeepgramSTTSession {
-  constructor(connectionId, onTranscript, onError) {
+  constructor(connectionId, onUtteranceEnd, onError) {
     this.connectionId = connectionId;
-    this.onTranscript = onTranscript;
+    this.onUtteranceEnd = onUtteranceEnd; // Called when user stops speaking (after utterance_end_ms silence)
     this.onError = onError;
     this.deepgram = null;
     this.connection = null;
@@ -113,32 +113,40 @@ class DeepgramSTTSession {
   async start() {
     try {
       this.deepgram = createClient(DEEPGRAM_API_KEY);
-      
+
       this.connection = this.deepgram.listen.live({
         model: 'nova-3',
         language: 'nl',
         smart_format: true,
         interim_results: true,
         utterance_end_ms: 1500,
+        endpointing: 500,
         vad_events: true,
         encoding: 'linear16',
         sample_rate: 16000,
         channels: 1
       });
 
-      // Handle transcript events
+      // Handle transcript events — accumulate finals, don't process yet
       this.connection.on(LiveTranscriptionEvents.Transcript, (data) => {
         const transcript = data.channel?.alternatives?.[0]?.transcript;
         if (transcript && transcript.trim()) {
           const isFinal = data.is_final;
           console.log(`🎙️ [${this.connectionId}] ${isFinal ? 'Final' : 'Interim'}: "${transcript}"`);
-          
+
           if (isFinal) {
             this.transcript += (this.transcript ? ' ' : '') + transcript;
-            this.onTranscript(transcript, true);
-          } else {
-            this.onTranscript(transcript, false);
           }
+        }
+      });
+
+      // UtteranceEnd fires after utterance_end_ms of silence — THIS is when the user is done
+      this.connection.on(LiveTranscriptionEvents.UtteranceEnd, () => {
+        if (this.transcript.trim()) {
+          console.log(`🎙️ [${this.connectionId}] UtteranceEnd → "${this.transcript}"`);
+          const fullTranscript = this.transcript;
+          this.transcript = '';
+          this.onUtteranceEnd(fullTranscript);
         }
       });
 
@@ -221,33 +229,33 @@ class DeepgramSTTSession {
 // Active STT sessions per connection
 const sttSessions = new Map();
 
-// === OpenClaw Integration ===
+// === OpenAI Integration ===
+const SYSTEM_PROMPT = `Je bent Dolores, een behulpzame en vriendelijke AI-assistent. Je praat in het Nederlands.
+Dit is een voice gesprek. Antwoord KORT in 1-3 zinnen, geen markdown/bullets, praat natuurlijk en conversationeel.`;
+
 /**
- * Send message to OpenClaw and get streaming response
+ * Send message to OpenAI and get streaming response
  */
-async function* callOpenClaw(userMessage) {
-  const voiceMessage = `[VOICE] ${userMessage}
-
-(Dit is een voice gesprek via de Dolores Voice app v2. Antwoord KORT in 1-3 zinnen, geen markdown/bullets, praat natuurlijk. GEBRUIK GEEN tts tool — de voice app regelt zelf de spraaksynthese.)`;
-
-  const response = await fetchWithTimeout(`${OPENCLAW_URL}/v1/chat/completions`, {
+async function* callLLM(userMessage) {
+  const response = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENCLAW_TOKEN}`,
-      'x-openclaw-agent-id': 'main'
+      'Authorization': `Bearer ${OPENAI_API_KEY}`
     },
     body: JSON.stringify({
-      model: 'openclaw',
-      messages: [{ role: 'user', content: voiceMessage }],
-      user: 'voice-jac',
+      model: OPENAI_MODEL,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userMessage }
+      ],
       stream: true
     })
-  }, 90000);
+  }, 30000);
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`OpenClaw error: ${response.status} - ${error}`);
+    throw new Error(`OpenAI error: ${response.status} - ${error}`);
   }
 
   const reader = response.body.getReader();
@@ -259,7 +267,7 @@ async function* callOpenClaw(userMessage) {
     if (done) break;
 
     buffer += decoder.decode(value, { stream: true });
-    
+
     const lines = buffer.split('\n');
     buffer = lines.pop();
 
@@ -267,7 +275,7 @@ async function* callOpenClaw(userMessage) {
       if (line.startsWith('data: ')) {
         const data = line.slice(6).trim();
         if (data === '[DONE]') return;
-        
+
         try {
           const json = JSON.parse(data);
           const delta = json.choices?.[0]?.delta?.content;
@@ -411,21 +419,24 @@ function handleVoiceInteraction(ws, connectionId) {
     console.log(`🔊 [${connectionId}] Sent audio chunk ${index} (${audioBuffer.length} bytes)`);
   };
 
+  // Serial TTS queue — process one at a time to avoid ElevenLabs 429 rate limits,
+  // but still overlap with LLM streaming (first sentence starts TTS immediately).
+  let ttsChain = Promise.resolve();
+
   const dispatchTts = (ttsIndex, textToSpeak) => {
     pendingTts++;
-    generateSpeech(textToSpeak)
-      .then(audioBuffer => {
+    ttsChain = ttsChain.then(async () => {
+      if (ws.interrupted) return;
+      try {
+        const audioBuffer = await generateSpeech(textToSpeak);
         ttsQueue[ttsIndex] = audioBuffer;
-      })
-      .catch(error => {
+      } catch (error) {
         console.error(`⚠️ [${connectionId}] TTS error:`, error.message);
-        // Empty buffer to maintain order
         ttsQueue[ttsIndex] = Buffer.alloc(0);
-      })
-      .finally(() => {
-        pendingTts--;
-        trySendQueuedAudio();
-      });
+      }
+      pendingTts--;
+      trySendQueuedAudio();
+    });
   };
 
   const endAudio = () => {
@@ -435,21 +446,21 @@ function handleVoiceInteraction(ws, connectionId) {
 
       // IMPORTANT: don't immediately resume listening/recording.
       // The client's speaker is still playing; if we resume STT too fast we'll transcribe our own TTS.
-      ws.muteUntilMs = Date.now() + 2000; // safety window
+      ws.muteUntilMs = Date.now() + 500; // short safety — playback_done now waits for real audio end
 
       console.log(`🔊 [${connectionId}] Audio streaming complete (waiting for playback_done)`);
 
-      // Fallback: if the client never sends playback_done, resume listening after a timeout.
+      // Fallback: if the client never sends playback_done, resume listening after a generous timeout.
+      // Long TTS responses can take 15+ seconds to play back on device.
       setTimeout(() => {
         try {
-          // Only resume if we're still not in listening
-          if (pipeline.getState() !== 'listening') {
-            ws.muteUntilMs = Date.now() + 1200;
-            pipeline.setState('listening');
+          if (currentState !== 'listening') {
+            ws.muteUntilMs = Date.now() + 500;
+            setState('listening');
             console.log(`🔊 [${connectionId}] playback_done timeout → resume listening`);
           }
         } catch {}
-      }, 4000).unref();
+      }, 30000).unref();
     }
   };
 
@@ -485,9 +496,19 @@ function handleVoiceInteraction(ws, connectionId) {
     }
   };
 
+  // Stop the active Deepgram session so it can't transcribe echo audio.
+  const stopSTT = () => {
+    const entry = sttSessions.get(connectionId);
+    if (entry?.session) {
+      entry.session.cleanup();
+      entry.session = null;
+    }
+  };
+
   return {
     setState,
     getState() { return currentState; },
+    stopSTT,
     async processTranscript(transcript) {
       if (!transcript || transcript.trim().length === 0) {
         console.log(`⚠️ [${connectionId}] Empty transcript, ignoring`);
@@ -498,6 +519,7 @@ function handleVoiceInteraction(ws, connectionId) {
       sendMessage(ws, { type: 'transcript', text: transcript });
 
       try {
+        stopSTT(); // Kill Deepgram session immediately — prevents echo transcription
         setState('processing');
         console.log(`🦋 [${connectionId}] Processing: "${transcript}"`);
 
@@ -507,8 +529,8 @@ function handleVoiceInteraction(ws, connectionId) {
         nextTtsIndex = 0;
         audioSent = false;
 
-        // Stream response from OpenClaw
-        for await (const chunk of callOpenClaw(transcript)) {
+        // Stream response from OpenAI
+        for await (const chunk of callLLM(transcript)) {
           if (ws.interrupted) {
             console.log(`⏸️ [${connectionId}] Interrupted during LLM streaming`);
             break;
@@ -572,7 +594,7 @@ function handleVoiceInteraction(ws, connectionId) {
       nextTtsIndex = 0;
       endAudio();
       ws.interrupted = false;
-    ws.muteUntilMs = 0; // Reset for next interaction
+      ws.muteUntilMs = 0;
     }
   };
 }
@@ -609,7 +631,7 @@ function startServer() {
   process.once('SIGINT', () => shutdown('SIGINT'));
 
   console.log(`🚀 Dolores Voice Server v2 - Pure Voice Pipeline`);
-  console.log(`🔗 OpenClaw: ${OPENCLAW_URL}`);
+  console.log(`🔗 LLM: OpenAI ${OPENAI_MODEL}`);
   console.log(`🎙️ STT: Deepgram Nova-3 (real-time)`);
   console.log(`🔊 TTS: ElevenLabs ${ELEVENLABS_MODEL} (voice: ${ELEVENLABS_VOICE_ID.substring(0, 8)}...)`);
   console.log(`🔐 Speaker Verification: ${AZURE_SPEAKER_KEY ? 'Azure (configured)' : 'disabled'}`);
@@ -659,7 +681,7 @@ function startServer() {
       stt: { provider: 'Deepgram', model: 'Nova-3', realtime: true },
       tts: { provider: 'ElevenLabs', model: ELEVENLABS_MODEL, voice: ELEVENLABS_VOICE_ID },
       speakerVerification: !!AZURE_SPEAKER_KEY,
-      backend: 'OpenClaw'
+      backend: 'OpenAI'
     });
 
     ws.on('message', async (data) => {
@@ -697,11 +719,9 @@ function startServer() {
             if (!entry.starting) {
               const session = new DeepgramSTTSession(
                 connectionId,
-                (transcript, isFinal) => {
-                  if (isFinal) {
-                    // Process complete utterance
-                    pipeline.processTranscript(transcript);
-                  }
+                (transcript) => {
+                  // Called on UtteranceEnd — user stopped speaking
+                  pipeline.processTranscript(transcript);
                 },
                 (error) => {
                   console.error(`❌ [${connectionId}] STT error:`, error);
@@ -739,17 +759,11 @@ function startServer() {
           entry.session.pushAudio(audioBuffer);
 
         } else if (message.type === 'playback_done') {
-          // Client confirms playback finished. Still add a safety tail before resuming STT,
-          // otherwise we can transcribe our own last audio (speaker leakage).
-          ws.muteUntilMs = Date.now() + 1200;
-          console.log(`🔊 [${connectionId}] playback_done received → resume listening after tail`);
-
-          setTimeout(() => {
-            try {
-              pipeline.setState('listening');
-              console.log(`🔊 [${connectionId}] resume listening (post-playback tail)`);
-            } catch {}
-          }, 1200).unref();
+          // Client confirms audio has finished playing; short safety tail for speaker decay.
+          // Main echo protection is Deepgram session kill — this just catches residual reverb.
+          ws.muteUntilMs = Date.now() + 500;
+          pipeline.setState('listening');
+          console.log(`🔊 [${connectionId}] playback_done received → resume listening`);
 
         } else if (message.type === 'interrupt') {
           // User interrupted (barge-in)
