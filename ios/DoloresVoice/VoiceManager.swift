@@ -150,7 +150,7 @@ final class PCMStreamingAudioPlayer {
             guard let pcmBuffer = makePCMBuffer(from: chunk) else { continue }
 
             scheduledBuffers += 1
-            playerNode.scheduleBuffer(pcmBuffer, completionCallbackType: .dataConsumed) { [weak self] _ in
+            playerNode.scheduleBuffer(pcmBuffer, completionCallbackType: .dataPlayedBack) { [weak self] _ in
                 guard let self else { return }
                 self.queue.async {
                     self.scheduledBuffers = max(0, self.scheduledBuffers - 1)

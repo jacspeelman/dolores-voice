@@ -386,6 +386,8 @@ function handleVoiceInteraction(ws, connectionId) {
   let nextTtsIndex = 0;
   let audioSent = false;
   let allChunksQueued = false;
+  let pendingTts = 0;
+  let llmDone = false;
 
   const setState = (newState) => {
     currentState = newState;
@@ -409,6 +411,23 @@ function handleVoiceInteraction(ws, connectionId) {
     console.log(`🔊 [${connectionId}] Sent audio chunk ${index} (${audioBuffer.length} bytes)`);
   };
 
+  const dispatchTts = (ttsIndex, textToSpeak) => {
+    pendingTts++;
+    generateSpeech(textToSpeak)
+      .then(audioBuffer => {
+        ttsQueue[ttsIndex] = audioBuffer;
+      })
+      .catch(error => {
+        console.error(`⚠️ [${connectionId}] TTS error:`, error.message);
+        // Empty buffer to maintain order
+        ttsQueue[ttsIndex] = Buffer.alloc(0);
+      })
+      .finally(() => {
+        pendingTts--;
+        trySendQueuedAudio();
+      });
+  };
+
   const endAudio = () => {
     if (audioSent) {
       sendMessage(ws, { type: 'audio_end' });
@@ -423,22 +442,30 @@ function handleVoiceInteraction(ws, connectionId) {
       console.log(`⏸️ [${connectionId}] Interrupted, clearing audio queue`);
       ttsQueue = [];
       nextTtsIndex = 0;
+      pendingTts = 0;
+      llmDone = false;
       endAudio();
       return;
     }
 
-    while (ttsQueue[nextTtsIndex] !== undefined) {
+    // Send only in-order ready chunks. We reserve slots with null;
+    // never advance past a null placeholder or we'll skip audio forever.
+    while (nextTtsIndex < ttsQueue.length) {
       const audioBuffer = ttsQueue[nextTtsIndex];
-      if (audioBuffer) {
+      if (audioBuffer === null || audioBuffer === undefined) break;
+      if (audioBuffer.length > 0) {
         sendAudio(audioBuffer, nextTtsIndex);
       }
       nextTtsIndex++;
     }
-    
-    // If all TTS calls are dispatched and all chunks sent, end audio
-    if (allChunksQueued && nextTtsIndex >= ttsQueue.length && ttsQueue.length > 0) {
-      allChunksQueued = false; // Prevent duplicate endAudio
+
+    // End audio only when LLM is done AND all TTS jobs resolved AND all queued chunks have been processed.
+    if (llmDone && pendingTts === 0 && nextTtsIndex >= ttsQueue.length && ttsQueue.length > 0) {
+      llmDone = false;
       endAudio();
+      // Reset queue for next turn
+      ttsQueue = [];
+      nextTtsIndex = 0;
     }
   };
 
@@ -463,7 +490,6 @@ function handleVoiceInteraction(ws, connectionId) {
         ttsQueue = [];
         nextTtsIndex = 0;
         audioSent = false;
-        allChunksQueued = false;
 
         // Stream response from OpenClaw
         for await (const chunk of callOpenClaw(transcript)) {
@@ -488,22 +514,16 @@ function handleVoiceInteraction(ws, connectionId) {
                 console.log(`🔊 [${connectionId}] TTS starting for sentence ${ttsIndex + 1}: "${sentence.substring(0, 50)}..."`);
                 
                 // Generate speech async
-                generateSpeech(sentence)
-                  .then(audioBuffer => {
-                    ttsQueue[ttsIndex] = audioBuffer;
-                    trySendQueuedAudio();
-                  })
-                  .catch(error => {
-                    console.error(`⚠️ [${connectionId}] TTS error:`, error.message);
-                    ttsQueue[ttsIndex] = Buffer.alloc(0); // Empty buffer to maintain order
-                    trySendQueuedAudio();
-                  });
+                dispatchTts(ttsIndex, sentence);
               }
             }
           }
 
           sentenceBuffer = remaining;
         }
+
+        // LLM stream finished; end audio once all TTS has resolved and been sent.
+        llmDone = true;
 
         // Handle remaining text
         if (!ws.interrupted && sentenceBuffer.trim().length > 2) {
@@ -512,19 +532,8 @@ function handleVoiceInteraction(ws, connectionId) {
           
           console.log(`🔊 [${connectionId}] TTS starting for final: "${sentenceBuffer.substring(0, 50)}..."`);
           
-          allChunksQueued = true;
-          generateSpeech(sentenceBuffer.trim())
-            .then(audioBuffer => {
-              ttsQueue[ttsIndex] = audioBuffer;
-              trySendQueuedAudio(); // Will call endAudio when all sent
-            })
-            .catch(error => {
-              console.error(`⚠️ [${connectionId}] TTS error:`, error.message);
-              ttsQueue[ttsIndex] = Buffer.alloc(0);
-              trySendQueuedAudio();
-            });
+          dispatchTts(ttsIndex, sentenceBuffer.trim());
         } else if (!ws.interrupted && ttsQueue.length > 0) {
-          allChunksQueued = true;
           trySendQueuedAudio();
         } else if (!ws.interrupted) {
           // No audio generated
