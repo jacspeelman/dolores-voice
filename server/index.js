@@ -435,9 +435,21 @@ function handleVoiceInteraction(ws, connectionId) {
 
       // IMPORTANT: don't immediately resume listening/recording.
       // The client's speaker is still playing; if we resume STT too fast we'll transcribe our own TTS.
-      ws.muteUntilMs = Date.now() + 2000; // safety window even if client never acks
+      ws.muteUntilMs = Date.now() + 2000; // safety window
 
       console.log(`🔊 [${connectionId}] Audio streaming complete (waiting for playback_done)`);
+
+      // Fallback: if the client never sends playback_done, resume listening after a timeout.
+      setTimeout(() => {
+        try {
+          // Only resume if we're still not in listening
+          if (pipeline.getState() !== 'listening') {
+            ws.muteUntilMs = Date.now() + 250;
+            pipeline.setState('listening');
+            console.log(`🔊 [${connectionId}] playback_done timeout → resume listening`);
+          }
+        } catch {}
+      }, 4000).unref();
     }
   };
 

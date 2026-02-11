@@ -454,12 +454,14 @@ class VoiceManager: ObservableObject {
             }
             
         case "audio_end":
-            // Server finished speaking
+            // Server finished speaking.
+            // Send playback_done immediately (best-effort) so server can resume STT.
+            // We still finalize the local player and update UI when audio really drains.
+            sendJSON(["type": "playback_done"])
+
             streamingAudioPlayer?.finalize { [weak self] in
                 Task { @MainActor in
                     self?.onSpeakingFinished()
-                    // Tell server playback is actually finished, so it can safely resume STT
-                    self?.sendJSON(["type": "playback_done"])
                 }
             }
             
