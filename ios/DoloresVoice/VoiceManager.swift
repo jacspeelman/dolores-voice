@@ -209,8 +209,10 @@ class VoiceManager: ObservableObject {
     private let audioChunkIntervalMs: Double = 100  // Send chunks every 100ms
     
     // Barge-in settings
-    private let bargeInThreshold: Float = 0.08
-    private let bargeInDurationMs: Double = 300
+    // NOTE: Temporarily disabled by making detection extremely conservative.
+    // Without speaker verification / robust AEC, the monitor can trigger on our own TTS audio.
+    private let bargeInThreshold: Float = 0.25
+    private let bargeInDurationMs: Double = 1200
     
     // MARK: - Published State
     
