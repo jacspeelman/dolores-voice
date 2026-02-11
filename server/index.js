@@ -390,7 +390,6 @@ function handleVoiceInteraction(ws, connectionId) {
   let llmDone = false;
 
   let resumeAfterPlayback = false;
-  let muteUntilMs = 0;
 
   const setState = (newState) => {
     currentState = newState;
@@ -439,7 +438,7 @@ function handleVoiceInteraction(ws, connectionId) {
       // IMPORTANT: don't immediately resume listening/recording.
       // The client's speaker is still playing; if we resume STT too fast we'll transcribe our own TTS.
       resumeAfterPlayback = true;
-      muteUntilMs = Date.now() + 2000; // safety window even if client never acks
+      ws.muteUntilMs = Date.now() + 2000; // safety window even if client never acks
 
       console.log(`🔊 [${connectionId}] Audio streaming complete (waiting for playback_done)`);
     }
@@ -563,7 +562,8 @@ function handleVoiceInteraction(ws, connectionId) {
       ttsQueue = [];
       nextTtsIndex = 0;
       endAudio();
-      ws.interrupted = false; // Reset for next interaction
+      ws.interrupted = false;
+    ws.muteUntilMs = 0; // Reset for next interaction
     }
   };
 }
@@ -634,6 +634,7 @@ function startServer() {
     ws.isAlive = true;
     ws.connectionId = connectionId;
     ws.interrupted = false;
+    ws.muteUntilMs = 0;
 
     // Create voice pipeline handler
     const pipeline = handleVoiceInteraction(ws, connectionId);
@@ -662,7 +663,7 @@ function startServer() {
           // Raw audio chunk from iOS — ignore during speaking/processing and during a post-playback cooldown
           // to prevent echo/self-transcription loops.
           const now = Date.now();
-          if (pipeline.getState() === 'speaking' || pipeline.getState() === 'processing' || now < muteUntilMs) {
+          if (pipeline.getState() === 'speaking' || pipeline.getState() === 'processing' || now < (ws.muteUntilMs || 0)) {
             return;
           }
           
@@ -731,7 +732,7 @@ function startServer() {
         } else if (message.type === 'playback_done') {
           // Client confirms audio has finished playing; safe to resume listening.
           resumeAfterPlayback = false;
-          muteUntilMs = Date.now() + 250; // short tail
+          ws.muteUntilMs = Date.now() + 250; // short tail
           pipeline.setState('listening');
           console.log(`🔊 [${connectionId}] playback_done received → resume listening`);
 
