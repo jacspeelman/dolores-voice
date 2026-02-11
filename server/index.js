@@ -389,8 +389,6 @@ function handleVoiceInteraction(ws, connectionId) {
   let pendingTts = 0;
   let llmDone = false;
 
-  let resumeAfterPlayback = false;
-
   const setState = (newState) => {
     currentState = newState;
     sendMessage(ws, { type: 'state', state: newState });
@@ -437,7 +435,6 @@ function handleVoiceInteraction(ws, connectionId) {
 
       // IMPORTANT: don't immediately resume listening/recording.
       // The client's speaker is still playing; if we resume STT too fast we'll transcribe our own TTS.
-      resumeAfterPlayback = true;
       ws.muteUntilMs = Date.now() + 2000; // safety window even if client never acks
 
       console.log(`🔊 [${connectionId}] Audio streaming complete (waiting for playback_done)`);
@@ -731,7 +728,6 @@ function startServer() {
 
         } else if (message.type === 'playback_done') {
           // Client confirms audio has finished playing; safe to resume listening.
-          resumeAfterPlayback = false;
           ws.muteUntilMs = Date.now() + 250; // short tail
           pipeline.setState('listening');
           console.log(`🔊 [${connectionId}] playback_done received → resume listening`);
