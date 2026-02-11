@@ -182,7 +182,12 @@ class DeepgramSTTSession {
   pushAudio(audioBuffer) {
     if (this.connection && this.isActive) {
       try {
-        this.connection.send(audioBuffer);
+        // Deepgram Node SDK expects an ArrayBuffer (not a Node Buffer)
+        const ab = audioBuffer.buffer.slice(
+          audioBuffer.byteOffset,
+          audioBuffer.byteOffset + audioBuffer.byteLength
+        );
+        this.connection.send(ab);
       } catch (error) {
         console.error(`🎙️ [${this.connectionId}] Failed to send audio:`, error);
       }
@@ -353,8 +358,21 @@ function extractCompleteSentences(text) {
 
 // === WebSocket Message Helper ===
 function sendMessage(ws, message) {
-  if (ws.readyState === 1) { // OPEN
+  if (ws.readyState !== 1) return; // not OPEN
+
+  // Basic backpressure protection: if the client isn't reading fast enough,
+  // ws.bufferedAmount grows and the process can get OOM-killed (exit -9).
+  const HIGH_WATERMARK = 8 * 1024 * 1024; // 8MB
+  if (ws.bufferedAmount > HIGH_WATERMARK) {
+    console.warn(`⚠️ [${ws.connectionId}] Backpressure: bufferedAmount=${ws.bufferedAmount} > ${HIGH_WATERMARK}. Closing.`);
+    try { ws.close(1013, 'backpressure'); } catch (_) {}
+    return;
+  }
+
+  try {
     ws.send(JSON.stringify(message));
+  } catch (err) {
+    console.warn(`⚠️ [${ws.connectionId}] ws.send failed: ${err.message}`);
   }
 }
 
@@ -531,6 +549,32 @@ function handleVoiceInteraction(ws, connectionId) {
 function startServer() {
   const wss = new WebSocketServer({ host: '0.0.0.0', port: PORT });
   let connectionCounter = 0;
+  let heartbeatInterval = null;
+
+  const shutdown = (signal) => {
+    console.log(`🛑 Received ${signal}, shutting down...`);
+
+    try { clearInterval(heartbeatInterval); } catch (_) {}
+
+    for (const entry of sttSessions.values()) {
+      try { entry?.session?.cleanup?.(); } catch (_) {}
+    }
+    sttSessions.clear();
+
+    try {
+      wss.close(() => {
+        console.log('✅ WebSocket server closed');
+        process.exit(0);
+      });
+    } catch (_) {
+      process.exit(0);
+    }
+
+    setTimeout(() => process.exit(0), 2000).unref();
+  };
+
+  process.once('SIGTERM', () => shutdown('SIGTERM'));
+  process.once('SIGINT', () => shutdown('SIGINT'));
 
   console.log(`🚀 Dolores Voice Server v2 - Pure Voice Pipeline`);
   console.log(`🔗 OpenClaw: ${OPENCLAW_URL}`);
@@ -540,14 +584,18 @@ function startServer() {
 
   // Heartbeat
   const HEARTBEAT_INTERVAL = 30000;
-  const heartbeatInterval = setInterval(() => {
+  heartbeatInterval = setInterval(() => {
     wss.clients.forEach((ws) => {
       if (ws.isAlive === false) {
         console.log(`💔 [${ws.connectionId}] Connection timeout, terminating`);
         return ws.terminate();
       }
       ws.isAlive = false;
-      ws.ping();
+      try {
+        ws.ping();
+      } catch (err) {
+        console.warn(`⚠️ [${ws.connectionId}] ping failed: ${err.message}`);
+      }
     });
   }, HEARTBEAT_INTERVAL);
 
@@ -603,35 +651,57 @@ function startServer() {
             return;
           }
 
-          // Get or create STT session
-          let sttSession = sttSessions.get(connectionId);
-          if (!sttSession) {
-            sttSession = new DeepgramSTTSession(
-              connectionId,
-              (transcript, isFinal) => {
-                if (isFinal) {
-                  // Process complete utterance
-                  pipeline.processTranscript(transcript);
-                }
-              },
-              (error) => {
-                console.error(`❌ [${connectionId}] STT error:`, error);
-                sendMessage(ws, { type: 'error', error: `STT error: ${error}` });
-              }
-            );
+          // Get or create STT session (with a start lock to avoid duplicate Deepgram connections)
+          let entry = sttSessions.get(connectionId);
+          if (!entry) {
+            entry = { session: null, starting: null };
+            sttSessions.set(connectionId, entry);
+          }
 
-            const started = await sttSession.start();
-            if (!started) {
-              sendMessage(ws, { type: 'error', error: 'Failed to start STT' });
-              return;
+          if (!entry.session || !entry.session.isActive) {
+            if (!entry.starting) {
+              const session = new DeepgramSTTSession(
+                connectionId,
+                (transcript, isFinal) => {
+                  if (isFinal) {
+                    // Process complete utterance
+                    pipeline.processTranscript(transcript);
+                  }
+                },
+                (error) => {
+                  console.error(`❌ [${connectionId}] STT error:`, error);
+                  sendMessage(ws, { type: 'error', error: `STT error: ${error}` });
+                }
+              );
+
+              entry.session = session; // set immediately so concurrent audio chunks don't create duplicates
+              entry.starting = (async () => {
+                const started = await session.start();
+                if (!started) throw new Error('Failed to start STT');
+                pipeline.setState('listening');
+                return session;
+              })()
+                .catch((err) => {
+                  // If start fails, clean up so we can retry on next audio
+                  try { session.cleanup(); } catch (_) {}
+                  entry.session = null;
+                  throw err;
+                })
+                .finally(() => {
+                  entry.starting = null;
+                });
             }
 
-            sttSessions.set(connectionId, sttSession);
-            pipeline.setState('listening');
+            try {
+              await entry.starting;
+            } catch (err) {
+              sendMessage(ws, { type: 'error', error: err.message || 'Failed to start STT' });
+              return;
+            }
           }
 
           // Push audio to STT
-          sttSession.pushAudio(audioBuffer);
+          entry.session.pushAudio(audioBuffer);
 
         } else if (message.type === 'interrupt') {
           // User interrupted (barge-in)
@@ -656,11 +726,11 @@ function startServer() {
       console.log(`🔌 [${connectionId}] Disconnected (code: ${code}, reason: ${reasonStr})`);
 
       // Cleanup STT session
-      const sttSession = sttSessions.get(connectionId);
-      if (sttSession) {
-        sttSession.cleanup();
-        sttSessions.delete(connectionId);
+      const entry = sttSessions.get(connectionId);
+      if (entry?.session) {
+        entry.session.cleanup();
       }
+      sttSessions.delete(connectionId);
     });
   });
 
@@ -670,6 +740,10 @@ function startServer() {
 
   wss.on('error', (error) => {
     console.error(`❌ Server error:`, error.message);
+    if (error && (error.code === 'EADDRINUSE' || String(error.message || '').includes('EADDRINUSE'))) {
+      console.error('❌ Port already in use. Exiting so launchd can retry cleanly.');
+      process.exit(1);
+    }
   });
 }
 
