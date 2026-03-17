@@ -1,6 +1,6 @@
 //
 //  RealtimeVoiceManager.swift
-//  DoloresVoice
+//  DonnaVoice
 //
 //  OpenAI Realtime API mode — direct WebRTC connection to OpenAI.
 //  No Deepgram, no ElevenLabs, no audio proxying.

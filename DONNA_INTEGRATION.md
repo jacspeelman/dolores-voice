@@ -1,12 +1,12 @@
-# Dolores Voice v2 - Integration Guide
+# Donna Voice v2 - Integration Guide
 
-This document describes how to connect the Dolores Voice server to the Dolores/OpenClaw backend instead of the default OpenAI API fallback.
+This document describes how to connect the Donna Voice server to the Donna/OpenClaw backend instead of the default OpenAI API fallback.
 
 ## Architecture Overview
 
 ```
 iPhone App  <──WebSocket──>  Node.js Server  <──HTTP/SSE──>  LLM Backend
-(mic + speaker)              (orchestrator)                  (Dolores brain)
+(mic + speaker)              (orchestrator)                  (Donna brain)
                                   │
                           Deepgram STT (streaming)
                           ElevenLabs TTS (streaming)
@@ -221,7 +221,7 @@ cp .env.example .env  # Fill in API keys
 node index.js
 
 # Build iOS app
-# Open ios/DoloresVoice.xcodeproj in Xcode
+# Open ios/DonnaVoice.xcodeproj in Xcode
 # Set server URL in VoiceManager.swift (line ~204)
 # Build and run on iPhone
 ```

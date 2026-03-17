@@ -1,8 +1,8 @@
-# Dolores Voice App v2 — Pure Voice Plan
+# Donna Voice App v2 — Pure Voice Plan
 
 **Versie:** 2.0  
 **Datum:** 10 februari 2026  
-**Auteur:** Dolores (OpenClaw Agent)
+**Auteur:** Donna (OpenClaw Agent)
 
 ---
 
@@ -226,7 +226,7 @@ struct ContentView: View {
     enum AppState {
         case listening    // Jac kan praten
         case processing   // Server verwerkt
-        case speaking     // Dolores praat
+        case speaking     // Donna praat
     }
     
     var body: some View {
@@ -345,7 +345,7 @@ const { SpeechToText } = require('./speech-to-text');
 const { OpenClawClient } = require('./openclaw-client');
 const { TextToSpeech } = require('./text-to-speech');
 
-class DoloresVoiceServer {
+class DonnaVoiceServer {
     constructor() {
         this.wss = new WebSocket.Server({ port: 8765 });
         this.speakerVerifier = new SpeakerVerifier();
@@ -480,8 +480,8 @@ class DoloresVoiceServer {
     }
 }
 
-const server = new DoloresVoiceServer();
-console.log('Dolores Voice Server v2 running on port 8765');
+const server = new DonnaVoiceServer();
+console.log('Donna Voice Server v2 running on port 8765');
 ```
 
 ---
@@ -511,7 +511,7 @@ console.log('Dolores Voice Server v2 running on port 8765');
 1. Jac leest 3x een willekeurige zin voor (elk 10-15 seconden)
 2. Server stuurt audio naar Azure: `POST /speaker/profiles`
 3. Azure maakt "voiceprint" aan (unieke ID)
-4. Voiceprint opslaan in `~/.dolores-voice/speaker-profile.json`
+4. Voiceprint opslaan in `~/.donna-voice/speaker-profile.json`
 
 **Code (speaker-verification.js):**
 ```javascript
@@ -531,7 +531,7 @@ class SpeakerVerifier {
     loadProfileId() {
         const fs = require('fs');
         const path = require('path');
-        const profilePath = path.join(process.env.HOME, '.dolores-voice', 'speaker-profile.json');
+        const profilePath = path.join(process.env.HOME, '.donna-voice', 'speaker-profile.json');
         
         if (!fs.existsSync(profilePath)) {
             throw new Error('Speaker profile not found. Run enrollment first.');
@@ -557,7 +557,7 @@ class SpeakerVerifier {
         // Save profile ID
         const fs = require('fs');
         const path = require('path');
-        const profilePath = path.join(process.env.HOME, '.dolores-voice', 'speaker-profile.json');
+        const profilePath = path.join(process.env.HOME, '.donna-voice', 'speaker-profile.json');
         fs.writeFileSync(profilePath, JSON.stringify({
             profileId: profile.profileId,
             enrolledAt: new Date().toISOString()
@@ -630,7 +630,7 @@ Dit is acceptabel. Audio chunks van 1 seconde geven 820ms buffer (1000ms - 180ms
 - Bij false positive: Rare input → OpenClaw antwoordt vreemd → Jac merkt het
 
 **Echo eliminatie:**
-Als Dolores' TTS audio wordt opgepikt door de microfoon, zal speaker verification deze NIET als Jac herkennen (andere stem). Dus: echo is automatisch gefilterd. WIN!
+Als Donna' TTS audio wordt opgepikt door de microfoon, zal speaker verification deze NIET als Jac herkennen (andere stem). Dus: echo is automatisch gefilterd. WIN!
 
 ---
 
@@ -788,7 +788,7 @@ module.exports = { SpeechToText };
 ## 6. Barge-in Mechanisme
 
 ### Concept
-Wanneer Jac praat terwijl Dolores aan het praten is, moet Dolores DIRECT stoppen.
+Wanneer Jac praat terwijl Donna aan het praten is, moet Donna DIRECT stoppen.
 
 ### Implementatie
 
@@ -887,7 +887,7 @@ async handleAudioChunk(ws, session, audioData) {
 **Nieuwe versie:**
 - Server detecteert barge-in (nieuwe audio = Jac wil praten)
 - Speaker verification → alleen Jac's stem triggert barge-in
-- Dolores' eigen stem triggert geen barge-in (echo safe!)
+- Donna' eigen stem triggert geen barge-in (echo safe!)
 - Simpelere iOS code (geen threshold tuning)
 
 ---
@@ -960,16 +960,16 @@ async handleAudioChunk(ws, session, audioData) {
 
 ```swift
 extension Color {
-    static let doloresListening = Color(hex: "3B82F6")   // Blauw
-    static let doloresProcessing = Color(hex: "F59E0B")  // Oranje
-    static let doloresSpeaking = Color(hex: "10B981")    // Groen
-    static let doloresBackground = Color.black
-    static let doloresTextSecondary = Color.gray
+    static let donnaListening = Color(hex: "3B82F6")   // Blauw
+    static let donnaProcessing = Color(hex: "F59E0B")  // Oranje
+    static let donnaSpeaking = Color(hex: "10B981")    // Groen
+    static let donnaBackground = Color.black
+    static let donnaTextSecondary = Color.gray
 }
 ```
 
 ### Accessibility
-- VoiceOver: Status lezen ("Dolores is listening", etc.)
+- VoiceOver: Status lezen ("Donna is listening", etc.)
 - Reduce Motion: Disable animations, gebruik static icons
 - Dark Mode: Default (geen light mode nodig)
 
@@ -1049,9 +1049,9 @@ App blijft wakker zolang hij open is. Battery drain is acceptabel (app is bedoel
 6. ✅ Remove enrollment UI (replace with main UI)
 
 **Dag 3-5: Testing**
-1. ✅ End-to-end test: Jac praat → Dolores antwoordt
-2. ✅ Test barge-in: Jac interrupt Dolores
-3. ✅ Test echo: Dolores' stem wordt niet als Jac herkend
+1. ✅ End-to-end test: Jac praat → Donna antwoordt
+2. ✅ Test barge-in: Jac interrupt Donna
+3. ✅ Test echo: Donna' stem wordt niet als Jac herkend
 4. ✅ Test false voices: Andere mensen worden genegeerd
 5. ✅ Test edge cases: Stilte, achtergrondgeluid, slechte mic
 
@@ -1066,7 +1066,7 @@ App blijft wakker zolang hij open is. Battery drain is acceptabel (app is bedoel
 
 **Dag 1-2: Server Deployment**
 1. ✅ Stop v1 LaunchDaemon
-2. ✅ Copy server-v2 to `~/dolores-voice/server/`
+2. ✅ Copy server-v2 to `~/donna-voice/server/`
 3. ✅ Update LaunchDaemon plist (port 8765)
 4. ✅ Start v2 server
 5. ✅ Verify logs
@@ -1091,8 +1091,8 @@ App blijft wakker zolang hij open is. Battery drain is acceptabel (app is bedoel
 ### Rollback Plan
 
 **If v2 fails:**
-1. Stop v2 server: `launchctl unload ~/Library/LaunchAgents/com.jac.dolores-voice.plist`
-2. Start v1 server: `launchctl load ~/Library/LaunchAgents/com.jac.dolores-voice-v1.plist`
+1. Stop v2 server: `launchctl unload ~/Library/LaunchAgents/com.jac.donna-voice.plist`
+2. Start v1 server: `launchctl load ~/Library/LaunchAgents/com.jac.donna-voice-v1.plist`
 3. Reinstall v1 iOS app from backup
 4. Debug v2 offline
 5. Retry when fixed
@@ -1154,22 +1154,22 @@ Acceptable risk. LAN latency is typisch &lt;10ms. Azure API latency dominant (20
 ### Risico 3: Echo Probleem Blijft
 
 **Risico:**
-- Dolores' TTS wordt opgepikt door iPhone mic
+- Donna' TTS wordt opgepikt door iPhone mic
 - Speaker verification herkent dit als Jac (false positive)
-- Eindeloze loop: Dolores hoort zichzelf, reageert op zichzelf
+- Eindeloze loop: Donna hoort zichzelf, reageert op zichzelf
 
 **Mitigatie:**
-- **Test eerst:** Record Dolores' TTS, feed terug naar mic, verify speaker verification rejects het
+- **Test eerst:** Record Donna' TTS, feed terug naar mic, verify speaker verification rejects het
 - **Audio ducking:** Verlaag mic gain tijdens playback
 - **Acoustic echo cancellation:** iOS `AVAudioSession` category `.playAndRecord` met `.defaultToSpeaker` zou moeten helpen
 
 **Alternatief:**
-- **Hardware:** Use headphones (Dolores in ear, Jac praat in mic)
+- **Hardware:** Use headphones (Donna in ear, Jac praat in mic)
 - **Directional mic:** External mic gericht op Jac
 - **Fallback:** Push-to-talk knop (tegen always-listening principe)
 
 **Besluit:**
-Speaker verification zou echo moeten elimineren (Dolores' stem ≠ Jac's stem). Test dit grondig in Fase 4. Als het faalt, fallback naar headphones.
+Speaker verification zou echo moeten elimineren (Donna' stem ≠ Jac's stem). Test dit grondig in Fase 4. Als het faalt, fallback naar headphones.
 
 ---
 
@@ -1254,7 +1254,7 @@ Acceptable risk. Azure's GDPR compliance is solide. Speaker profile opslaan encr
 1. ✅ **Pure voice:** Geen text UI, geen chat history
 2. ✅ **Always-listening:** Geen knop, altijd klaar
 3. ✅ **Speaker verification:** Alleen Jac wordt herkend
-4. ✅ **Echo-safe:** Dolores' stem wordt genegeerd
+4. ✅ **Echo-safe:** Donna' stem wordt genegeerd
 5. ✅ **Barge-in:** Natuurlijke interrupt flow
 6. ✅ **Simplified app:** Geen lokale STT, geen level monitoring
 
@@ -1280,8 +1280,8 @@ Acceptable risk. Azure's GDPR compliance is solide. Speaker profile opslaan encr
 ```bash
 # Activate Azure Speaker Recognition API
 az cognitiveservices account create \
-  --name dolores-speaker \
-  --resource-group dolores-rg \
+  --name donna-speaker \
+  --resource-group donna-rg \
   --kind SpeechServices \
   --sku S0 \
   --location westeurope
@@ -1328,7 +1328,7 @@ az cognitiveservices account create \
 **Nice-to-have:**
 - Multi-language support (Engels + Nederlands)
 - Emotion detection (happy/sad/angry voice)
-- Wake word ("Hey Dolores") voor hands-free
+- Wake word ("Hey Donna") voor hands-free
 - Multiple speaker profiles (Jac + others)
 - Conversation history (audio recordings + transcripts)
 - Analytics dashboard (response time, accuracy, usage)
@@ -1344,7 +1344,7 @@ az cognitiveservices account create \
 ## Appendix: File Structure
 
 ```
-~/dolores-voice/
+~/donna-voice/
 ├── PLAN-V2.md                    # This document
 ├── README.md                     # Project overview
 ├── server-v1/                    # Old server (backup)
@@ -1359,19 +1359,19 @@ az cognitiveservices account create \
 │   ├── package.json
 │   └── .env                      # API keys (gitignored)
 ├── ios-app/                      # iOS app (Xcode project)
-│   ├── DoloresVoice.xcodeproj
-│   ├── DoloresVoice/
+│   ├── DonnaVoice.xcodeproj
+│   ├── DonnaVoice/
 │   │   ├── ContentView.swift     # Main UI
 │   │   ├── AudioStreamManager.swift
 │   │   ├── AudioPlaybackManager.swift
 │   │   ├── VisualComponents.swift
 │   │   └── Info.plist
-│   └── DoloresVoiceTests/
+│   └── DonnaVoiceTests/
 ├── enrollment/                   # Enrollment audio samples
 │   ├── jac-sample-1.wav
 │   ├── jac-sample-2.wav
 │   └── jac-sample-3.wav
-├── .dolores-voice/               # Runtime data (user home)
+├── .donna-voice/               # Runtime data (user home)
 │   ├── speaker-profile.json      # Jac's voiceprint
 │   └── logs/                     # Server logs
 └── scripts/
@@ -1383,5 +1383,5 @@ az cognitiveservices account create \
 
 **END OF PLAN**
 
-*Geschreven door Dolores, 10 februari 2026*  
+*Geschreven door Donna, 10 februari 2026*  
 *Next: Start met Azure setup & enrollment test*

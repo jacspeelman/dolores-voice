@@ -1,6 +1,6 @@
-# Dolores Voice App — Projectplan v2
+# Donna Voice App — Projectplan v2
 
-**Doel:** Native iOS app voor natuurlijke spraakcommunicatie met Dolores, beveiligd en wereldwijd bereikbaar.
+**Doel:** Native iOS app voor natuurlijke spraakcommunicatie met Donna, beveiligd en wereldwijd bereikbaar.
 
 **Scope:** Persoonlijk project voor Jac — geen product, alleen jouw iPhone.
 
@@ -23,7 +23,7 @@
 
 ```
 ┌─────────────────┐         ┌─────────────────────────────┐
-│   iPhone App    │◄───────►│   Mac Mini (Dolores)        │
+│   iPhone App    │◄───────►│   Mac Mini (Donna)        │
 │                 │  mTLS    │                             │
 │  ┌───────────┐  │  over    │  ┌───────────────────────┐  │
 │  │ Whisper   │  │  WS      │  │ OpenClaw Gateway      │  │
@@ -57,7 +57,7 @@
 ## 🧠 LLM Laag (toegevoegd na review)
 
 **Model:** Claude (via OpenClaw Gateway)
-- Dezelfde Dolores die je nu via Telegram spreekt
+- Dezelfde Donna die je nu via Telegram spreekt
 - Geen extra API nodig — OpenClaw handelt dit af
 - Context/memory blijft behouden
 
@@ -194,7 +194,7 @@ iPhone → VPS (vast IP) → WireGuard tunnel → Mac Mini
 - [ ] Whisper on-device transcriptie testen
 - [ ] WebSocket verbinding naar Mac Mini
 - [ ] TTS playback (ElevenLabs)
-- [ ] Basis flow: praten → tekst → Dolores → tekst → spraak
+- [ ] Basis flow: praten → tekst → Donna → tekst → spraak
 - [ ] AVSpeechSynthesizer fallback
 
 ### Fase 2: Security (1-2 weken)
@@ -212,7 +212,7 @@ iPhone → VPS (vast IP) → WireGuard tunnel → Mac Mini
 - [ ] Voice Activity Detection (optioneel)
 
 ### Fase 4: Extras (ongoing)
-- [ ] Custom wake word ("Hey Dolores")
+- [ ] Custom wake word ("Hey Donna")
 - [ ] Widget voor snelle toegang
 - [ ] Conversation memory in app
 
@@ -274,8 +274,8 @@ iPhone → VPS (vast IP) → WireGuard tunnel → Mac Mini
 ## 📅 Volgende Stappen
 
 1. **Jac:** Beslissen op open vragen
-2. **Dolores:** VPS + WireGuard tunnel opzetten
-3. **Dolores:** Voice API endpoint bouwen op Mac Mini
+2. **Donna:** VPS + WireGuard tunnel opzetten
+3. **Donna:** Voice API endpoint bouwen op Mac Mini
 4. **Samen:** iOS app ontwikkelen (ik schrijf code, jij test)
 
 ---

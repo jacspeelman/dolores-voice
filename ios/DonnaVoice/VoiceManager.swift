@@ -1,6 +1,6 @@
 //
 //  VoiceManager.swift
-//  DoloresVoice
+//  DonnaVoice
 //
 //  Pure voice mode - stream PCM audio to server, play TTS chunks
 //  v2: No STT on device, all processing on server
@@ -410,7 +410,7 @@ class VoiceManager: ObservableObject {
                     stopProcessingAnimation()
                     stopSpeakingAnimation()
                     // Echo protection is handled server-side (Deepgram session killed + mute window).
-                    // Start recording quickly so user can speak immediately after Dolores finishes.
+                    // Start recording quickly so user can speak immediately after Donna finishes.
                     stopBargeInMonitoring()
                     if !isRecording {
                         Task { [weak self] in

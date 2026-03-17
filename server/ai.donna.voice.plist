@@ -3,19 +3,19 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>ai.dolores.voice</string>
+    <string>ai.donna.voice</string>
     
     <key>ProgramArguments</key>
     <array>
         <string>/opt/homebrew/bin/node</string>
-        <string>/Users/dolores/dolores-voice/server/index.js</string>
+        <string>/Users/donna/donna-voice/server/index.js</string>
     </array>
     
     <key>WorkingDirectory</key>
-    <string>/Users/dolores/dolores-voice/server</string>
+    <string>/Users/donna/donna-voice/server</string>
     
     <key>UserName</key>
-    <string>dolores</string>
+    <string>donna</string>
     
     <key>RunAtLoad</key>
     <true/>
@@ -24,10 +24,10 @@
     <true/>
     
     <key>StandardOutPath</key>
-    <string>/Users/dolores/dolores-voice/server/logs/voice-server.log</string>
+    <string>/Users/donna/donna-voice/server/logs/voice-server.log</string>
     
     <key>StandardErrorPath</key>
-    <string>/Users/dolores/dolores-voice/server/logs/voice-server-error.log</string>
+    <string>/Users/donna/donna-voice/server/logs/voice-server-error.log</string>
     
     <key>EnvironmentVariables</key>
     <dict>

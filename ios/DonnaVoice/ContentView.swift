@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  DoloresVoice
+//  DonnaVoice
 //
 //  Pure voice interface - no text, no chat
 //  Visual feedback via pulsing circle

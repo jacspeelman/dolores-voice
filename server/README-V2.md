@@ -1,4 +1,4 @@
-# Dolores Voice Server v2 - Pure Voice Pipeline
+# Donna Voice Server v2 - Pure Voice Pipeline
 
 Complete rewrite voor pure voice interaction zonder chat UI.
 
@@ -8,7 +8,7 @@ Complete rewrite voor pure voice interaction zonder chat UI.
 1. **iOS app** → raw PCM audio (16-bit, 16kHz mono)
 2. **Speaker Verification** (Azure) → check of het Jac is *(optioneel)*
 3. **STT** (Deepgram Nova-3) → real-time streaming transcriptie
-4. **AI** (OpenClaw) → Dolores antwoordt
+4. **AI** (OpenClaw) → Donna antwoordt
 5. **TTS** (ElevenLabs) → natuurlijke Nederlandse stem
 6. **iOS app** ← audio chunks
 
@@ -16,7 +16,7 @@ Complete rewrite voor pure voice interaction zonder chat UI.
 - ✅ **Real-time STT streaming** met Deepgram Nova-3
 - ✅ **Barge-in support** - interrupt tijdens spraak
 - ✅ **State management** - listening/processing/speaking
-- ✅ **Speaker verification** - voorkom Dolores' eigen stem als trigger
+- ✅ **Speaker verification** - voorkom Donna' eigen stem als trigger
 - ✅ **Sentence-based TTS** - begin spraak zo snel mogelijk
 - ✅ **OpenClaw integration** - bestaande agent blijft werken
 
@@ -35,7 +35,7 @@ Complete rewrite voor pure voice interaction zonder chat UI.
    - Model: `eleven_multilingual_v2`
 
 3. **Azure Speaker Verification** (OPTIONAL)
-   - Voor productie: voorkom Dolores' eigen stem als trigger
+   - Voor productie: voorkom Donna' eigen stem als trigger
    - Setup vereist:
      - Azure Speech resource aanmaken
      - Speaker profile voor Jac's stem
@@ -52,7 +52,7 @@ Complete rewrite voor pure voice interaction zonder chat UI.
 ## 🚀 Installation
 
 ```bash
-cd ~/dolores-voice/server
+cd ~/donna-voice/server
 npm install
 ```
 
@@ -85,7 +85,7 @@ node index.js
 
 Expected output:
 ```
-🚀 Dolores Voice Server v2 - Pure Voice Pipeline
+🚀 Donna Voice Server v2 - Pure Voice Pipeline
 🔗 OpenClaw: http://127.0.0.1:18789
 🎙️ STT: Deepgram Nova-3 (real-time)
 🔊 TTS: ElevenLabs eleven_multilingual_v2 (voice: yO6w2xlE...)
@@ -95,15 +95,15 @@ Expected output:
 
 ### LaunchDaemon (Production)
 
-De bestaande `ai.dolores.voice` LaunchDaemon blijft werken:
+De bestaande `ai.donna.voice` LaunchDaemon blijft werken:
 
 ```bash
 # Restart service met nieuwe v2 server
-launchctl stop ai.dolores.voice
-launchctl start ai.dolores.voice
+launchctl stop ai.donna.voice
+launchctl start ai.donna.voice
 
 # Check logs
-tail -f ~/dolores-voice/server/logs/voice-server.log
+tail -f ~/donna-voice/server/logs/voice-server.log
 ```
 
 ## 📡 WebSocket Protocol

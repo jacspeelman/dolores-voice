@@ -1,4 +1,4 @@
-# Dolores Voice v2 - Deployment Guide
+# Donna Voice v2 - Deployment Guide
 
 ## ✅ Wat is gebouwd
 
@@ -61,7 +61,7 @@
   1. Ga naar https://console.deepgram.com/
   2. Sign up / Log in
   3. Create API Key
-  4. Add to `~/dolores-voice/server/.env`:
+  4. Add to `~/donna-voice/server/.env`:
      ```
      DEEPGRAM_API_KEY=your_key_here
      ```
@@ -69,7 +69,7 @@
 ### 🔒 Optional - Voor productie
 **Azure Speaker Verification**
 - Status: ❌ Niet geconfigureerd (code is klaar, credentials ontbreken)
-- Functie: Verificatie dat het Jac is (voorkom Dolores' eigen stem als trigger)
+- Functie: Verificatie dat het Jac is (voorkom Donna' eigen stem als trigger)
 - Wat nodig is:
   1. Azure Speech resource aanmaken
   2. Voice samples van Jac opnemen
@@ -86,13 +86,13 @@
 
 ### Server Start Test
 ```bash
-cd ~/dolores-voice/server
+cd ~/donna-voice/server
 node index.js
 ```
 
 **Met dummy DEEPGRAM_API_KEY:**
 ```
-✅ 🚀 Dolores Voice Server v2 - Pure Voice Pipeline
+✅ 🚀 Donna Voice Server v2 - Pure Voice Pipeline
 ✅ 🔗 OpenClaw: http://127.0.0.1:18789
 ✅ 🎙️ STT: Deepgram Nova-3 (real-time)
 ✅ 🔊 TTS: ElevenLabs eleven_multilingual_v2
@@ -123,7 +123,7 @@ node index.js
 
 ### 2. Add to .env
 ```bash
-cd ~/dolores-voice/server
+cd ~/donna-voice/server
 nano .env
 
 # Add deze regel:
@@ -133,14 +133,14 @@ DEEPGRAM_API_KEY=jouw_deepgram_key_hier
 ### 3. Test de server
 ```bash
 # Stop de oude v1 server
-launchctl stop ai.dolores.voice
+launchctl stop ai.donna.voice
 
 # Start v2 handmatig voor test
-cd ~/dolores-voice/server
+cd ~/donna-voice/server
 node index.js
 
 # Expected output:
-# 🚀 Dolores Voice Server v2 - Pure Voice Pipeline
+# 🚀 Donna Voice Server v2 - Pure Voice Pipeline
 # ✅ Ready on ws://0.0.0.0:8765
 ```
 
@@ -154,15 +154,15 @@ node index.js
 ```bash
 # Als alles werkt:
 # De LaunchDaemon zal automatisch de nieuwe v2 server gebruiken
-launchctl start ai.dolores.voice
+launchctl start ai.donna.voice
 
 # Check logs
-tail -f ~/dolores-voice/server/logs/voice-server.log
+tail -f ~/donna-voice/server/logs/voice-server.log
 ```
 
 ## 📊 GitHub Status
 
-### Repository: jacspeelman/dolores-voice
+### Repository: jacspeelman/donna-voice
 
 **Main branch:**
 - Tag `v1.0` - ✅ Chat UI versie (v1 state preserved)
@@ -171,7 +171,7 @@ tail -f ~/dolores-voice/server/logs/voice-server.log
 - ✅ Complete server rewrite
 - ✅ All changes committed
 - ✅ Pushed to origin
-- 🔗 PR ready: https://github.com/jacspeelman/dolores-voice/pull/new/v2-pure-voice
+- 🔗 PR ready: https://github.com/jacspeelman/donna-voice/pull/new/v2-pure-voice
 
 ## 🔧 Technical Details
 
@@ -225,7 +225,7 @@ listening → (audio received) → processing → (TTS ready) → speaking → (
 
 ### Issue: Port 8765 in use
 **Cause:** v1 server still running via LaunchDaemon  
-**Fix:** `launchctl stop ai.dolores.voice` before testing v2
+**Fix:** `launchctl stop ai.donna.voice` before testing v2
 
 ### Issue: DEEPGRAM_API_KEY not set
 **Cause:** Key needs to be added to .env  

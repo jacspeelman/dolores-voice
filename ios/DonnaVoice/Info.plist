@@ -12,6 +12,6 @@
 		<string>_http._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Dolores maakt verbinding met de voice server op je lokale netwerk.</string>
+	<string>Donna maakt verbinding met de voice server op je lokale netwerk.</string>
 </dict>
 </plist>

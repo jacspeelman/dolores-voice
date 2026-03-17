@@ -1,7 +1,7 @@
 {
-  "name": "dolores-voice-server",
+  "name": "donna-voice-server",
   "version": "2.0.0",
-  "description": "Pure Voice API server for Dolores iOS app - v2 with Deepgram + ElevenLabs",
+  "description": "Pure Voice API server for Donna iOS app - v2 with Deepgram + ElevenLabs",
   "main": "index.js",
   "type": "module",
   "scripts": {

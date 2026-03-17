@@ -1,6 +1,6 @@
 //
 //  RealtimeVoiceView.swift
-//  DoloresVoice
+//  DonnaVoice
 //
 //  UI for OpenAI Realtime mode — same visual style as Classic mode
 //  with pulsing circles, but backed by RealtimeVoiceManager.

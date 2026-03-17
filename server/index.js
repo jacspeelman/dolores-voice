@@ -1,5 +1,5 @@
 /**
- * Dolores Voice Server v2 - Pure Voice Pipeline
+ * Donna Voice Server v2 - Pure Voice Pipeline
  *
  * WebSocket server for real-time voice interaction with:
  * - Speaker Verification (Azure Speaker Recognition - optional)
@@ -231,7 +231,7 @@ class DeepgramSTTSession {
 const sttSessions = new Map();
 
 // === OpenAI Integration ===
-const SYSTEM_PROMPT = `Je bent Dolores, een behulpzame en vriendelijke AI-assistent. Je praat in het Nederlands.
+const SYSTEM_PROMPT = `Je bent Donna, een behulpzame en vriendelijke AI-assistent. Je praat in het Nederlands.
 Dit is een voice gesprek. Antwoord KORT in 1-3 zinnen, geen markdown/bullets, praat natuurlijk en conversationeel.`;
 
 /**
@@ -690,7 +690,7 @@ function startServer() {
   process.once('SIGTERM', () => shutdown('SIGTERM'));
   process.once('SIGINT', () => shutdown('SIGINT'));
 
-  console.log(`🚀 Dolores Voice Server v2 - Pure Voice Pipeline`);
+  console.log(`🚀 Donna Voice Server v2 - Pure Voice Pipeline`);
   console.log(`🔗 LLM: OpenAI ${OPENAI_MODEL}`);
   console.log(`🎙️ STT: Deepgram Nova-3 (real-time)`);
   console.log(`🔊 TTS: ElevenLabs ${ELEVENLABS_MODEL} (voice: ${ELEVENLABS_VOICE_ID.substring(0, 8)}...)`);

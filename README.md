@@ -1,6 +1,6 @@
-# Dolores Voice 🦋
+# Donna Voice 🦋
 
-Native iOS voice interface for Dolores AI assistant.
+Native iOS voice interface for Donna AI assistant.
 
 ## Features
 
@@ -13,7 +13,7 @@ Native iOS voice interface for Dolores AI assistant.
 ## Architecture
 
 ```
-iPhone App ←→ VPS (WireGuard) ←→ Mac Mini (Dolores)
+iPhone App ←→ VPS (WireGuard) ←→ Mac Mini (Donna)
 ```
 
 ## Status
