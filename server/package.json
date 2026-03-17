@@ -1,7 +1,7 @@
 {
   "name": "dolores-voice-server",
-  "version": "1.0.0",
-  "description": "Voice API server for Dolores iOS app",
+  "version": "2.0.0",
+  "description": "Pure Voice API server for Dolores iOS app - v2 with Deepgram + ElevenLabs",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.0",
-    "microsoft-cognitiveservices-speech-sdk": "^1.48.0",
-    "ws": "^8.16.0"
+    "ws": "^8.16.0",
+    "@deepgram/sdk": "^3.11.0"
   }
 }

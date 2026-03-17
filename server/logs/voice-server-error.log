@@ -43,3 +43,8 @@
 ❌ [1] STT error: InvalidOperation: Payload must be ArrayBuffer
 🎙️ [1] STT Error: InvalidOperation: Payload must be ArrayBuffer
 ❌ [1] STT error: InvalidOperation: Payload must be ArrayBuffer
+❌ Server error: listen EADDRINUSE: address already in use 0.0.0.0:8765
+❌ Server error: listen EADDRINUSE: address already in use 0.0.0.0:8765
+❌ Server error: listen EADDRINUSE: address already in use 0.0.0.0:8765
+❌ Server error: listen EADDRINUSE: address already in use 0.0.0.0:8765
+❌ Server error: listen EADDRINUSE: address already in use 0.0.0.0:8765
