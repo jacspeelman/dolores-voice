@@ -1,18 +1,18 @@
 /**
  * Dolores Voice Server v2 - Pure Voice Pipeline
- * 
+ *
  * WebSocket server for real-time voice interaction with:
  * - Speaker Verification (Azure Speaker Recognition - optional)
  * - Speech-to-Text (Deepgram Nova-3 real-time streaming)
  * - AI Response (OpenClaw Gateway)
  * - Text-to-Speech (ElevenLabs multilingual)
  * - Barge-in support (interrupt during playback)
- * 
+ *
  * Protocol:
  * Client → Server:
  *   {type: "audio", data: <base64 PCM 16-bit 16kHz mono>}
  *   {type: "interrupt"}
- * 
+ *
  * Server → Client:
  *   {type: "state", state: "listening|processing|speaking"}
  *   {type: "audio", format: "pcm_s16le", sampleRate: 16000, channels: 1, data: <base64 PCM>}
@@ -21,6 +21,7 @@
  */
 
 import { WebSocketServer } from 'ws';
+import http from 'http';
 import { config } from 'dotenv';
 import { createClient, LiveTranscriptionEvents } from '@deepgram/sdk';
 
@@ -66,7 +67,7 @@ if (!OPENAI_API_KEY) {
 function fetchWithTimeout(url, options, timeoutMs = 60000) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  
+
   return fetch(url, { ...options, signal: controller.signal })
     .finally(() => clearTimeout(timeout));
 }
@@ -165,7 +166,7 @@ class DeepgramSTTSession {
       // Wait for connection to open
       await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => reject(new Error('Connection timeout')), 10000);
-        
+
         this.connection.on(LiveTranscriptionEvents.Open, () => {
           clearTimeout(timeout);
           console.log(`🎙️ [${this.connectionId}] Deepgram connection opened`);
@@ -210,11 +211,11 @@ class DeepgramSTTSession {
         console.error(`🎙️ [${this.connectionId}] Error finishing connection:`, error);
       }
     }
-    
+
     this.isActive = false;
     const finalTranscript = this.transcript;
     this.transcript = '';
-    
+
     console.log(`🎙️ [${this.connectionId}] STT stopped, final: "${finalTranscript}"`);
     return finalTranscript;
   }
@@ -292,10 +293,10 @@ async function* callLLM(userMessage) {
 
 // === ElevenLabs TTS ===
 /**
- * Generate speech with ElevenLabs
- * Returns raw PCM S16LE 16kHz mono (Buffer)
+ * Generate speech with ElevenLabs — streaming version.
+ * Yields PCM chunks as they arrive from ElevenLabs instead of buffering the entire response.
  */
-async function generateSpeech(text) {
+async function* streamSpeech(text) {
   if (!text || text.trim().length === 0) {
     throw new Error('Empty text for TTS');
   }
@@ -330,25 +331,23 @@ async function generateSpeech(text) {
     throw new Error(`ElevenLabs error: ${response.status} - ${error}`);
   }
 
-  // Read full audio buffer
-  const chunks = [];
   const reader = response.body.getReader();
-  
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
-    chunks.push(value);
+    yield Buffer.from(value);
   }
+}
 
-  const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-  const audioBuffer = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const chunk of chunks) {
-    audioBuffer.set(chunk, offset);
-    offset += chunk.length;
+/**
+ * Non-streaming fallback — returns full buffer (used nowhere currently, kept for reference).
+ */
+async function generateSpeech(text) {
+  const chunks = [];
+  for await (const chunk of streamSpeech(text)) {
+    chunks.push(chunk);
   }
-
-  return Buffer.from(audioBuffer);
+  return Buffer.concat(chunks);
 }
 
 // === Helper: Sentence detection ===
@@ -357,12 +356,12 @@ function extractCompleteSentences(text) {
   const sentences = [];
   let match;
   let lastIndex = 0;
-  
+
   while ((match = sentenceRegex.exec(text)) !== null) {
     sentences.push(match[0].trim());
     lastIndex = match.index + match[0].length;
   }
-  
+
   const remaining = text.slice(lastIndex).trim();
   return { sentences, remaining };
 }
@@ -391,9 +390,7 @@ function sendMessage(ws, message) {
 function handleVoiceInteraction(ws, connectionId) {
   let currentState = 'listening';
   let ttsQueue = [];
-  let nextTtsIndex = 0;
   let audioSent = false;
-  let allChunksQueued = false;
   let pendingTts = 0;
   let llmDone = false;
 
@@ -403,24 +400,8 @@ function handleVoiceInteraction(ws, connectionId) {
     console.log(`📡 [${connectionId}] State: ${newState}`);
   };
 
-  const sendAudio = (audioBuffer, index) => {
-    if (!audioSent) {
-      audioSent = true;
-      setState('speaking');
-    }
-    sendMessage(ws, {
-      type: 'audio',
-      format: 'pcm_s16le',
-      sampleRate: 16000,
-      channels: 1,
-      data: audioBuffer.toString('base64'),
-      index
-    });
-    console.log(`🔊 [${connectionId}] Sent audio chunk ${index} (${audioBuffer.length} bytes)`);
-  };
-
   // Serial TTS queue — process one at a time to avoid ElevenLabs 429 rate limits,
-  // but still overlap with LLM streaming (first sentence starts TTS immediately).
+  // but now STREAMS audio chunks to the client as they arrive from ElevenLabs.
   let ttsChain = Promise.resolve();
 
   const dispatchTts = (ttsIndex, textToSpeak) => {
@@ -428,14 +409,33 @@ function handleVoiceInteraction(ws, connectionId) {
     ttsChain = ttsChain.then(async () => {
       if (ws.interrupted) return;
       try {
+        // Buffer complete sentence audio, then send as one clean block.
+        // Streaming small chunks caused audio crackling at chunk boundaries.
+        // Latency win comes from overlapping LLM streaming with TTS generation.
         const audioBuffer = await generateSpeech(textToSpeak);
-        ttsQueue[ttsIndex] = audioBuffer;
+        if (!audioSent) {
+          audioSent = true;
+          setState('speaking');
+        }
+        if (audioBuffer.length > 0) {
+          sendMessage(ws, {
+            type: 'audio',
+            format: 'pcm_s16le',
+            sampleRate: 16000,
+            channels: 1,
+            data: audioBuffer.toString('base64'),
+            index: ttsIndex
+          });
+        }
+        console.log(`🔊 [${connectionId}] TTS ${ttsIndex} sent (${audioBuffer.length} bytes)`);
+        ttsQueue[ttsIndex] = Buffer.alloc(1); // Mark as done (non-null, non-empty sentinel)
       } catch (error) {
         console.error(`⚠️ [${connectionId}] TTS error:`, error.message);
         ttsQueue[ttsIndex] = Buffer.alloc(0);
       }
       pendingTts--;
-      trySendQueuedAudio();
+      // Check if all done
+      checkAllDone();
     });
   };
 
@@ -464,35 +464,21 @@ function handleVoiceInteraction(ws, connectionId) {
     }
   };
 
-  const trySendQueuedAudio = () => {
+  const checkAllDone = () => {
     if (ws.interrupted) {
       console.log(`⏸️ [${connectionId}] Interrupted, clearing audio queue`);
       ttsQueue = [];
-      nextTtsIndex = 0;
       pendingTts = 0;
       llmDone = false;
       endAudio();
       return;
     }
 
-    // Send only in-order ready chunks. We reserve slots with null;
-    // never advance past a null placeholder or we'll skip audio forever.
-    while (nextTtsIndex < ttsQueue.length) {
-      const audioBuffer = ttsQueue[nextTtsIndex];
-      if (audioBuffer === null || audioBuffer === undefined) break;
-      if (audioBuffer.length > 0) {
-        sendAudio(audioBuffer, nextTtsIndex);
-      }
-      nextTtsIndex++;
-    }
-
-    // End audio only when LLM is done AND all TTS jobs resolved AND all queued chunks have been processed.
-    if (llmDone && pendingTts === 0 && nextTtsIndex >= ttsQueue.length && ttsQueue.length > 0) {
+    // End audio only when LLM is done AND all TTS jobs have streamed
+    if (llmDone && pendingTts === 0 && ttsQueue.length > 0) {
       llmDone = false;
       endAudio();
-      // Reset queue for next turn
       ttsQueue = [];
-      nextTtsIndex = 0;
     }
   };
 
@@ -526,7 +512,7 @@ function handleVoiceInteraction(ws, connectionId) {
         let fullResponse = '';
         let sentenceBuffer = '';
         ttsQueue = [];
-        nextTtsIndex = 0;
+
         audioSent = false;
 
         // Stream response from OpenAI
@@ -548,9 +534,9 @@ function handleVoiceInteraction(ws, connectionId) {
               if (sentence.length > 2) {
                 const ttsIndex = ttsQueue.length;
                 ttsQueue.push(null); // Reserve slot
-                
+
                 console.log(`🔊 [${connectionId}] TTS starting for sentence ${ttsIndex + 1}: "${sentence.substring(0, 50)}..."`);
-                
+
                 // Generate speech async
                 dispatchTts(ttsIndex, sentence);
               }
@@ -567,12 +553,12 @@ function handleVoiceInteraction(ws, connectionId) {
         if (!ws.interrupted && sentenceBuffer.trim().length > 2) {
           const ttsIndex = ttsQueue.length;
           ttsQueue.push(null);
-          
+
           console.log(`🔊 [${connectionId}] TTS starting for final: "${sentenceBuffer.substring(0, 50)}..."`);
-          
+
           dispatchTts(ttsIndex, sentenceBuffer.trim());
         } else if (!ws.interrupted && ttsQueue.length > 0) {
-          trySendQueuedAudio();
+          checkAllDone();
         } else if (!ws.interrupted) {
           // No audio generated
           setState('listening');
@@ -591,7 +577,6 @@ function handleVoiceInteraction(ws, connectionId) {
       console.log(`⏸️ [${connectionId}] User interrupted`);
       ws.interrupted = true;
       ttsQueue = [];
-      nextTtsIndex = 0;
       endAudio();
       ws.interrupted = false;
       ws.muteUntilMs = 0;
@@ -599,9 +584,84 @@ function handleVoiceInteraction(ws, connectionId) {
   };
 }
 
-// === WebSocket Server ===
+// === HTTP Server for REST endpoints + WebSocket ===
 function startServer() {
-  const wss = new WebSocketServer({ host: '0.0.0.0', port: PORT });
+  // Create HTTP server for both REST endpoints and WebSocket upgrade
+  const httpServer = http.createServer(async (req, res) => {
+    // CORS headers for iOS app
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+
+    if (req.method === 'POST' && req.url === '/realtime-session') {
+      try {
+        // Read request body
+        const chunks = [];
+        for await (const chunk of req) chunks.push(chunk);
+        const body = JSON.parse(Buffer.concat(chunks).toString() || '{}');
+
+        const {
+          voice = 'marin',
+          instructions = 'Spreek natuurlijk Nederlands met een neutraal accent. Praat helder, vriendelijk en beknopt. Gebruik alleen Nederlands tenzij de gebruiker expliciet om Engels vraagt.'
+        } = body;
+
+        console.log(`🌐 /realtime-session requested (voice: ${voice})`);
+
+        // Request ephemeral token from OpenAI Realtime API
+        const response = await fetchWithTimeout('https://api.openai.com/v1/realtime/sessions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-realtime-preview',
+            voice,
+            instructions,
+            modalities: ['audio', 'text'],
+            input_audio_transcription: { model: 'whisper-1' },
+          }),
+        }, 15000);
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error('❌ OpenAI Realtime session error:', data);
+          res.writeHead(response.status, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: data }));
+          return;
+        }
+
+        console.log('✅ Ephemeral token created (expires in ~60s)');
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(data));
+
+      } catch (error) {
+        console.error('❌ /realtime-session error:', error.message);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: error.message }));
+      }
+      return;
+    }
+
+    // Health check
+    if (req.method === 'GET' && (req.url === '/' || req.url === '/health')) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'ok', version: '2.1.0', modes: ['classic', 'realtime'] }));
+      return;
+    }
+
+    res.writeHead(404);
+    res.end('Not found');
+  });
+
+  const wss = new WebSocketServer({ server: httpServer });
   let connectionCounter = 0;
   let heartbeatInterval = null;
 
@@ -697,9 +757,9 @@ function startServer() {
           if (pipeline.getState() === 'speaking' || pipeline.getState() === 'processing' || now < (ws.muteUntilMs || 0)) {
             return;
           }
-          
+
           const audioBuffer = Buffer.from(message.data, 'base64');
-          
+
           // Speaker verification (optional)
           const isVerified = await verifySpeaker(audioBuffer);
           if (!isVerified) {
@@ -796,16 +856,23 @@ function startServer() {
     });
   });
 
-  wss.on('listening', () => {
-    console.log(`✅ Ready on ws://0.0.0.0:${PORT}`);
+  wss.on('error', (error) => {
+    console.error(`❌ WebSocket server error:`, error.message);
   });
 
-  wss.on('error', (error) => {
-    console.error(`❌ Server error:`, error.message);
+  httpServer.on('error', (error) => {
+    console.error(`❌ HTTP server error:`, error.message);
     if (error && (error.code === 'EADDRINUSE' || String(error.message || '').includes('EADDRINUSE'))) {
       console.error('❌ Port already in use. Exiting so launchd can retry cleanly.');
       process.exit(1);
     }
+  });
+
+  httpServer.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Ready on http://0.0.0.0:${PORT} (WebSocket + REST)`);
+    console.log(`   POST /realtime-session → OpenAI Realtime ephemeral token`);
+    console.log(`   GET  /health           → Health check`);
+    console.log(`   ws://0.0.0.0:${PORT}   → Classic voice pipeline`);
   });
 }
 

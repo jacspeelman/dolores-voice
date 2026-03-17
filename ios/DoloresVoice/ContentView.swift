@@ -4,21 +4,36 @@
 //
 //  Pure voice interface - no text, no chat
 //  Visual feedback via pulsing circle
+//  Supports both Classic (Deepgram+ElevenLabs) and Realtime (OpenAI WebRTC) modes
 //
 
 import SwiftUI
 
-struct ContentView: View {
+/// Classic mode voice view (existing Deepgram + ElevenLabs pipeline)
+struct ClassicVoiceView: View {
     @EnvironmentObject var voiceManager: VoiceManager
-    
+
     var body: some View {
         ZStack {
-            // Dark background
             Color.black.ignoresSafeArea()
-            
+
             VStack {
+                // Mode indicator at top
+                HStack {
+                    Spacer()
+                    Text("Classic")
+                        .font(.caption2)
+                        .foregroundColor(.blue.opacity(0.7))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Color.blue.opacity(0.15))
+                        .cornerRadius(8)
+                        .padding(.trailing, 16)
+                        .padding(.top, 8)
+                }
+
                 Spacer()
-                
+
                 // Pulsing circle in center
                 ZStack {
                     // Listening: pulsing rings identical to speaking rings
@@ -31,7 +46,7 @@ struct ContentView: View {
                                 .opacity(1.0 - Double(index) * 0.3)
                         }
                     }
-                    
+
                     // Processing spinner
                     if voiceManager.state == .processing {
                         Circle()
@@ -40,7 +55,7 @@ struct ContentView: View {
                             .frame(width: 220, height: 220)
                             .rotationEffect(.degrees(voiceManager.spinnerRotation))
                     }
-                    
+
                     // Speaking waveform
                     if voiceManager.state == .speaking {
                         ForEach(0..<3, id: \.self) { index in
@@ -51,7 +66,7 @@ struct ContentView: View {
                                 .opacity(1.0 - Double(index) * 0.3)
                         }
                     }
-                    
+
                     // Main circle
                     Circle()
                         .fill(
@@ -67,15 +82,15 @@ struct ContentView: View {
                         )
                         .frame(width: 200, height: 200)
                         .shadow(color: voiceManager.state.color.opacity(0.5), radius: 20)
-                    
+
                     // State icon
                     Image(systemName: voiceManager.state.icon)
                         .font(.system(size: 60))
                         .foregroundColor(.white)
                 }
-                
+
                 Spacer()
-                
+
                 // Bottom status
                 VStack(spacing: 12) {
                     // Connection status dot
@@ -83,12 +98,12 @@ struct ContentView: View {
                         Circle()
                             .fill(voiceManager.isConnected ? Color.green : Color.red)
                             .frame(width: 12, height: 12)
-                        
-                        Text(voiceManager.isConnected ? "Verbonden" : "Niet verbonden")
+
+                        Text(voiceManager.isConnected ? "Verbonden (Classic)" : "Niet verbonden")
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
-                    
+
                     // Error message
                     if let error = voiceManager.errorMessage {
                         Text(error)
@@ -97,7 +112,7 @@ struct ContentView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
-                    
+
                     // Reconnect button
                     if !voiceManager.isConnected {
                         Button("Opnieuw verbinden") {
@@ -118,10 +133,64 @@ struct ContentView: View {
             voiceManager.checkPermissions()
             voiceManager.connect()
         }
+        .onDisappear {
+            voiceManager.disconnect()
+        }
+    }
+}
+
+struct ContentView: View {
+    @EnvironmentObject var voiceManager: VoiceManager
+    @EnvironmentObject var realtimeManager: RealtimeVoiceManager
+
+    @AppStorage("useRealtimeMode") private var useRealtimeMode = false
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // Mode toggle at top
+                HStack {
+                    Text("Classic")
+                        .font(.caption)
+                        .foregroundColor(useRealtimeMode ? .gray : .blue)
+
+                    Toggle("", isOn: $useRealtimeMode)
+                        .toggleStyle(SwitchToggleStyle(tint: .purple))
+                        .labelsHidden()
+                        .onChange(of: useRealtimeMode) { _, newValue in
+                            // Disconnect the old mode when switching
+                            if newValue {
+                                voiceManager.disconnect()
+                            } else {
+                                realtimeManager.disconnect()
+                            }
+                        }
+
+                    Text("Realtime")
+                        .font(.caption)
+                        .foregroundColor(useRealtimeMode ? .purple : .gray)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+                .padding(.bottom, 4)
+
+                // Mode-specific view
+                if useRealtimeMode {
+                    RealtimeVoiceView()
+                        .environmentObject(realtimeManager)
+                } else {
+                    ClassicVoiceView()
+                        .environmentObject(voiceManager)
+                }
+            }
+        }
     }
 }
 
 #Preview {
     ContentView()
         .environmentObject(VoiceManager())
+        .environmentObject(RealtimeVoiceManager())
 }
