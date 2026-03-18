@@ -55,7 +55,11 @@ class RealtimeVoiceManager: ObservableObject {
 
     // MARK: - Configuration
 
-    private let serverBaseURL = "http://192.168.1.66:8765"
+    private var serverBaseURL: String {
+        let host = UserDefaults.standard.string(forKey: "serverHost") ?? "192.168.1.66"
+        let port = UserDefaults.standard.string(forKey: "serverPort") ?? "8765"
+        return "http://\(host):\(port)"
+    }
     private let defaultVoice = "marin"
     private let defaultInstructions = "Spreek natuurlijk Nederlands met een neutraal accent. Praat helder, vriendelijk en beknopt. Gebruik alleen Nederlands tenzij de gebruiker expliciet om Engels vraagt."
 
@@ -332,7 +336,7 @@ class RealtimeVoiceManager: ObservableObject {
     }
 
     private func sendOfferToOpenAI(sdp: String, ephemeralKey: String) async throws -> String {
-        guard let url = URL(string: "https://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview") else {
+        guard let url = URL(string: "https://api.openai.com/v1/realtime?model=gpt-4o-mini-realtime-preview") else {
             throw RealtimeError.invalidURL
         }
 

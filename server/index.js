@@ -43,9 +43,17 @@ const AZURE_SPEAKER_KEY = process.env.AZURE_SPEAKER_KEY;
 const AZURE_SPEAKER_REGION = process.env.AZURE_SPEAKER_REGION || 'westeurope';
 const AZURE_SPEAKER_PROFILE_ID = process.env.AZURE_SPEAKER_PROFILE_ID; // Jac's voice profile
 
-// OpenAI API (direct, replaces OpenClaw for local testing)
+// LLM Backend — switch between 'openai' (direct) and 'openclaw' (gateway)
+const LLM_BACKEND = (process.env.LLM_BACKEND || 'openai').toLowerCase();
+
+// OpenAI API (direct)
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o';
+
+// OpenClaw Gateway
+const OPENCLAW_URL = process.env.OPENCLAW_URL || 'http://127.0.0.1:18789';
+const OPENCLAW_TOKEN = process.env.OPENCLAW_TOKEN;
+const OPENCLAW_MODEL = process.env.OPENCLAW_MODEL || process.env.OPENAI_MODEL || 'gpt-4o';
 
 // === Validation ===
 if (!DEEPGRAM_API_KEY) {
@@ -58,8 +66,13 @@ if (!ELEVENLABS_API_KEY) {
   process.exit(1);
 }
 
-if (!OPENAI_API_KEY) {
-  console.error('❌ OPENAI_API_KEY not set');
+if (LLM_BACKEND === 'openai' && !OPENAI_API_KEY) {
+  console.error('❌ OPENAI_API_KEY not set (required for LLM_BACKEND=openai)');
+  process.exit(1);
+}
+
+if (LLM_BACKEND === 'openclaw' && !OPENCLAW_TOKEN) {
+  console.error('❌ OPENCLAW_TOKEN not set (required for LLM_BACKEND=openclaw)');
   process.exit(1);
 }
 
@@ -120,8 +133,8 @@ class DeepgramSTTSession {
         language: 'nl',
         smart_format: true,
         interim_results: true,
-        utterance_end_ms: 1500,
-        endpointing: 500,
+        utterance_end_ms: 1000,
+        endpointing: 300,
         vad_events: true,
         encoding: 'linear16',
         sample_rate: 16000,
@@ -235,17 +248,31 @@ const SYSTEM_PROMPT = `Je bent Donna, een behulpzame en vriendelijke AI-assisten
 Dit is een voice gesprek. Antwoord KORT in 1-3 zinnen, geen markdown/bullets, praat natuurlijk en conversationeel.`;
 
 /**
- * Send message to OpenAI and get streaming response
+ * Send message to LLM backend (OpenAI direct or OpenClaw gateway) and get streaming response.
+ * Configured via LLM_BACKEND env var: 'openai' (default) or 'openclaw'.
  */
 async function* callLLM(userMessage) {
-  const response = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
+  // Determine endpoint, auth header and model based on backend
+  let url, authHeader, model;
+
+  if (LLM_BACKEND === 'openclaw') {
+    url = `${OPENCLAW_URL}/v1/chat/completions`;
+    authHeader = `Bearer ${OPENCLAW_TOKEN}`;
+    model = OPENCLAW_MODEL;
+  } else {
+    url = 'https://api.openai.com/v1/chat/completions';
+    authHeader = `Bearer ${OPENAI_API_KEY}`;
+    model = OPENAI_MODEL;
+  }
+
+  const response = await fetchWithTimeout(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`
+      'Authorization': authHeader
     },
     body: JSON.stringify({
-      model: OPENAI_MODEL,
+      model,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userMessage }
@@ -256,7 +283,7 @@ async function* callLLM(userMessage) {
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`OpenAI error: ${response.status} - ${error}`);
+    throw new Error(`LLM error (${LLM_BACKEND}): ${response.status} - ${error}`);
   }
 
   const reader = response.body.getReader();
@@ -691,7 +718,7 @@ function startServer() {
   process.once('SIGINT', () => shutdown('SIGINT'));
 
   console.log(`🚀 Donna Voice Server v2 - Pure Voice Pipeline`);
-  console.log(`🔗 LLM: OpenAI ${OPENAI_MODEL}`);
+  console.log(`🔗 LLM: ${LLM_BACKEND === 'openclaw' ? `OpenClaw @ ${OPENCLAW_URL} (model: ${OPENCLAW_MODEL})` : `OpenAI ${OPENAI_MODEL}`}`);
   console.log(`🎙️ STT: Deepgram Nova-3 (real-time)`);
   console.log(`🔊 TTS: ElevenLabs ${ELEVENLABS_MODEL} (voice: ${ELEVENLABS_VOICE_ID.substring(0, 8)}...)`);
   console.log(`🔐 Speaker Verification: ${AZURE_SPEAKER_KEY ? 'Azure (configured)' : 'disabled'}`);
@@ -741,7 +768,7 @@ function startServer() {
       stt: { provider: 'Deepgram', model: 'Nova-3', realtime: true },
       tts: { provider: 'ElevenLabs', model: ELEVENLABS_MODEL, voice: ELEVENLABS_VOICE_ID },
       speakerVerification: !!AZURE_SPEAKER_KEY,
-      backend: 'OpenAI'
+      backend: LLM_BACKEND === 'openclaw' ? 'OpenClaw' : 'OpenAI'
     });
 
     ws.on('message', async (data) => {

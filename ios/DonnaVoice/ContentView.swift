@@ -139,19 +139,73 @@ struct ClassicVoiceView: View {
     }
 }
 
+struct SettingsView: View {
+    @AppStorage("serverHost") private var serverHost = "192.168.1.66"
+    @AppStorage("serverPort") private var serverPort = "8765"
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Server")) {
+                    HStack {
+                        Text("IP adres")
+                            .foregroundColor(.gray)
+                        TextField("192.168.1.66", text: $serverHost)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .autocorrectionDisabled()
+                    }
+                    HStack {
+                        Text("Poort")
+                            .foregroundColor(.gray)
+                        TextField("8765", text: $serverPort)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                    }
+                }
+
+                Section {
+                    Text("Herstart de verbinding na het wijzigen van het adres.")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+            }
+            .navigationTitle("Instellingen")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Klaar") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
 struct ContentView: View {
     @EnvironmentObject var voiceManager: VoiceManager
     @EnvironmentObject var realtimeManager: RealtimeVoiceManager
 
     @AppStorage("useRealtimeMode") private var useRealtimeMode = false
+    @State private var showSettings = false
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Mode toggle at top
+                // Top bar: mode toggle + settings
                 HStack {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                            .foregroundColor(.gray)
+                            .font(.body)
+                    }
+
+                    Spacer()
+
                     Text("Classic")
                         .font(.caption)
                         .foregroundColor(useRealtimeMode ? .gray : .blue)
@@ -185,6 +239,9 @@ struct ContentView: View {
                         .environmentObject(voiceManager)
                 }
             }
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
     }
 }
