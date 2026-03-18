@@ -113,6 +113,23 @@ struct RealtimeVoiceView: View {
 
                 // Bottom status
                 VStack(spacing: 12) {
+                    // Speaker toggle
+                    Button {
+                        realtimeManager.useLoudspeaker.toggle()
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: realtimeManager.useLoudspeaker ? "speaker.wave.3.fill" : "ear.fill")
+                                .font(.body)
+                            Text(realtimeManager.useLoudspeaker ? "Luidspreker" : "Telefoon")
+                                .font(.caption)
+                        }
+                        .foregroundColor(realtimeManager.useLoudspeaker ? .purple : .gray)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 14)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(16)
+                    }
+
                     // Connection status dot
                     HStack(spacing: 8) {
                         Circle()

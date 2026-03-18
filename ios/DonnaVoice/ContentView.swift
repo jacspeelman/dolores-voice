@@ -93,6 +93,23 @@ struct ClassicVoiceView: View {
 
                 // Bottom status
                 VStack(spacing: 12) {
+                    // Speaker toggle
+                    Button {
+                        voiceManager.useLoudspeaker.toggle()
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: voiceManager.useLoudspeaker ? "speaker.wave.3.fill" : "ear.fill")
+                                .font(.body)
+                            Text(voiceManager.useLoudspeaker ? "Luidspreker" : "Telefoon")
+                                .font(.caption)
+                        }
+                        .foregroundColor(voiceManager.useLoudspeaker ? .blue : .gray)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 14)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(16)
+                    }
+
                     // Connection status dot
                     HStack(spacing: 8) {
                         Circle()
@@ -152,9 +169,10 @@ struct SettingsView: View {
                         Text("IP adres")
                             .foregroundColor(.gray)
                         TextField("192.168.1.66", text: $serverHost)
-                            .keyboardType(.decimalPad)
+                            .keyboardType(.numbersAndPunctuation)
                             .multilineTextAlignment(.trailing)
                             .autocorrectionDisabled()
+                            .textInputAutocapitalization(.never)
                     }
                     HStack {
                         Text("Poort")

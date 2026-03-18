@@ -224,6 +224,12 @@ class VoiceManager: ObservableObject {
     @Published var errorMessage: String?
     @Published var isConnected: Bool = false
     @Published var audioLevel: Float = 0.0
+    @Published var useLoudspeaker: Bool = true {
+        didSet {
+            UserDefaults.standard.set(useLoudspeaker, forKey: "useLoudspeaker")
+            applyAudioRoute()
+        }
+    }
     
     // UI animation properties
     @Published var spinnerRotation: Double = 0.0
@@ -270,14 +276,35 @@ class VoiceManager: ObservableObject {
     // MARK: - Audio Session Setup
     
     private func setupAudioSession() {
+        // Restore saved preference
+        useLoudspeaker = UserDefaults.standard.object(forKey: "useLoudspeaker") as? Bool ?? true
+
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playAndRecord, mode: .voiceChat, options: [.defaultToSpeaker, .allowBluetooth])
+            let options: AVAudioSession.CategoryOptions = useLoudspeaker
+                ? [.defaultToSpeaker, .allowBluetooth]
+                : [.allowBluetooth]
+            try session.setCategory(.playAndRecord, mode: .voiceChat, options: options)
             try session.setActive(true)
-            print("✅ Audio session configured: playAndRecord, voiceChat mode")
+            applyAudioRoute()
+            print("✅ Audio session configured: playAndRecord, voiceChat mode, loudspeaker: \(useLoudspeaker)")
         } catch {
             print("⚠️ Audio session setup failed: \(error)")
             errorMessage = "Audio setup mislukt"
+        }
+    }
+
+    private func applyAudioRoute() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            if useLoudspeaker {
+                try session.overrideOutputAudioPort(.speaker)
+            } else {
+                try session.overrideOutputAudioPort(.none)
+            }
+            print("🔊 Audio route: \(useLoudspeaker ? "luidspreker" : "telefoon speaker")")
+        } catch {
+            print("⚠️ Audio route switch failed: \(error)")
         }
     }
     

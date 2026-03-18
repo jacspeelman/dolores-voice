@@ -78,6 +78,12 @@ class RealtimeVoiceManager: ObservableObject {
     @Published var waveformScale: CGFloat = 1.0
     @Published var listeningWaveformScale: CGFloat = 1.0
     @Published var audioLevel: Float = 0.0
+    @Published var useLoudspeaker: Bool = true {
+        didSet {
+            UserDefaults.standard.set(useLoudspeaker, forKey: "useLoudspeaker")
+            applyAudioRoute()
+        }
+    }
 
     // MARK: - WebRTC Properties
 
@@ -103,14 +109,34 @@ class RealtimeVoiceManager: ObservableObject {
     // MARK: - Audio Session
 
     private func setupAudioSession() {
+        useLoudspeaker = UserDefaults.standard.object(forKey: "useLoudspeaker") as? Bool ?? true
+
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playAndRecord, mode: .voiceChat, options: [.defaultToSpeaker, .allowBluetoothHFP])
+            let options: AVAudioSession.CategoryOptions = useLoudspeaker
+                ? [.defaultToSpeaker, .allowBluetoothHFP]
+                : [.allowBluetoothHFP]
+            try session.setCategory(.playAndRecord, mode: .voiceChat, options: options)
             try session.setActive(true)
-            print("✅ [Realtime] Audio session configured")
+            applyAudioRoute()
+            print("✅ [Realtime] Audio session configured, loudspeaker: \(useLoudspeaker)")
         } catch {
             print("⚠️ [Realtime] Audio session setup failed: \(error)")
             errorMessage = "Audio setup mislukt"
+        }
+    }
+
+    private func applyAudioRoute() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            if useLoudspeaker {
+                try session.overrideOutputAudioPort(.speaker)
+            } else {
+                try session.overrideOutputAudioPort(.none)
+            }
+            print("🔊 [Realtime] Audio route: \(useLoudspeaker ? "luidspreker" : "telefoon speaker")")
+        } catch {
+            print("⚠️ [Realtime] Audio route switch failed: \(error)")
         }
     }
 
